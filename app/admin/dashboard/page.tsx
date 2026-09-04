@@ -6,6 +6,7 @@ import {
   getCmsFaqs,
   getCmsSiteSettings,
   getContactMessages,
+  getCmsTestimonials,
 } from "@/lib/cms-repo";
 import { AdminDashboardHub } from "@/components/admin/AdminDashboardHub";
 
@@ -15,14 +16,16 @@ export const metadata: Metadata = {
 };
 
 export default async function AdminDashboardPage() {
-  const [applications, courses, stats, faqs, settings, messages] = await Promise.all([
-    getApplications(),
-    getCmsCourses(),
-    getCmsStats(),
-    getCmsFaqs(),
-    getCmsSiteSettings(),
-    getContactMessages(),
-  ]);
+  const [applications, courses, stats, faqs, settings, messages, testimonials] =
+    await Promise.all([
+      getApplications(),
+      getCmsCourses(),
+      getCmsStats(),
+      getCmsFaqs(),
+      getCmsSiteSettings(),
+      getContactMessages(),
+      getCmsTestimonials(),
+    ]);
 
   return (
     <AdminDashboardHub
@@ -32,6 +35,7 @@ export default async function AdminDashboardPage() {
       initialFaqs={faqs}
       initialSettings={settings}
       initialMessages={messages}
+      initialTestimonials={testimonials}
     />
   );
 }

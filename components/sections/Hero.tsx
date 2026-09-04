@@ -20,8 +20,10 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { siteConfig, availableCourses } from "@/lib/content";
+import { useTranslation } from "@/lib/i18n/context";
 
 export function Hero() {
+  const { t } = useTranslation();
   const cardRef = useRef<HTMLDivElement>(null);
   const floatingBadgeRef = useRef<HTMLDivElement>(null);
   const glowOrbRef = useRef<HTMLDivElement>(null);
@@ -81,7 +83,7 @@ export function Hero() {
               className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-blue-50 border border-blue-200/80 text-xs font-bold text-blue-700 shadow-sm"
             >
               <Sparkles className="w-3.5 h-3.5 text-blue-600" />
-              <span>Transforming Education for Ethiopian Learners & Professionals</span>
+              <span>{t.hero.pillBadge}</span>
             </motion.div>
 
             {/* Main Headline */}
@@ -91,9 +93,9 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.1 }}
               className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 leading-[1.12]"
             >
-              Unlock Globally Recognized{" "}
+              {t.hero.headlinePrefix}{" "}
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 via-blue-600 to-sky-600">
-                Education & Job-Ready Skills
+                {t.hero.headlineGradient}
               </span>
             </motion.h1>
 
@@ -104,9 +106,7 @@ export function Hero() {
               transition={{ duration: 0.6, delay: 0.2 }}
               className="text-base sm:text-lg text-slate-600 max-w-2xl leading-relaxed"
             >
-              Equitable access to subsidized US-aligned higher education, 10,000+ specialized courses,
-              and industry certifications delivered via <strong>Skillsoft Percipio</strong> in collaboration
-              with <strong>N</strong>, <strong>RI</strong>, and the <strong>University in New York</strong>.
+              {t.hero.description}
             </motion.p>
 
             {/* Interactive CTAs */}
@@ -118,14 +118,14 @@ export function Hero() {
             >
               <Link href="/apply">
                 <Button size="lg" className="w-full sm:w-auto px-8 py-4 text-base font-semibold group shadow-lg shadow-blue-600/25">
-                  <span>Start Online Application</span>
+                  <span>{t.hero.ctaApply}</span>
                   <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
               <Link href="/#courses">
                 <Button variant="outline" size="lg" className="w-full sm:w-auto px-7 py-4 text-base font-semibold">
                   <BookOpen className="w-4 h-4 mr-2 text-blue-600" />
-                  Explore 120+ Programs
+                  {t.hero.ctaExplore}
                 </Button>
               </Link>
             </motion.div>
@@ -139,15 +139,15 @@ export function Hero() {
             >
               <div className="flex items-center space-x-2">
                 <CheckCircle2 className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>FAYDA ID Verified Access</span>
+                <span>{t.hero.trustFayda}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <GraduationCap className="w-4 h-4 text-blue-600 shrink-0" />
-                <span>Univ. in NY Associated Credentials</span>
+                <span>{t.hero.trustNy}</span>
               </div>
               <div className="flex items-center space-x-2">
                 <ShieldCheck className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>Subsidized Tuition in ETB</span>
+                <span>{t.hero.trustCourses}</span>
               </div>
             </motion.div>
           </div>

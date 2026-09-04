@@ -1,26 +1,49 @@
 "use client";
 
 import React, { useState } from "react";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip,
+  CartesianGrid,
+  BarChart,
+  Bar,
+  Cell,
+} from "recharts";
+import { Card } from "@/components/ui/Card";
 import { AnalyticsSummary } from "@/types";
-import { TrendingUp, Award, BarChart3, Users, Eye, Sparkles } from "lucide-react";
+import { TrendingUp, BarChart3, Users, Sparkles, Filter } from "lucide-react";
 
 interface AnalyticsChartsProps {
   analytics: AnalyticsSummary;
 }
 
 export function AnalyticsCharts({ analytics }: AnalyticsChartsProps) {
-  const [hoveredTrendIdx, setHoveredTrendIdx] = useState<number | null>(null);
+  const [timeRange, setTimeRange] = useState<"7d" | "all">("7d");
 
-  const maxTrend = Math.max(...analytics.applicationTrends.map((t) => t.count), 5);
-  const maxCourseApps = Math.max(...analytics.popularCourses.map((c) => c.applicationsCount), 1);
+  const trendData = analytics.applicationTrends.map((t) => ({
+    name: t.date,
+    applications: t.count,
+    cumulative: t.cumulative,
+  }));
+
+  const popularCoursesData = analytics.popularCourses.slice(0, 6).map((c) => ({
+    name: c.courseTitle.length > 22 ? c.courseTitle.slice(0, 22) + "..." : c.courseTitle,
+    fullName: c.courseTitle,
+    applications: c.applicationsCount,
+    views: c.viewsCount,
+  }));
+
+  const BAR_COLORS = ["#1d4ed8", "#2563eb", "#3b82f6", "#60a5fa", "#93c5fd", "#bfdbfe"];
 
   return (
     <div className="space-y-8">
-      {/* 2-Column Grid: Timeline Chart & Popular Courses */}
+      {/* 2-Column Grid: Recharts Area Chart & Popular Courses Bar Chart */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        
-        {/* Left: Application Volume Trends (Interactive SVG Area Chart) */}
+        {/* Left: Application Volume Trends (Recharts Area Chart) */}
         <div className="lg:col-span-7">
           <Card className="p-6 bg-white border-slate-200 shadow-md h-full flex flex-col justify-between">
             <div>
@@ -28,65 +51,89 @@ export function AnalyticsCharts({ analytics }: AnalyticsChartsProps) {
                 <div>
                   <h3 className="text-base font-black text-slate-900 flex items-center">
                     <TrendingUp className="w-4 h-4 mr-2 text-blue-600" />
-                    Applicant Inflow Timeline
+                    Applicant Inflow Velocity
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Daily submissions registered over the past 7 days</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Daily registrations & cumulative trajectory
+                  </p>
                 </div>
                 <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-blue-50 text-blue-700 border border-blue-200">
                   {analytics.totalApplications} Total Dossiers
                 </span>
               </div>
 
-              {/* Interactive SVG Bar & Area Visualizer */}
-              <div className="h-48 flex items-end justify-between gap-2 pt-4 px-2">
-                {analytics.applicationTrends.map((trend, idx) => {
-                  const heightPercent = Math.max(Math.round((trend.count / maxTrend) * 100), 12);
-                  const isHovered = hoveredTrendIdx === idx;
-
-                  return (
-                    <div
-                      key={trend.date}
-                      className="flex-1 flex flex-col items-center group relative cursor-pointer"
-                      onMouseEnter={() => setHoveredTrendIdx(idx)}
-                      onMouseLeave={() => setHoveredTrendIdx(null)}
-                    >
-                      {/* Tooltip */}
-                      {isHovered && (
-                        <div className="absolute -top-12 z-20 px-2.5 py-1 rounded-lg bg-slate-900 text-white text-[11px] font-bold shadow-lg whitespace-nowrap animate-in fade-in zoom-in duration-150">
-                          {trend.count} Applications ({trend.cumulative} Total)
-                        </div>
-                      )}
-
-                      {/* Bar with gradient and smooth height */}
-                      <div className="w-full max-w-[40px] bg-slate-100 rounded-t-xl overflow-hidden flex items-end h-36">
-                        <div
-                          className={`w-full rounded-t-xl transition-all duration-300 ${
-                            isHovered
-                              ? "bg-blue-700 shadow-md shadow-blue-500/30 scale-x-105"
-                              : "bg-blue-600 hover:bg-blue-500"
-                          }`}
-                          style={{ height: `${heightPercent}%` }}
-                        />
-                      </div>
-
-                      {/* Label */}
-                      <span className={`text-[10px] font-semibold mt-2 ${isHovered ? "text-blue-700 font-bold" : "text-slate-500"}`}>
-                        {trend.date}
-                      </span>
-                    </div>
-                  );
-                })}
+              {/* Recharts Area Chart */}
+              <div className="h-60 w-full pt-2">
+                <ResponsiveContainer width="100%" height="100%">
+                  <AreaChart
+                    data={trendData}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <defs>
+                      <linearGradient id="colorApplications" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#2563eb" stopOpacity={0.4} />
+                        <stop offset="95%" stopColor="#2563eb" stopOpacity={0.0} />
+                      </linearGradient>
+                      <linearGradient id="colorCumulative" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="5%" stopColor="#0284c7" stopOpacity={0.25} />
+                        <stop offset="95%" stopColor="#0284c7" stopOpacity={0.0} />
+                      </linearGradient>
+                    </defs>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                    <XAxis
+                      dataKey="name"
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      tickLine={false}
+                      axisLine={{ stroke: "#e2e8f0" }}
+                    />
+                    <YAxis
+                      tick={{ fontSize: 11, fill: "#64748b" }}
+                      tickLine={false}
+                      axisLine={false}
+                      allowDecimals={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload, label }) => {
+                        if (active && payload && payload.length) {
+                          return (
+                            <div className="bg-slate-900 text-white p-3 rounded-xl shadow-xl text-xs space-y-1">
+                              <p className="font-bold text-slate-300">{label}</p>
+                              <p className="text-blue-400 font-semibold">
+                                New Applications: {payload[0]?.value}
+                              </p>
+                              {payload[1] && (
+                                <p className="text-sky-300">
+                                  Cumulative Total: {payload[1]?.value}
+                                </p>
+                              )}
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Area
+                      type="monotone"
+                      dataKey="applications"
+                      stroke="#2563eb"
+                      strokeWidth={2.5}
+                      fillOpacity={1}
+                      fill="url(#colorApplications)"
+                      name="Applications"
+                    />
+                  </AreaChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
             <div className="pt-4 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500 mt-4">
-              <span>Intake tracking active</span>
-              <span className="font-semibold text-blue-700">Real-time DB Sync</span>
+              <span>Dynamic Intake Telemetry</span>
+              <span className="font-semibold text-blue-700">Auto-Refreshed</span>
             </div>
           </Card>
         </div>
 
-        {/* Right: Popular Courses Ranking */}
+        {/* Right: Popular Courses Ranking (Recharts Horizontal / Vertical Bar Chart) */}
         <div className="lg:col-span-5">
           <Card className="p-6 bg-white border-slate-200 shadow-md h-full flex flex-col justify-between">
             <div>
@@ -96,41 +143,56 @@ export function AnalyticsCharts({ analytics }: AnalyticsChartsProps) {
                     <BarChart3 className="w-4 h-4 mr-2 text-blue-600" />
                     Top Applied Programs
                   </h3>
-                  <p className="text-xs text-slate-500 mt-0.5">Most in-demand tracks based on applicant submissions</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
+                    Demand breakdown by registered candidates
+                  </p>
                 </div>
               </div>
 
-              <div className="space-y-3.5">
-                {analytics.popularCourses.slice(0, 5).map((course, idx) => {
-                  const percent = Math.max(Math.round((course.applicationsCount / maxCourseApps) * 100), 10);
-                  return (
-                    <div key={course.courseTitle} className="space-y-1.5">
-                      <div className="flex items-center justify-between text-xs">
-                        <span className="font-bold text-slate-800 truncate max-w-[200px]">
-                          {idx + 1}. {course.courseTitle}
-                        </span>
-                        <div className="flex items-center space-x-2 text-slate-600 shrink-0">
-                          <span className="font-bold text-blue-700">{course.applicationsCount} apps</span>
-                          <span className="text-[10px] text-slate-400 flex items-center">
-                            <Eye className="w-3 h-3 mr-0.5" />
-                            {course.viewsCount}
-                          </span>
-                        </div>
-                      </div>
-                      <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-gradient-to-r from-blue-600 to-sky-500 transition-all duration-500"
-                          style={{ width: `${percent}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="h-60 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart
+                    data={popularCoursesData}
+                    layout="vertical"
+                    margin={{ top: 5, right: 10, left: 10, bottom: 5 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f1f5f9" />
+                    <XAxis type="number" hide />
+                    <YAxis
+                      dataKey="name"
+                      type="category"
+                      tick={{ fontSize: 10, fill: "#475569" }}
+                      width={100}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (active && payload && payload.length) {
+                          const data = payload[0].payload;
+                          return (
+                            <div className="bg-slate-900 text-white p-2.5 rounded-xl shadow-xl text-xs space-y-1">
+                              <p className="font-bold text-white">{data.fullName}</p>
+                              <p className="text-blue-400 font-semibold">{data.applications} Applications</p>
+                              <p className="text-slate-400 text-[10px]">{data.views} Catalog Views</p>
+                            </div>
+                          );
+                        }
+                        return null;
+                      }}
+                    />
+                    <Bar dataKey="applications" radius={[0, 6, 6, 0]}>
+                      {popularCoursesData.map((_, index) => (
+                        <Cell key={`cell-${index}`} fill={BAR_COLORS[index % BAR_COLORS.length]} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
               </div>
             </div>
 
             <div className="pt-4 border-t border-slate-100 text-[11px] text-slate-500 mt-4">
-              Rankings dynamically recalculate as new dossiers are submitted.
+              Real-time curriculum ranking across all registered cohorts.
             </div>
           </Card>
         </div>
@@ -145,7 +207,9 @@ export function AnalyticsCharts({ analytics }: AnalyticsChartsProps) {
                 <Users className="w-4 h-4 mr-2 text-blue-600" />
                 Applicant Academic Background Distribution
               </h3>
-              <p className="text-xs text-slate-500 mt-0.5">Qualifications reported across current applicant pool</p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Qualifications reported across current applicant pool
+              </p>
             </div>
           </div>
 
@@ -158,7 +222,10 @@ export function AnalyticsCharts({ analytics }: AnalyticsChartsProps) {
                   <span className="text-xs font-bold text-blue-600">{q.percentage}%</span>
                 </div>
                 <div className="w-full h-1.5 rounded-full bg-slate-200 mt-2 overflow-hidden">
-                  <div className="h-full bg-blue-600 rounded-full" style={{ width: `${q.percentage}%` }} />
+                  <div
+                    className="h-full bg-gradient-to-r from-blue-600 to-sky-500 rounded-full"
+                    style={{ width: `${q.percentage}%` }}
+                  />
                 </div>
               </div>
             ))}

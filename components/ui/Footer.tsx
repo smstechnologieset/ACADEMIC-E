@@ -1,9 +1,14 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
-import { GraduationCap, Mail, Phone, MapPin, ArrowUpRight, ShieldCheck, Shield } from "lucide-react";
+import { GraduationCap, Mail, Phone, MapPin, ArrowUpRight, ShieldCheck, Shield, Search } from "lucide-react";
 import { siteConfig } from "@/lib/content";
+import { useTranslation } from "@/lib/i18n/context";
 
 export function Footer() {
+  const { t } = useTranslation();
+
   return (
     <footer id="contact" className="border-t border-slate-200 bg-slate-900 text-slate-400 text-sm">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -25,31 +30,37 @@ export function Footer() {
 
           {/* Col 2: Navigation */}
           <div>
-            <h4 className="text-white font-bold text-xs mb-4 tracking-wider uppercase">Institutional Links</h4>
+            <h4 className="text-white font-bold text-xs mb-4 tracking-wider uppercase">{t.footer.institutionalLinks}</h4>
             <ul className="space-y-2.5 text-xs">
               <li>
                 <Link href="/#about" className="hover:text-white transition-colors">
-                  About & Vision
+                  {t.footer.aboutVision}
                 </Link>
               </li>
               <li>
                 <Link href="/#courses" className="hover:text-white transition-colors">
-                  Job-Ready Programs (120+)
+                  {t.footer.programs}
                 </Link>
               </li>
               <li>
                 <Link href="/#how-it-works" className="hover:text-white transition-colors">
-                  Admissions Process
+                  {t.footer.admissions}
                 </Link>
               </li>
               <li>
                 <Link href="/#faq" className="hover:text-white transition-colors">
-                  Frequently Asked Questions
+                  {t.footer.faq}
+                </Link>
+              </li>
+              <li>
+                <Link href="/track" className="hover:text-blue-300 transition-colors flex items-center text-blue-400 font-medium">
+                  <Search className="w-3 h-3 mr-1" />
+                  {t.nav.track}
                 </Link>
               </li>
               <li>
                 <Link href="/apply" className="text-blue-400 hover:underline flex items-center font-bold">
-                  Apply with FAYDA ID <ArrowUpRight className="w-3.5 h-3.5 ml-1" />
+                  {t.nav.apply}<ArrowUpRight className="w-3.5 h-3.5 ml-1" />
                 </Link>
               </li>
             </ul>
@@ -77,7 +88,7 @@ export function Footer() {
 
         {/* Bottom bar with subtle Shield icon for admin */}
         <div className="mt-14 pt-8 border-t border-slate-800 flex items-center justify-between text-xs text-slate-500">
-          <p>© {new Date().getFullYear()} {siteConfig.name}. All rights reserved.</p>
+          <p>© {new Date().getFullYear()} {siteConfig.name}. Powered by <Link href="https://smstechnologieset.com" target="_blank" rel="noopener noreferrer"> <span className="text-blue-600 font-bold">SMS Technologies</span></Link>.</p>
           <div className="flex items-center space-x-4">
             <span className="hidden sm:inline">In collaboration with N, RI, and University in New York</span>
             {/* Admin entry point represented solely as a shield icon */}

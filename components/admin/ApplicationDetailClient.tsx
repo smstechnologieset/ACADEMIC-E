@@ -19,18 +19,20 @@ import {
   PenTool,
   Award,
 } from "lucide-react";
-import { Application, ApplicationStatus } from "@/types";
+import { Application, ApplicationStatus, ApplicationEvent } from "@/types";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/Card";
 import { formatDate, formatBytes } from "@/lib/utils";
 import { processApplicationDecisionAction } from "@/app/actions/admin-actions";
+import { ApplicationTimeline } from "./ApplicationTimeline";
 
 interface ApplicationDetailClientProps {
   application: Application;
+  events?: ApplicationEvent[];
 }
 
-export function ApplicationDetailClient({ application }: ApplicationDetailClientProps) {
+export function ApplicationDetailClient({ application, events = [] }: ApplicationDetailClientProps) {
   const router = useRouter();
   const [currentStatus, setCurrentStatus] = useState<ApplicationStatus>(application.status);
   const [internalNotes, setInternalNotes] = useState(application.internal_notes || "");
@@ -86,7 +88,7 @@ export function ApplicationDetailClient({ application }: ApplicationDetailClient
   return (
     <div className="max-w-6xl mx-auto space-y-8">
       {/* Top back navigation */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <Link
           href="/admin/dashboard"
           className="inline-flex items-center text-xs font-bold text-slate-600 hover:text-blue-600"
@@ -94,7 +96,17 @@ export function ApplicationDetailClient({ application }: ApplicationDetailClient
           <ArrowLeft className="w-4 h-4 mr-1.5" />
           Back to Admissions Registry
         </Link>
-        <Badge status={currentStatus} />
+        <div className="flex items-center gap-3">
+          <a
+            href={`/api/export/pdf/${application.id}`}
+            download
+            className="inline-flex items-center px-3.5 py-1.5 rounded-xl bg-white border border-slate-300 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-blue-400 transition-colors shadow-xs"
+          >
+            <Download className="w-3.5 h-3.5 mr-1.5 text-blue-600" />
+            Download PDF Dossier
+          </a>
+          <Badge status={currentStatus} />
+        </div>
       </div>
 
       {actionSuccess && (
@@ -361,6 +373,15 @@ export function ApplicationDetailClient({ application }: ApplicationDetailClient
                 Save notes only
               </button>
             </div>
+          </Card>
+
+          {/* Application Timeline Audit */}
+          <Card className="p-7 bg-white border-slate-200 shadow-md">
+            <h3 className="text-base font-bold text-slate-900 mb-1">Application Lifecycle Timeline</h3>
+            <p className="text-xs text-slate-500 mb-5">
+              Chronological log of applicant submissions, payment uploads, and evaluator decisions.
+            </p>
+            <ApplicationTimeline events={events} />
           </Card>
         </div>
       </div>

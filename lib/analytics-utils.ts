@@ -6,6 +6,7 @@ export function calculateAnalytics(applications: Application[], courses: CmsCour
   const underReview = applications.filter(a => a.status === 'under_review').length;
   const pending = applications.filter(a => a.status === 'pending').length;
   const rejected = applications.filter(a => a.status === 'rejected').length;
+  const cancelled = applications.filter(a => a.status === 'cancelled').length;
 
   // Financial calculations
   // Realized revenue = Approved applications
@@ -82,6 +83,7 @@ export function calculateAnalytics(applications: Application[], courses: CmsCour
     underReviewCount: underReview,
     approvedCount: approved,
     rejectedCount: rejected,
+    cancelledCount: cancelled,
     totalRevenueEtb,
     pendingRevenueEtb,
     feePerApplicant,

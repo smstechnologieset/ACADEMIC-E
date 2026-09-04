@@ -1,12 +1,22 @@
 "use server";
 
+import { headers } from "next/headers";
 import { createAdminClient } from "@/lib/supabase/server";
-import { mockStore } from "@/lib/mock-data";
-import { Application } from "@/types";
+import { generateShortId } from "@/lib/id-generator";
+import { validateFileType, validateFileSize, sanitizeFileName, checkDangerousExtension } from "@/lib/file-validation";
+import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limiter";
 import { recordContactMessage } from "@/lib/cms-repo";
 
 export async function submitApplicationAction(formData: FormData) {
   try {
+    // Rate limiting
+    const hdrs = await headers();
+    const ip = getClientIp(hdrs);
+    const rl = rateLimit(`app-submit:${ip}`, RATE_LIMITS.applicationSubmit);
+    if (!rl.allowed) {
+      return { success: false, error: "Too many applications submitted. Please try again later." };
+    }
+
     const firstName = (formData.get("firstName") as string)?.trim();
     const middleName = (formData.get("middleName") as string)?.trim() || "";
     const lastName = (formData.get("lastName") as string)?.trim();
@@ -30,59 +40,45 @@ export async function submitApplicationAction(formData: FormData) {
       return { success: false, error: "Please upload your Official ID (FAYDA) document or image." };
     }
 
-    if (faydaFile.size > 10 * 1024 * 1024) {
-      return { success: false, error: "Official ID file exceeds maximum size of 10MB." };
-    }
+    // Server-side file validation
+    const sizeCheck = validateFileSize(faydaFile.size, 10);
+    if (!sizeCheck.valid) return { success: false, error: sizeCheck.error };
+
+    const extCheck = checkDangerousExtension(faydaFile.name);
+    if (!extCheck.safe) return { success: false, error: extCheck.error };
+
+    const fileBuffer = await faydaFile.arrayBuffer();
+    const typeCheck = validateFileType(fileBuffer, faydaFile.type);
+    if (!typeCheck.valid) return { success: false, error: typeCheck.error };
 
     const fullName = middleName ? `${firstName} ${middleName} ${lastName}` : `${firstName} ${lastName}`;
-    const newAppId = crypto.randomUUID();
-    const cleanFileName = faydaFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
-    const filePath = `${newAppId}/${cleanFileName}`;
+    const cleanFileName = sanitizeFileName(faydaFile.name);
 
-    try {
-      const supabase = createAdminClient();
-
-      // 1. Upload FAYDA ID to 'documents' bucket
-      const fileBuffer = await faydaFile.arrayBuffer();
-      await supabase.storage.from("documents").upload(filePath, fileBuffer, {
-        contentType: faydaFile.type || "application/octet-stream",
-        upsert: true,
-      });
-
-      // 2. Insert into applications
-      await supabase.from("applications").insert({
-        id: newAppId,
-        first_name: firstName,
-        middle_name: middleName,
-        last_name: lastName,
-        full_name: fullName,
-        age,
-        full_address: fullAddress,
-        phone,
-        email,
-        qualification,
-        course_applied: courseApplied,
-        signature,
-        place,
-        submission_date: submissionDate,
-        status: "pending",
-      });
-
-      // 3. Insert into application_files
-      await supabase.from("application_files").insert({
-        application_id: newAppId,
-        file_category: "fayda_id",
-        file_path: filePath,
-        file_name: faydaFile.name,
-        file_size: faydaFile.size,
-        mime_type: faydaFile.type,
-      });
-    } catch (dbErr) {
-      console.warn("Supabase live write failed, saving to mock store fallback:", dbErr);
+    // Generate short ID with collision check
+    const supabase = createAdminClient();
+    let newAppId = generateShortId();
+    let attempts = 0;
+    while (attempts < 5) {
+      const { data: existing } = await supabase
+        .from("applications")
+        .select("id")
+        .eq("id", newAppId)
+        .maybeSingle();
+      if (!existing) break;
+      newAppId = generateShortId();
+      attempts++;
     }
 
-    // Always sync mock store for immediate local reliability
-    const newApp: Application = {
+    const filePath = `${newAppId}/${cleanFileName}`;
+
+    // 1. Upload FAYDA ID to 'documents' bucket
+    await supabase.storage.from("documents").upload(filePath, fileBuffer, {
+      contentType: typeCheck.detectedMime || faydaFile.type || "application/octet-stream",
+      upsert: true,
+    });
+
+    // 2. Insert into applications
+    const { error: insertErr } = await supabase.from("applications").insert({
       id: newAppId,
       first_name: firstName,
       middle_name: middleName,
@@ -98,25 +94,30 @@ export async function submitApplicationAction(formData: FormData) {
       place,
       submission_date: submissionDate,
       status: "pending",
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      files: [
-        {
-          id: crypto.randomUUID(),
-          application_id: newAppId,
-          file_category: "fayda_id",
-          file_path: filePath,
-          file_name: faydaFile.name,
-          file_size: faydaFile.size,
-          mime_type: faydaFile.type,
-          uploaded_at: new Date().toISOString(),
-        },
-      ],
-    };
+    });
 
-    if (mockStore) {
-      mockStore.unshift(newApp);
+    if (insertErr) {
+      console.error("Application insert error:", insertErr.message);
+      return { success: false, error: "Failed to save application. Please try again." };
     }
+
+    // 3. Insert into application_files
+    await supabase.from("application_files").insert({
+      application_id: newAppId,
+      file_category: "fayda_id",
+      file_path: filePath,
+      file_name: faydaFile.name,
+      file_size: faydaFile.size,
+      mime_type: typeCheck.detectedMime || faydaFile.type,
+    });
+
+    // 4. Insert timeline event
+    await supabase.from("application_events").insert({
+      application_id: newAppId,
+      event_type: "submitted",
+      new_value: "pending",
+      actor: "applicant",
+    });
 
     return { success: true, applicationId: newAppId };
   } catch (err: unknown) {
@@ -127,6 +128,14 @@ export async function submitApplicationAction(formData: FormData) {
 
 export async function submitPaymentProofAction(formData: FormData) {
   try {
+    // Rate limiting
+    const hdrs = await headers();
+    const ip = getClientIp(hdrs);
+    const rl = rateLimit(`payment:${ip}`, RATE_LIMITS.paymentUpload);
+    if (!rl.allowed) {
+      return { success: false, error: "Too many upload attempts. Please try again later." };
+    }
+
     const applicationId = formData.get("applicationId") as string;
     const paymentMethod = (formData.get("paymentMethod") as string)?.trim() || "Telebirr / Bank Transfer";
     const transactionRef = (formData.get("transactionRef") as string)?.trim() || "";
@@ -140,64 +149,62 @@ export async function submitPaymentProofAction(formData: FormData) {
       return { success: false, error: "Please attach your bank deposit / transfer slip." };
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      return { success: false, error: "Payment slip image exceeds maximum size of 5MB." };
-    }
+    // Server-side file validation
+    const sizeCheck = validateFileSize(file.size, 5);
+    if (!sizeCheck.valid) return { success: false, error: sizeCheck.error };
 
-    const cleanFileName = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+    const extCheck = checkDangerousExtension(file.name);
+    if (!extCheck.safe) return { success: false, error: extCheck.error };
+
+    const fileBuffer = await file.arrayBuffer();
+    const typeCheck = validateFileType(fileBuffer, file.type);
+    if (!typeCheck.valid) return { success: false, error: typeCheck.error };
+
+    const cleanFileName = sanitizeFileName(file.name);
     const filePath = `${applicationId}/${cleanFileName}`;
 
-    try {
-      const supabase = createAdminClient();
-      const fileBuffer = await file.arrayBuffer();
+    const supabase = createAdminClient();
 
-      await supabase.storage.from("payment-proofs").upload(filePath, fileBuffer, {
-        contentType: file.type,
-        upsert: true,
-      });
+    await supabase.storage.from("payment-proofs").upload(filePath, fileBuffer, {
+      contentType: typeCheck.detectedMime || file.type,
+      upsert: true,
+    });
 
-      await supabase.from("application_files").insert({
+    await supabase.from("application_files").insert({
+      application_id: applicationId,
+      file_category: "payment_proof",
+      file_path: filePath,
+      file_name: file.name,
+      file_size: file.size,
+      mime_type: typeCheck.detectedMime || file.type,
+    });
+
+    await supabase
+      .from("applications")
+      .update({
+        status: "under_review",
+        payment_method: paymentMethod,
+        transaction_ref: transactionRef,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", applicationId);
+
+    // Insert timeline events
+    await supabase.from("application_events").insert([
+      {
         application_id: applicationId,
-        file_category: "payment_proof",
-        file_path: filePath,
-        file_name: file.name,
-        file_size: file.size,
-        mime_type: file.type,
-      });
-
-      await supabase
-        .from("applications")
-        .update({
-          status: "under_review",
-          payment_method: paymentMethod,
-          transaction_ref: transactionRef,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", applicationId);
-    } catch (err) {
-      console.warn("Supabase payment update exception, sync mock store:", err);
-    }
-
-    if (mockStore) {
-      const app = mockStore.find((a) => a.id === applicationId);
-      if (app) {
-        app.status = "under_review";
-        app.payment_method = paymentMethod;
-        app.transaction_ref = transactionRef;
-        app.updated_at = new Date().toISOString();
-        if (!app.files) app.files = [];
-        app.files.push({
-          id: crypto.randomUUID(),
-          application_id: applicationId,
-          file_category: "payment_proof",
-          file_path: filePath,
-          file_name: file.name,
-          file_size: file.size,
-          mime_type: file.type,
-          uploaded_at: new Date().toISOString(),
-        });
-      }
-    }
+        event_type: "payment_uploaded",
+        new_value: paymentMethod,
+        actor: "applicant",
+      },
+      {
+        application_id: applicationId,
+        event_type: "status_changed",
+        old_value: "pending",
+        new_value: "under_review",
+        actor: "system",
+      },
+    ]);
 
     return { success: true };
   } catch (err: unknown) {
@@ -208,6 +215,14 @@ export async function submitPaymentProofAction(formData: FormData) {
 
 export async function submitContactMessageAction(formData: FormData) {
   try {
+    // Rate limiting
+    const hdrs = await headers();
+    const ip = getClientIp(hdrs);
+    const rl = rateLimit(`contact:${ip}`, RATE_LIMITS.contactForm);
+    if (!rl.allowed) {
+      return { success: false, error: "Too many messages sent. Please try again later." };
+    }
+
     const email = (formData.get("email") as string)?.trim();
     const message = (formData.get("message") as string)?.trim();
 

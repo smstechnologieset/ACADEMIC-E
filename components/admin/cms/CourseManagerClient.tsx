@@ -295,6 +295,17 @@ export function CourseManagerClient({ initialCourses }: CourseManagerProps) {
               </div>
 
               <div>
+                <label className="block font-bold text-slate-700 uppercase mb-1">Program Description</label>
+                <textarea
+                  rows={3}
+                  value={editingCourse.description || ""}
+                  onChange={(e) => setEditingCourse({ ...editingCourse, description: e.target.value })}
+                  placeholder="e.g. Master industry-aligned technical and leadership skills..."
+                  className="w-full px-3 py-2 rounded-xl bg-white border border-slate-300 text-slate-900 focus:outline-none focus:border-blue-600 shadow-sm"
+                />
+              </div>
+
+              <div>
                 <label className="block font-bold text-slate-700 uppercase mb-1">Specialization / Remarks</label>
                 <textarea
                   rows={2}

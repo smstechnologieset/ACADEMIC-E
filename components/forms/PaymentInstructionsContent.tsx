@@ -22,6 +22,7 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { formatBytes } from "@/lib/utils";
 import { submitPaymentProofAction } from "@/app/actions/application-actions";
+import { cancelApplicationAction } from "@/app/actions/track-actions";
 
 interface PaymentInstructionsProps {
   dynamicSettings?: CmsSiteSettings;
@@ -86,6 +87,12 @@ export function PaymentInstructionsContent({ dynamicSettings }: PaymentInstructi
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  // Cancel state
+  const [showCancel, setShowCancel] = useState(false);
+  const [cancelEmail, setCancelEmail] = useState("");
+  const [cancelLoading, setCancelLoading] = useState(false);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
   const activeMethod = activeMethods.find((m) => m.id === selectedMethodId) || activeMethods[0];
 
   const copyToClipboard = (text: string, label: string) => {
@@ -123,6 +130,22 @@ export function PaymentInstructionsContent({ dynamicSettings }: PaymentInstructi
     setFile(selectedFile);
   };
 
+  const handleCancel = async () => {
+    if (!cancelEmail.trim() || !applicationId) return;
+    setCancelLoading(true);
+    setCancelError(null);
+    const res = await cancelApplicationAction(applicationId, cancelEmail.trim());
+    if (res.success) {
+      try {
+        localStorage.removeItem("ae_pending_payment_ref");
+      } catch {}
+      router.push("/apply");
+    } else {
+      setCancelError(res.error || "Failed to cancel application.");
+    }
+    setCancelLoading(false);
+  };
+
   const handleSubmitProof = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!file) {
@@ -143,6 +166,9 @@ export function PaymentInstructionsContent({ dynamicSettings }: PaymentInstructi
     setIsSubmitting(false);
 
     if (result.success) {
+      try {
+        localStorage.removeItem("ae_pending_payment_ref");
+      } catch {}
       router.push(`/confirmation?ref=${applicationId}`);
     } else {
       setErrorMessage(result.error || "Failed to submit receipt. Please try again.");
@@ -167,14 +193,25 @@ export function PaymentInstructionsContent({ dynamicSettings }: PaymentInstructi
               </span>
             </div>
           </div>
-          <button
-            type="button"
-            onClick={() => copyToClipboard(applicationId, "ref")}
-            className="text-xs font-bold px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-100/50 flex items-center space-x-1.5 shadow-sm"
-          >
-            {copiedField === "ref" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedField === "ref" ? "Copied" : "Copy ID"}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => setShowCancel(true)}
+              className="text-xs font-bold px-3.5 py-2 rounded-xl bg-white border border-rose-200 text-rose-600 hover:bg-rose-50 flex items-center space-x-1.5 shadow-sm"
+            >
+              <X className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cancel & Start Over</span>
+              <span className="sm:hidden">Cancel</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => copyToClipboard(applicationId, "ref")}
+              className="text-xs font-bold px-3.5 py-2 rounded-xl bg-white border border-blue-200 text-blue-800 hover:bg-blue-100/50 flex items-center space-x-1.5 shadow-sm"
+            >
+              {copiedField === "ref" ? <Check className="w-3.5 h-3.5 text-emerald-600" /> : <Copy className="w-3.5 h-3.5" />}
+              <span>{copiedField === "ref" ? "Copied" : "Copy ID"}</span>
+            </button>
+          </div>
         </div>
       )}
 
@@ -406,6 +443,52 @@ export function PaymentInstructionsContent({ dynamicSettings }: PaymentInstructi
           </Card>
         </div>
       </div>
+
+      {/* Cancel Modal */}
+      {showCancel && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl shadow-xl border border-slate-200 w-full max-w-sm p-6 overflow-hidden relative">
+            <button 
+              onClick={() => setShowCancel(false)}
+              className="absolute top-4 right-4 text-slate-400 hover:text-slate-600"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="w-12 h-12 rounded-full bg-rose-100 text-rose-600 flex items-center justify-center mb-4">
+              <AlertCircle className="w-6 h-6" />
+            </div>
+            <h3 className="text-lg font-bold text-slate-900 mb-1">Cancel Application?</h3>
+            <p className="text-sm text-slate-500 mb-4">
+              To cancel this pending application and start over, please confirm the email address you registered with.
+            </p>
+            {cancelError && (
+              <div className="mb-4 p-3 rounded-xl bg-rose-50 border border-rose-200 text-rose-700 text-xs">
+                {cancelError}
+              </div>
+            )}
+            <input
+              type="email"
+              value={cancelEmail}
+              onChange={(e) => setCancelEmail(e.target.value)}
+              placeholder="Your email address"
+              className="w-full px-4 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:border-rose-500 focus:ring-1 focus:ring-rose-500 mb-4"
+            />
+            <div className="flex gap-2">
+              <Button variant="outline" className="flex-1" onClick={() => setShowCancel(false)}>
+                Go Back
+              </Button>
+              <Button 
+                className="flex-1 bg-rose-600 hover:bg-rose-700 text-white" 
+                onClick={handleCancel}
+                disabled={cancelLoading || !cancelEmail.trim()}
+                isLoading={cancelLoading}
+              >
+                {cancelLoading ? "Cancelling..." : "Confirm Cancel"}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

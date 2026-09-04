@@ -8,6 +8,7 @@ import { ChevronDown, HelpCircle } from "lucide-react";
 import { faqs as defaultFaqs } from "@/lib/content";
 import { CmsFaq } from "@/types";
 import { cn } from "@/lib/utils";
+import { useTranslation } from "@/lib/i18n/context";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
@@ -20,6 +21,7 @@ interface FaqProps {
 export function Faq({ faqs }: FaqProps) {
   const [openIndex, setOpenIndex] = useState<number | null>(0);
   const faqListRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
 
   const displayFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
 
@@ -55,13 +57,13 @@ export function Faq({ faqs }: FaqProps) {
         <div className="text-center mb-14">
           <div className="inline-flex items-center space-x-2 text-xs font-bold uppercase tracking-widest text-blue-600 mb-2">
             <HelpCircle className="w-4 h-4" />
-            <span>Common Inquiries</span>
+            <span>{t.faq.sectionLabel}</span>
           </div>
           <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">
-            Frequently Asked Questions
+            {t.faq.title}
           </h2>
           <p className="mt-3 text-slate-600 text-sm">
-            Everything you need to know about the admissions, FAYDA validation, and Skillsoft Percipio access.
+            {t.faq.subtitle}
           </p>
         </div>
 

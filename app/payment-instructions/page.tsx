@@ -7,8 +7,12 @@ import { getCmsSiteSettings } from "@/lib/cms-repo";
 import { Loader2 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Subsidized Payment Instructions",
+  title: "Subsidized Payment Instructions | Academic Excellence",
   description: "Telebirr & bank transfer details and deposit receipt upload for Academic Excellence applicants.",
+  robots: {
+    index: false,
+    follow: true,
+  },
 };
 
 export default async function PaymentInstructionsPage() {

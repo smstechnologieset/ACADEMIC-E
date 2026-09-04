@@ -1,4 +1,4 @@
-export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected';
+export type ApplicationStatus = 'pending' | 'under_review' | 'approved' | 'rejected' | 'cancelled';
 
 export type FileCategory = 'fayda_id' | 'document' | 'payment_proof';
 
@@ -69,10 +69,13 @@ export interface CmsStat {
 export interface CmsCourse {
   id: string;
   title: string;
+  slug?: string;
   duration: string;
   level: string;
   category: 'job-ready' | 'pgd' | 'tech' | 'business';
   specialization?: string;
+  description?: string;
+  learning_outcomes?: string[];
   status: 'Active' | 'Coming Soon' | 'Archived';
   is_featured: boolean;
   sort_order: number;
@@ -85,6 +88,19 @@ export interface CmsFaq {
   answer: string;
   category: string;
   sort_order: number;
+}
+
+export interface CmsTestimonial {
+  id: string;
+  name: string;
+  role?: string;
+  quote: string;
+  course_completed?: string;
+  rating: number;
+  is_featured: boolean;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface CmsSiteSettings {
@@ -105,12 +121,33 @@ export interface CmsSiteSettings {
   paymentMethods: PaymentMethod[];
 }
 
+export interface ApplicationEvent {
+  id: string;
+  application_id: string;
+  event_type: string; // 'submitted', 'payment_uploaded', 'status_changed', 'note_added', 'cancelled'
+  old_value?: string;
+  new_value?: string;
+  actor: string; // 'system', 'applicant', or admin email
+  created_at: string;
+}
+
+export interface AdminActivityLogEntry {
+  id: string;
+  actor_email: string;
+  action: string;
+  target_type?: string;
+  target_id?: string;
+  details?: Record<string, unknown>;
+  created_at: string;
+}
+
 export interface AnalyticsSummary {
   totalApplications: number;
   pendingCount: number;
   underReviewCount: number;
   approvedCount: number;
   rejectedCount: number;
+  cancelledCount: number;
   totalRevenueEtb: number;
   pendingRevenueEtb: number;
   feePerApplicant: number;

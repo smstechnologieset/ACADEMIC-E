@@ -8,12 +8,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { siteConfig } from "@/lib/content";
 import { submitContactMessageAction } from "@/app/actions/application-actions";
+import { useTranslation } from "@/lib/i18n/context";
 
 if (typeof window !== "undefined") {
   gsap.registerPlugin(ScrollTrigger);
 }
 
 export function ContactSection() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -85,11 +87,11 @@ export function ContactSection() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="text-center mb-14">
           <span className="text-xs font-bold uppercase tracking-widest text-blue-600 mb-2 block">
-            Admissions Desk
+            {t.contact.sectionLabel}
           </span>
-          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">Contact Us</h2>
+          <h2 className="text-3xl sm:text-4xl font-black text-slate-900 tracking-tight">{t.contact.title}</h2>
           <p className="mt-2 text-slate-600 text-xs sm:text-sm max-w-lg mx-auto">
-            Have questions about course admissions, FAYDA ID validation, or subsidized tuition? Send our advisors a message.
+            {t.contact.subtitle}
           </p>
         </div>
 
@@ -98,10 +100,9 @@ export function ContactSection() {
           <div ref={leftColRef} className="lg:col-span-5 flex">
             <div className="p-7 rounded-2xl bg-blue-50/80 border border-blue-100 space-y-5 w-full flex flex-col justify-between shadow-sm">
               <div>
-                <h3 className="text-base font-bold text-slate-900">Academic Excellence Admissions Hub</h3>
+                <h3 className="text-base font-bold text-slate-900">{t.contact.hubTitle}</h3>
                 <p className="text-xs text-slate-600 leading-relaxed mt-2">
-                  Our academic counselors in Addis Ababa provide guidance on university credential equivalence,
-                  course tracks, and Skillsoft Percipio platform access.
+                  {t.contact.hubDesc}
                 </p>
               </div>
               
@@ -129,7 +130,7 @@ export function ContactSection() {
               </div>
 
               <div className="pt-4 border-t border-blue-200/60 text-[11px] text-blue-900 font-semibold">
-                Monday - Friday: 8:30 AM - 5:30 PM EAT
+                {t.contact.officeHours}
               </div>
             </div>
           </div>
@@ -142,12 +143,12 @@ export function ContactSection() {
                   <div className="w-12 h-12 rounded-full bg-emerald-50 border border-emerald-200 flex items-center justify-center mx-auto text-emerald-600 shadow-sm">
                     <CheckCircle2 className="w-6 h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-slate-900">Message Sent Successfully</h3>
+                  <h3 className="text-lg font-bold text-slate-900">{t.contact.successTitle}</h3>
                   <p className="text-xs text-slate-600">
-                    Thank you for contacting Academic Excellence. Our admissions office will get back to you shortly.
+                    {t.contact.successDesc}
                   </p>
                   <Button variant="outline" size="sm" onClick={() => setSuccess(false)}>
-                    Send Another Message
+                    {t.contact.sendAnother}
                   </Button>
                 </div>
               ) : (
@@ -161,13 +162,13 @@ export function ContactSection() {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Email <span className="text-blue-600">*</span>
+                      {t.contact.emailLabel} <span className="text-blue-600">*</span>
                     </label>
                     <input
                       type="email"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      placeholder="your.email@example.com"
+                      placeholder={t.contact.emailPlaceholder}
                       className="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 text-sm shadow-sm"
                       required
                     />
@@ -175,13 +176,13 @@ export function ContactSection() {
 
                   <div>
                     <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
-                      Write a Message <span className="text-blue-600">*</span>
+                      {t.contact.messageLabel} <span className="text-blue-600">*</span>
                     </label>
                     <textarea
                       rows={4}
                       value={message}
                       onChange={(e) => setMessage(e.target.value)}
-                      placeholder="Inquire about course eligibility, FAYDA ID requirements, or scholarship availability..."
+                      placeholder={t.contact.messagePlaceholder}
                       className="w-full px-4 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 text-sm resize-none shadow-sm"
                       required
                     />
@@ -189,7 +190,7 @@ export function ContactSection() {
 
                   <Button type="submit" className="w-full justify-center py-3 font-semibold shadow-md shadow-blue-600/20" isLoading={isSubmitting}>
                     <Send className="w-4 h-4 mr-2" />
-                    Submit Message
+                    {isSubmitting ? t.contact.submitting : t.contact.submitBtn}
                   </Button>
                 </form>
               )}

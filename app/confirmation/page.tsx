@@ -6,8 +6,12 @@ import { ConfirmationContent } from "@/components/forms/ConfirmationContent";
 import { Loader2 } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Application Received",
+  title: "Application Received | Academic Excellence",
   description: "Your Academic Excellence application dossier and payment proof have been successfully registered.",
+  robots: {
+    index: false,
+    follow: false,
+  },
 };
 
 export default function ConfirmationPage() {

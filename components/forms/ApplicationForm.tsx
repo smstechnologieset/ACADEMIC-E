@@ -38,6 +38,8 @@ export function ApplicationForm({ dynamicCourses }: ApplicationFormProps) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [draftSaved, setDraftSaved] = useState(false);
+  const [hasDraft, setHasDraft] = useState(false);
 
   const activeCourseTitles = dynamicCourses && dynamicCourses.length > 0
     ? dynamicCourses.map(c => c.title)
@@ -59,6 +61,85 @@ export function ApplicationForm({ dynamicCourses }: ApplicationFormProps) {
     submissionDate: new Date().toISOString().split("T")[0],
     captchaInput: "",
   });
+
+  // Restore saved draft on mount & check query params
+  useEffect(() => {
+    try {
+      // Check query param for course
+      if (typeof window !== "undefined") {
+        const pendingRef = localStorage.getItem("ae_pending_payment_ref");
+        if (pendingRef) {
+          router.push(`/payment-instructions?ref=${pendingRef}`);
+          return;
+        }
+
+        const params = new URLSearchParams(window.location.search);
+        const queryCourse = params.get("course");
+
+        const saved = localStorage.getItem("ae_draft_application");
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          setFormData(prev => ({
+            ...prev,
+            ...parsed,
+            // Keep query course if specified
+            courseApplied: queryCourse || parsed.courseApplied || prev.courseApplied,
+            captchaInput: "", // Do not restore captcha
+          }));
+          setHasDraft(true);
+        } else if (queryCourse) {
+          setFormData(prev => ({ ...prev, courseApplied: queryCourse }));
+        }
+      }
+    } catch {
+      // Ignore local storage parse error
+    }
+  }, []);
+
+  // Autosave draft whenever formData changes (debounced)
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      try {
+        // Only save if at least one meaningful field is entered
+        if (formData.firstName || formData.lastName || formData.phone || formData.email) {
+          const { captchaInput, ...toSave } = formData;
+          localStorage.setItem("ae_draft_application", JSON.stringify(toSave));
+          setDraftSaved(true);
+          setHasDraft(true);
+          const hideTimer = setTimeout(() => setDraftSaved(false), 2000);
+          return () => clearTimeout(hideTimer);
+        }
+      } catch {
+        // Storage might be unavailable
+      }
+    }, 800);
+    return () => clearTimeout(timer);
+  }, [formData]);
+
+  const clearDraft = () => {
+    try {
+      localStorage.removeItem("ae_draft_application");
+      setFormData({
+        firstName: "",
+        middleName: "",
+        lastName: "",
+        age: "",
+        fullAddress: "",
+        phone: "",
+        email: "",
+        qualification: qualificationOptions[3],
+        courseApplied: activeCourseTitles[0] || "Artificial Intelligence (AI)",
+        signature: "",
+        place: "Addis Ababa",
+        submissionDate: new Date().toISOString().split("T")[0],
+        captchaInput: "",
+      });
+      setHasDraft(false);
+      setDraftSaved(false);
+    } catch {
+      // Ignore
+    }
+  };
 
   // Captcha state
   const [captchaCode, setCaptchaCode] = useState("AE79X");
@@ -86,10 +167,10 @@ export function ApplicationForm({ dynamicCourses }: ApplicationFormProps) {
   const handleInputChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
   ) => {
-    setFormData({
-      ...formData,
+    setFormData(prev => ({
+      ...prev,
       [e.target.name]: e.target.value,
-    });
+    }));
     setErrorMessage(null);
   };
 
@@ -212,6 +293,12 @@ export function ApplicationForm({ dynamicCourses }: ApplicationFormProps) {
     setIsSubmitting(false);
 
     if (result.success && result.applicationId) {
+      try {
+        localStorage.removeItem("ae_draft_application");
+        localStorage.setItem("ae_pending_payment_ref", result.applicationId);
+      } catch {
+        // Ignore
+      }
       router.push(`/payment-instructions?ref=${result.applicationId}`);
     } else {
       setErrorMessage(result.error || "Failed to submit application. Please check your data and retry.");
@@ -220,6 +307,30 @@ export function ApplicationForm({ dynamicCourses }: ApplicationFormProps) {
 
   return (
     <div className="max-w-3xl mx-auto py-6">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center gap-2 text-xs">
+          {draftSaved && (
+            <span className="inline-flex items-center gap-1 text-emerald-600 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 font-medium animate-pulse">
+              <CheckCircle2 className="w-3.5 h-3.5" /> Draft auto-saved
+            </span>
+          )}
+          {hasDraft && !draftSaved && (
+            <span className="text-slate-400 text-[11px]">
+              Draft restored from your last session
+            </span>
+          )}
+        </div>
+        {hasDraft && (
+          <button
+            type="button"
+            onClick={clearDraft}
+            className="text-[11px] text-slate-400 hover:text-rose-600 transition-colors underline"
+          >
+            Clear saved draft
+          </button>
+        )}
+      </div>
+
       <ProgressSteps steps={steps} currentStep={currentStep} />
 
       {errorMessage && (

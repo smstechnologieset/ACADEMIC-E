@@ -30,8 +30,6 @@ export function AdminLoginForm() {
         return;
       }
 
-      // Set admin session cookie for middleware route protection
-      document.cookie = "academic_admin_session=active; path=/; max-age=86400; SameSite=Lax";
       router.push("/admin/dashboard");
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : "Authentication failed. Please check your credentials.";

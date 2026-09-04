@@ -1,7 +1,9 @@
 import { notFound } from "next/navigation";
 import { Metadata } from "next";
 import { getApplicationById } from "@/lib/applications-repo";
+import { createAdminClient } from "@/lib/supabase/server";
 import { ApplicationDetailClient } from "@/components/admin/ApplicationDetailClient";
+import type { ApplicationEvent } from "@/types";
 
 interface ApplicationDetailPageProps {
   params: Promise<{ id: string }>;
@@ -22,9 +24,22 @@ export default async function ApplicationDetailPage({ params }: ApplicationDetai
     notFound();
   }
 
+  let events: ApplicationEvent[] = [];
+  try {
+    const supabase = createAdminClient();
+    const { data } = await supabase
+      .from("application_events")
+      .select("*")
+      .eq("application_id", id)
+      .order("created_at", { ascending: true });
+    if (data) events = data as ApplicationEvent[];
+  } catch {
+    // Ignore error
+  }
+
   return (
     <main className="min-h-screen bg-slate-50 py-10 px-4 sm:px-6 lg:px-8">
-      <ApplicationDetailClient application={application} />
+      <ApplicationDetailClient application={application} events={events} />
     </main>
   );
 }
