@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us | Academic Excellence</title>
+  <meta name="description" content="Get in touch with Academic Excellence for admissions, curriculum inquiries, tuition assistance, and institutional partnerships." />
+  
+  <!-- Favicon / Logo -->
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Signature Top-Right Orange Decorative Badge (from BPG reference) -->
+  <div class="header-corner-accent" aria-hidden="true"></div>
+
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
+        <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
+      </a>
+
+      <nav class="nav-menu" id="primaryNav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="index.html#programs" class="nav-link">Programs</a>
+        <a href="index.html#values" class="nav-link">Values</a>
+        <a href="contact.html" class="nav-link active">Contact</a>
+      </nav>
+
+      <button class="mobile-nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTENT -->
+  <main>
+
+    <!-- CONTACT HERO BANNER (With Globe Video Background) -->
+    <section class="hero-section contact-hero">
+      <video class="hero-video-bg" loop autoplay muted playsinline poster="assets/skyline.jpg">
+        <source type="video/mp4" src="https://bpgpartnership.com/wp-content/uploads/2024/08/Globe.mp4" />
+        <source type="video/webm" src="https://bpgpartnership.com/wp-content/uploads/2024/08/Globe.webm" />
+      </video>
+      <div class="hero-overlay" aria-hidden="true"></div>
+
+      <div class="container hero-content">
+        <h1 class="hero-title">Contact Us</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 780px; line-height: 1.8;">
+          Thank you for your interest in Academic Excellence. Whether you are seeking admission into our accredited diploma programs, have inquiries about our U.S. curriculum and Skillsoft platform, or wish to explore institutional partnerships, our team is here to assist you.
+        </p>
+      </div>
+    </section>
+
+    <!-- CONTACT FORM & PARTNERSHIP SECTION (Matching BPG Contact Page Layout) -->
+    <section class="section-padding contact-section">
+      <div class="container contact-split-grid">
+        
+        <!-- Left Column: Partnerships, Media & Admissions -->
+        <div class="contact-info-col">
+          <h3 class="contact-col-heading">Partnership Opportunities &amp;<br />Admissions Inquiries</h3>
+          <p class="contact-desc">
+            If you are interested in exploring academic partnership opportunities, corporate sponsorship for employees, or collaborating with Academic Excellence to empower Ethiopian professionals with global credentials, please reach out to our team at:
+          </p>
+
+          <div class="contact-detail-group">
+            <h4 style="font-family: var(--font-serif); font-size: 1.25rem; color: var(--primary-navy); margin-bottom: 8px;">
+              Email: <a href="mailto:partnerships@academice.edu.et" style="color: var(--primary-blue);">partnerships@academice.edu.et</a>
+            </h4>
+          </div>
+
+          <div class="contact-detail-group" style="margin-top: 30px;">
+            <div class="contact-detail-label">Admissions Office Email</div>
+            <div class="contact-detail-value">
+              <a href="mailto:admissions@academice.edu.et">admissions@academice.edu.et</a>
+            </div>
+          </div>
+
+          <div class="contact-detail-group">
+            <div class="contact-detail-label">Direct Phone &amp; Support</div>
+            <div class="contact-detail-value">+251 11 555 2345 / +251 91 100 0000</div>
+          </div>
+
+          <div class="contact-detail-group">
+            <div class="contact-detail-label">Main Education Hub</div>
+            <div class="contact-detail-value">Bole Sub-City, Education Hub Tower, Addis Ababa, Ethiopia</div>
+          </div>
+
+          <div class="contact-detail-group">
+            <div class="contact-detail-label">Office Hours</div>
+            <div class="contact-detail-value">Monday &ndash; Friday: 8:30 AM &ndash; 5:30 PM (EAT)</div>
+          </div>
+        </div>
+
+        <!-- Right Column: General Inquiries Form (Matching BPG inputs) -->
+        <div class="contact-form-col">
+          <h3 class="contact-col-heading">General Inquiries</h3>
+          <p class="contact-desc">
+            For general inquiries please contact us using the form below:
+          </p>
+
+          <form id="academicInquiryForm">
+            <div class="form-field-group">
+              <input type="text" id="fullName" class="form-input" placeholder="Name *" required />
+            </div>
+
+            <div class="form-field-group">
+              <input type="text" id="companyName" class="form-input" placeholder="Company / Institution Name" />
+            </div>
+
+            <div class="form-field-group">
+              <input type="email" id="emailAddress" class="form-input" placeholder="Email Address *" required />
+            </div>
+
+            <div class="form-field-group">
+              <input type="tel" id="phoneNumber" class="form-input" placeholder="Phone Number" />
+            </div>
+
+            <div class="form-field-group">
+              <input type="text" id="countryRegion" class="form-input" placeholder="Country/Region" />
+            </div>
+
+            <div class="form-field-group">
+              <select id="natureOfInquiry" class="form-select">
+                <option value="" disabled selected>Nature of Inquiry</option>
+                <option value="admissions">Program Admissions &amp; Enrollment</option>
+                <option value="curriculum">Curriculum &amp; University in New York Accreditation</option>
+                <option value="partnership">Corporate / Institutional Partnership</option>
+                <option value="payment">Tuition &amp; Bank Transfer Support</option>
+                <option value="other">Other Inquiry</option>
+              </select>
+            </div>
+
+            <div class="form-field-group">
+              <textarea id="message" class="form-textarea" placeholder="Your Message"></textarea>
+            </div>
+
+            <button type="submit" class="btn-form-submit">Submit</button>
+            <div id="formStatus" class="form-status"></div>
+          </form>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="Academic Excellence" style="height: 44px; margin-bottom: 20px;" />
+          <p>
+            Academic Excellence is dedicated to fostering strategic, high-impact educational pathways between Ethiopian learners and renowned North American institutions.
+          </p>
+          <p>
+            Implemented in collaboration with University in New York and delivered via the Skillsoft Percipio platform.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Our Service Areas</h4>
+          <ul class="footer-links">
+            <li><a href="index.html#programs">Software Engineering &amp; AI</a></li>
+            <li><a href="index.html#programs">Cloud &amp; Cyber Defense</a></li>
+            <li><a href="index.html#programs">Business Administration</a></li>
+            <li><a href="index.html#programs">Data Analytics &amp; FinTech</a></li>
+            <li><a href="index.html#programs">Workforce Reskilling</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About</a></li>
+            <li><a href="index.html#programs">Programs</a></li>
+            <li><a href="index.html#values">Our Values</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; 2026 Academic Excellence Education Initiative. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Main JavaScript -->
+  <script src="main.js"></script>
+</body>
+</html>
