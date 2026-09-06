@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Track Your Application | Academic Excellence</title>
+  <meta name="description" content="Check real-time application and payment verification status for Academic Excellence programs." />
+  
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top-Right Corner Badge -->
+  <div class="header-corner-accent" aria-hidden="true"></div>
+
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
+        <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
+      </a>
+
+      <nav class="nav-menu" id="primaryNav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="courses.html" class="nav-link">Programs</a>
+        <a href="apply.html" class="nav-link">Apply</a>
+        <a href="track.html" class="nav-link active">Track</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="admin/login.html" class="nav-link" style="opacity: 0.85; font-size: 0.85rem;">Admin</a>
+      </nav>
+
+      <button class="mobile-nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO BANNER -->
+    <section class="hero-section" style="min-height: 38vh; padding-top: 130px; padding-bottom: 50px;">
+      <div class="hero-overlay" style="opacity: 0.85;" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <div class="hero-badge-wrap">
+          <span class="hero-badge-pill">Verification</span>
+          <span class="hero-badge-text">Admissions Desk</span>
+        </div>
+        <h1 class="hero-title" style="font-size: 3.2rem;">Track Your Application</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;">
+          Enter your Application Reference Number or registered Email Address to monitor your admissions progress.
+        </p>
+      </div>
+    </section>
+
+    <!-- SEARCH & TRACKING SECTION -->
+    <section class="section-padding" style="background-color: #f8fafc; padding-top: 0;">
+      <div class="container">
+        
+        <!-- Search Card -->
+        <div class="track-search-card">
+          <h3 style="font-size: 1.35rem; color: #0b1b3d; margin-bottom: 16px; text-align: center;">
+            Lookup Application Record
+          </h3>
+
+          <form id="trackSearchForm">
+            <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+              <input type="text" id="trackQueryInput" class="form-input" style="flex: 1; min-width: 260px;" placeholder="e.g. AE-2026-7014 or your email address" required />
+              <button type="submit" class="btn btn-orange" style="white-space: nowrap;">Search Status</button>
+            </div>
+          </form>
+
+          <div id="searchErrorNotice" style="display: none; color: #d93025; font-size: 0.9rem; margin-top: 12px; text-align: center;"></div>
+        </div>
+
+        <!-- Result Card (Initially Hidden) -->
+        <div id="trackingResultWrapper" style="display: none;">
+          <div class="application-wrapper" style="margin-top: 0;">
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px; border-bottom: 1px solid var(--border-light); padding-bottom: 20px; margin-bottom: 25px;">
+              <div>
+                <span style="font-size: 0.8rem; text-transform: uppercase; color: #64748b; font-weight: 700;">Reference ID</span>
+                <div style="font-size: 1.8rem; font-family: var(--font-serif); font-weight: 700; color: var(--primary-navy);" id="trackAppId">
+                  AE-2026-7014
+                </div>
+              </div>
+
+              <div>
+                <span id="trackStatusBadge" class="badge-status status-under_review">Under Review</span>
+              </div>
+            </div>
+
+            <!-- Stepper Timeline -->
+            <div class="status-timeline" id="trackStepper">
+              <div class="status-node completed" id="stepNode1">
+                <div class="status-icon">&check;</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #0b1b3d; margin-top: 6px;">Submitted</div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep1">Aug 28</div>
+              </div>
+
+              <div class="status-node" id="stepNode2">
+                <div class="status-icon">2</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Payment Verification</div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep2">&mdash;</div>
+              </div>
+
+              <div class="status-node" id="stepNode3">
+                <div class="status-icon">3</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Admissions Review</div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep3">&mdash;</div>
+              </div>
+
+              <div class="status-node" id="stepNode4">
+                <div class="status-icon">4</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Enrolled / Accepted</div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep4">&mdash;</div>
+              </div>
+            </div>
+
+            <!-- Candidate Details Grid -->
+            <div style="background: #f8fafc; padding: 25px; border: 1px solid var(--border-light); margin-bottom: 30px;">
+              <h4 style="font-size: 1.2rem; color: #0b1b3d; margin-bottom: 16px;">Applicant Particulars</h4>
+              <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; font-size: 0.92rem;">
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Full Name</div>
+                  <strong id="trackFullName" style="color: #0b1b3d;">Dawit Haile Tadesse</strong>
+                </div>
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Enrolled Track</div>
+                  <strong id="trackCourse" style="color: #0b1b3d;">Artificial Intelligence (AI)</strong>
+                </div>
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Registered Email</div>
+                  <span id="trackEmail">dawit.tadesse@aau.edu.et</span>
+                </div>
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">FAYDA ID / FIN</div>
+                  <span id="trackFayda">FIN-ET-8923-0192</span>
+                </div>
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Prior Qualification</div>
+                  <span id="trackQualification">Bachelor's Degree</span>
+                </div>
+                <div>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Payment Status</div>
+                  <span id="trackPaymentSummary">Completed (CBE)</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Action Prompt Banner (If pending payment) -->
+            <div id="pendingPaymentBanner" style="display: none; background: #fffaf0; border-left: 4px solid #dd6b20; padding: 20px; margin-bottom: 30px;">
+              <h4 style="color: #9c4221; font-size: 1.15rem; margin-bottom: 6px;">Payment Required to Finalize Review</h4>
+              <p style="font-size: 0.95rem; color: #7b341e; margin-bottom: 14px;">
+                Your application has been received, but the intake processing fee has not yet been verified. Please transfer the fee and upload your payment receipt.
+              </p>
+              <a href="#" id="completePaymentBtn" class="btn btn-orange">Upload Payment Slip Now &rarr;</a>
+            </div>
+
+            <!-- Audit / Event Timeline -->
+            <div>
+              <h4 style="font-size: 1.2rem; color: #0b1b3d; margin-bottom: 18px;">Application Event History</h4>
+              <div id="trackEventsList">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="Academic Excellence" style="height: 44px; margin-bottom: 20px;" />
+          <p>Academic Excellence connects Ethiopian learners with certified U.S. university programs.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Support</h4>
+          <ul class="footer-links">
+            <li><a href="courses.html">All Programs</a></li>
+            <li><a href="apply.html">Online Application</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="admin/login.html">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; 2026 Academic Excellence Education Initiative. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/applications-service.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const form = document.getElementById("trackSearchForm");
+      const queryInput = document.getElementById("trackQueryInput");
+      const errNotice = document.getElementById("searchErrorNotice");
+      const resultWrap = document.getElementById("trackingResultWrapper");
+
+      // Auto-search if ref param present
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryParam = urlParams.get("ref") || urlParams.get("email");
+      if (queryParam) {
+        queryInput.value = queryParam;
+        performSearch(queryParam);
+      }
+
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+        performSearch(queryInput.value.trim());
+      });
+
+      function performSearch(query) {
+        errNotice.style.display = "none";
+        const app = window.ApplicationsService.getApplication(query);
+
+        if (!app) {
+          errNotice.textContent = "No application record found matching that Reference ID or Email. Please check your spelling.";
+          errNotice.style.display = "block";
+          resultWrap.style.display = "none";
+          return;
+        }
+
+        renderAppDetails(app);
+      }
+
+      function renderAppDetails(app) {
+        resultWrap.style.display = "block";
+        document.getElementById("trackAppId").textContent = app.id;
+        document.getElementById("trackFullName").textContent = app.fullName || `${app.firstName} ${app.lastName}`;
+        document.getElementById("trackCourse").textContent = app.courseApplied;
+        document.getElementById("trackEmail").textContent = app.email;
+        document.getElementById("trackFayda").textContent = app.faydaIdNumber || "Verified";
+        document.getElementById("trackQualification").textContent = `${app.qualification} (${app.fieldOfStudy || "General"})`;
+
+        // Badge & Stepper Status
+        const badge = document.getElementById("trackStatusBadge");
+        badge.className = `badge-status status-${app.status}`;
+        badge.textContent = app.status.replace("_", " ").toUpperCase();
+
+        const node1 = document.getElementById("stepNode1");
+        const node2 = document.getElementById("stepNode2");
+        const node3 = document.getElementById("stepNode3");
+        const node4 = document.getElementById("stepNode4");
+
+        // Reset
+        [node1, node2, node3, node4].forEach(n => {
+          n.className = "status-node";
+        });
+
+        const pendingBanner = document.getElementById("pendingPaymentBanner");
+        if (app.status === "pending") {
+          node1.className = "status-node completed";
+          node2.className = "status-node active";
+          pendingBanner.style.display = "block";
+          document.getElementById("completePaymentBtn").href = `payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+          document.getElementById("trackPaymentSummary").textContent = "Pending Payment Slip Upload";
+        } else if (app.status === "under_review") {
+          node1.className = "status-node completed";
+          node2.className = "status-node completed";
+          node3.className = "status-node active";
+          pendingBanner.style.display = "none";
+          document.getElementById("trackPaymentSummary").textContent = `Slip Uploaded (${app.paymentMethod || "Bank"})`;
+        } else if (app.status === "approved") {
+          node1.className = "status-node completed";
+          node2.className = "status-node completed";
+          node3.className = "status-node completed";
+          node4.className = "status-node completed";
+          pendingBanner.style.display = "none";
+          document.getElementById("trackPaymentSummary").textContent = `Verified & Confirmed (${app.paymentMethod || "Bank"})`;
+        } else {
+          // Rejected or Cancelled
+          node1.className = "status-node completed";
+          pendingBanner.style.display = "none";
+          document.getElementById("trackPaymentSummary").textContent = app.status.toUpperCase();
+        }
+
+        // Timeline events
+        const eventsContainer = document.getElementById("trackEventsList");
+        if (app.events && app.events.length > 0) {
+          eventsContainer.innerHTML = app.events.map(ev => `
+            <div class="event-item">
+              <div class="event-time">${window.AcademicDB.formatDate(ev.time)}</div>
+              <div class="event-title">${ev.title}</div>
+              <div style="font-size: 0.88rem; color: #475569; margin-top: 4px;">${ev.note || ""}</div>
+            </div>
+          `).join("");
+        } else {
+          eventsContainer.innerHTML = `<p style="color: #64748b;">Application recorded.</p>`;
+        }
+
+        resultWrap.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  </script>
+</body>
+</html>

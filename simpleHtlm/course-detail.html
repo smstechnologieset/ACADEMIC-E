@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Program Details | Academic Excellence</title>
+  <meta name="description" content="View program syllabus, learning outcomes, entry prerequisites, and apply online for accredited diploma certification." />
+  
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top-Right Orange Corner Badge -->
+  <div class="header-corner-accent" aria-hidden="true"></div>
+
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
+        <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
+      </a>
+
+      <nav class="nav-menu" id="primaryNav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="courses.html" class="nav-link active">Programs</a>
+        <a href="apply.html" class="nav-link">Apply</a>
+        <a href="track.html" class="nav-link">Track</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="admin/login.html" class="nav-link" style="opacity: 0.85; font-size: 0.85rem;">Admin</a>
+      </nav>
+
+      <button class="mobile-nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- PROGRAM HERO BANNER -->
+    <section class="hero-section detail-hero" id="courseHero">
+      <div class="hero-overlay" style="opacity: 0.85;" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <div style="margin-bottom: 16px;">
+          <a href="courses.html" style="color: #d8ebf4; font-size: 0.88rem; font-weight: 600; text-decoration: underline;">&larr; Back to all programs</a>
+        </div>
+        <div class="hero-badge-wrap">
+          <span class="hero-badge-pill" id="courseCategoryBadge">Program</span>
+          <span class="hero-badge-text">University in New York Certified</span>
+        </div>
+        <h1 class="hero-title" id="courseTitle" style="font-size: 3.2rem;">Program Title</h1>
+        <p id="courseDescShort" style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;">
+          Loading program details...
+        </p>
+      </div>
+    </section>
+
+    <!-- COURSE DETAIL & SYLLABUS SECTION -->
+    <section class="section-padding" style="background-color: #f8fafc;">
+      <div class="container course-detail-layout">
+        
+        <!-- Left Main Column: Syllabus, Overview, Highlights -->
+        <div class="course-main-col">
+          
+          <div style="background: #ffffff; padding: 40px; border: 1px solid var(--border-light); margin-bottom: 35px;">
+            <h2 style="font-size: 1.85rem; color: #0b1b3d; margin-bottom: 20px;">Program Overview</h2>
+            <p id="courseOverviewText" style="font-size: 1.05rem; line-height: 1.85; color: #3b4b59; margin-bottom: 25px;">
+              Loading overview...
+            </p>
+
+            <h3 style="font-size: 1.35rem; color: #0b1b3d; margin-bottom: 16px;">Key Highlights &amp; Competencies</h3>
+            <div id="courseHighlightsList" style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Syllabus Accordion -->
+          <div style="background: #ffffff; padding: 40px; border: 1px solid var(--border-light); margin-bottom: 35px;">
+            <h2 style="font-size: 1.85rem; color: #0b1b3d; margin-bottom: 20px;">Curriculum Syllabus</h2>
+            <p style="color: #64748b; margin-bottom: 25px;">
+              Delivered through self-paced interactive modules, hands-on virtual labs, and faculty mentorship via Skillsoft Percipio.
+            </p>
+            <div id="courseSyllabusList">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <!-- Prerequisites & Accreditation -->
+          <div style="background: #ffffff; padding: 40px; border: 1px solid var(--border-light);">
+            <h2 style="font-size: 1.85rem; color: #0b1b3d; margin-bottom: 16px;">Entry Prerequisites</h2>
+            <p id="coursePrereqText" style="font-size: 1.02rem; line-height: 1.8; color: #3b4b59; margin-bottom: 20px;">
+              Open to Ethiopian nationals and residents. Prior education credentials (Degree, Diploma, or Transcripts) must be verified during application.
+            </p>
+            <div style="background: #e8f4fa; border-left: 4px solid var(--accent-orange); padding: 18px 22px;">
+              <strong style="color: #0b1b3d;">Accreditation Note:</strong>
+              <p style="font-size: 0.92rem; color: #334e68; margin-top: 6px; margin-bottom: 0;">
+                Upon successful completion, students receive a verified digital diploma endorsed by University in New York and Skillsoft Percipio. High-achieving learners (GPA 3.6+) are eligible for the Academic Excellence Medallion of Merit.
+              </p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Right Sticky Sidebar: Admissions Information Card -->
+        <aside class="course-sidebar-col">
+          <div class="course-sidebar-card">
+            <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--accent-orange); letter-spacing: 1px;">Admissions Information</span>
+            <div class="sidebar-fee" id="courseFeeText">Subsidized Intake</div>
+            
+            <div class="sidebar-feature-list">
+              <div class="sidebar-feature-item">
+                <span class="sidebar-feature-icon">&#10003;</span>
+                <div><strong>Duration:</strong> <span id="courseDurationText">24 Weeks</span></div>
+              </div>
+              <div class="sidebar-feature-item">
+                <span class="sidebar-feature-icon">&#10003;</span>
+                <div><strong>Format:</strong> 100% Online &amp; Self-Paced</div>
+              </div>
+              <div class="sidebar-feature-item">
+                <span class="sidebar-feature-icon">&#10003;</span>
+                <div><strong>Platform:</strong> Skillsoft Percipio Portal</div>
+              </div>
+              <div class="sidebar-feature-item">
+                <span class="sidebar-feature-icon">&#10003;</span>
+                <div><strong>Accreditation:</strong> University in New York</div>
+              </div>
+              <div class="sidebar-feature-item">
+                <span class="sidebar-feature-icon">&#10003;</span>
+                <div><strong>Verification:</strong> FAYDA National ID &amp; Degree Docs</div>
+              </div>
+            </div>
+
+            <div style="margin-top: 25px;">
+              <a href="#" id="applyNowBtn" class="btn btn-orange" style="width: 100%; text-align: center; margin-bottom: 12px;">Apply For This Program</a>
+              <a href="contact.html" class="btn btn-black" style="width: 100%; text-align: center;">Inquire With Advisor</a>
+            </div>
+
+            <div style="margin-top: 20px; font-size: 0.8rem; color: #64748b; text-align: center;">
+              Application fee: 1,500 ETB / $35 USD payable via Telebirr or Bank Transfer.
+            </div>
+          </div>
+        </aside>
+
+      </div>
+    </section>
+
+    <!-- RELATED PROGRAMS SECTION -->
+    <section class="section-padding" style="background-color: var(--ice-blue);">
+      <div class="container">
+        <div class="section-header">
+          <h2 class="section-title">Other Recommended Tracks</h2>
+          <p class="section-desc">Explore related diploma pathways to broaden your technical and leadership skills.</p>
+        </div>
+        <div class="programs-grid" id="relatedCoursesList">
+          <!-- Populated by JS -->
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="Academic Excellence" style="height: 44px; margin-bottom: 20px;" />
+          <p>Academic Excellence connects Ethiopian learners with certified U.S. university programs.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Program Tracks</h4>
+          <ul class="footer-links">
+            <li><a href="courses.html">All Programs</a></li>
+            <li><a href="apply.html">Apply Online</a></li>
+            <li><a href="track.html">Track Application</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="admin/login.html">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; 2026 Academic Excellence Education Initiative. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/courses-service.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const slug = urlParams.get("slug") || "artificial-intelligence";
+
+      const course = window.CoursesService.getCourseBySlug(slug) || window.CoursesService.getAllCourses()[0];
+      if (!course) return;
+
+      document.getElementById("pageTitle").textContent = `${course.title} | Academic Excellence`;
+      document.getElementById("courseTitle").textContent = course.title;
+      document.getElementById("courseCategoryBadge").textContent = course.categoryLabel || "Accredited Program";
+      document.getElementById("courseDescShort").textContent = course.description;
+      document.getElementById("courseOverviewText").textContent = course.description;
+      document.getElementById("courseDurationText").textContent = course.duration;
+      document.getElementById("courseFeeText").textContent = course.tuitionFee || "Subsidized Intake";
+      document.getElementById("coursePrereqText").textContent = course.prerequisites || "Bachelor's, Diploma, or secondary credential required.";
+
+      // Apply button pre-fill
+      document.getElementById("applyNowBtn").href = `apply.html?course=${encodeURIComponent(course.title)}`;
+
+      // Highlights
+      const highlightsContainer = document.getElementById("courseHighlightsList");
+      if (course.highlights && course.highlights.length > 0) {
+        highlightsContainer.innerHTML = course.highlights.map(h => `
+          <div style="background: #f8fafc; padding: 14px; border: 1px solid #e2e8f0; display: flex; align-items: center; gap: 10px;">
+            <span style="color: #df6b26; font-weight: bold;">&bull;</span>
+            <span style="font-size: 0.95rem; color: #1e293b;">${h}</span>
+          </div>
+        `).join("");
+      } else {
+        highlightsContainer.innerHTML = `<p style="color: #64748b;">Comprehensive theoretical grounding &amp; applied laboratory practice.</p>`;
+      }
+
+      // Syllabus
+      const syllabusContainer = document.getElementById("courseSyllabusList");
+      if (course.syllabus && course.syllabus.length > 0) {
+        syllabusContainer.innerHTML = course.syllabus.map(s => `
+          <div class="syllabus-module-item">
+            <div class="syllabus-header">
+              <span>${s.module}</span>
+              <span class="syllabus-weeks">${s.weeks}</span>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Related courses
+      const all = window.CoursesService.getAllCourses();
+      const related = all.filter(c => c.id !== course.id && c.category === course.category).slice(0, 3);
+      const relatedContainer = document.getElementById("relatedCoursesList");
+      if (relatedContainer) {
+        relatedContainer.innerHTML = related.map(rc => `
+          <div class="program-card">
+            <div>
+              <span class="program-badge">${rc.categoryLabel || "Program"}</span>
+              <h4>${rc.title}</h4>
+              <p>${rc.description}</p>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+              <a href="course-detail.html?slug=${encodeURIComponent(rc.slug)}" class="btn btn-sm" style="flex: 1; text-align: center; border-color: #0b1b3d; color: #0b1b3d;">View Details</a>
+              <a href="apply.html?course=${encodeURIComponent(rc.title)}" class="btn btn-sm" style="background: #df6b26; border-color: #df6b26; color: #ffffff; text-align: center;">Apply</a>
+            </div>
+          </div>
+        `).join("");
+      }
+    });
+  </script>
+</body>
+</html>

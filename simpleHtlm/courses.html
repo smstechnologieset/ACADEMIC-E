@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Academic Programs &amp; Diplomas | Academic Excellence</title>
+  <meta name="description" content="Explore certified online diploma tracks and professional specializations in collaboration with University in New York and Skillsoft Percipio." />
+  
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Signature Top-Right Orange Corner Badge -->
+  <div class="header-corner-accent" aria-hidden="true"></div>
+
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
+        <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
+      </a>
+
+      <nav class="nav-menu" id="primaryNav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="courses.html" class="nav-link active">Programs</a>
+        <a href="apply.html" class="nav-link">Apply</a>
+        <a href="track.html" class="nav-link">Track</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="admin/login.html" class="nav-link" style="opacity: 0.85; font-size: 0.85rem;">Admin</a>
+      </nav>
+
+      <button class="mobile-nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- COURSES HERO BANNER -->
+    <section class="hero-section" style="min-height: 42vh; padding-top: 140px; padding-bottom: 60px;">
+      <div class="hero-overlay" style="opacity: 0.8;" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <div class="hero-badge-wrap">
+          <span class="hero-badge-pill">Curriculum</span>
+          <span class="hero-badge-text">Certified with University in New York</span>
+        </div>
+        <h1 class="hero-title" style="font-size: 3.2rem;">Academic Programs &amp; Diplomas</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;">
+          Structured 24-week diplomas and 12-month postgraduate programs delivered via Skillsoft Percipio, empowering Ethiopian talent with globally recognized credentials.
+        </p>
+      </div>
+    </section>
+
+    <!-- CATALOG FILTER & COURSES GRID -->
+    <section class="section-padding" style="background-color: #f8fafc;">
+      <div class="container">
+        
+        <!-- Filter Bar -->
+        <div class="catalog-filter-bar">
+          <div class="category-tabs" id="categoryTabs">
+            <button class="tab-btn active" data-cat="all">All Programs</button>
+            <button class="tab-btn" data-cat="job-ready">Job-Ready (24 Weeks)</button>
+            <button class="tab-btn" data-cat="pgd">Postgraduate Diplomas (PGD)</button>
+          </div>
+
+          <div class="search-box-wrap">
+            <input type="text" id="courseSearch" class="search-input" placeholder="Search programs by keyword..." />
+          </div>
+        </div>
+
+        <!-- Dynamic Courses Grid -->
+        <div class="programs-grid" id="coursesList">
+          <!-- Populated by JavaScript -->
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="Academic Excellence" style="height: 44px; margin-bottom: 20px;" />
+          <p>
+            Academic Excellence is a transformative educational initiative connecting Ethiopian learners with accredited U.S. university diploma programs and industry certifications.
+          </p>
+        </div>
+
+        <div class="footer-col">
+          <h4>Program Categories</h4>
+          <ul class="footer-links">
+            <li><a href="courses.html?cat=job-ready">Job-Ready Tracks (24 Wks)</a></li>
+            <li><a href="courses.html?cat=pgd">Postgraduate Diplomas (PGD)</a></li>
+            <li><a href="apply.html">Online Application</a></li>
+            <li><a href="track.html">Application Tracking</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="index.html#about">About Us</a></li>
+            <li><a href="courses.html">Programs</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+            <li><a href="admin/login.html">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; 2026 Academic Excellence Education Initiative. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/courses-service.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const coursesList = document.getElementById("coursesList");
+      const categoryTabs = document.getElementById("categoryTabs");
+      const searchInput = document.getElementById("courseSearch");
+
+      let currentCategory = "all";
+
+      // Check query param
+      const urlParams = new URLSearchParams(window.location.search);
+      const queryCat = urlParams.get("cat");
+      if (queryCat) {
+        currentCategory = queryCat;
+        document.querySelectorAll(".tab-btn").forEach(btn => {
+          btn.classList.toggle("active", btn.dataset.cat === queryCat);
+        });
+      }
+
+      function renderCourses() {
+        const query = searchInput ? searchInput.value : "";
+        const courses = window.CoursesService.search(query, currentCategory);
+
+        if (!courses || courses.length === 0) {
+          coursesList.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background: #ffffff; border: 1px solid #e2e8f0;">
+              <h3 style="font-size: 1.4rem; color: #0b1b3d; margin-bottom: 8px;">No Programs Found</h3>
+              <p style="color: #64748b;">Try adjusting your keyword search or category filter.</p>
+            </div>
+          `;
+          return;
+        }
+
+        coursesList.innerHTML = courses.map(course => `
+          <div class="program-card">
+            <div>
+              <span class="program-badge">${course.categoryLabel || "Certified Program"}</span>
+              <h4>${course.title}</h4>
+              <p>${course.description}</p>
+            </div>
+            <div>
+              <div class="program-meta" style="margin-bottom: 18px;">
+                <span>Duration: ${course.duration}</span>
+                <span>${course.level.split("/")[0].trim()}</span>
+              </div>
+              <div style="display: flex; gap: 10px;">
+                <a href="course-detail.html?slug=${encodeURIComponent(course.slug)}" class="btn btn-sm" style="flex: 1; text-align: center; border-color: #0b1b3d; color: #0b1b3d;">View Details</a>
+                <a href="apply.html?course=${encodeURIComponent(course.title)}" class="btn btn-sm" style="background: #df6b26; border-color: #df6b26; color: #ffffff; text-align: center;">Apply</a>
+              </div>
+            </div>
+          </div>
+        `).join("");
+      }
+
+      // Tab click events
+      categoryTabs.addEventListener("click", (e) => {
+        if (e.target.classList.contains("tab-btn")) {
+          document.querySelectorAll(".tab-btn").forEach(b => b.classList.remove("active"));
+          e.target.classList.add("active");
+          currentCategory = e.target.dataset.cat;
+          renderCourses();
+        }
+      });
+
+      // Search input event
+      searchInput.addEventListener("input", () => {
+        renderCourses();
+      });
+
+      renderCourses();
+    });
+  </script>
+</body>
+</html>

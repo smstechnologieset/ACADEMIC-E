@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Online Application | Academic Excellence</title>
+  <meta name="description" content="Apply for certified U.S. university diploma programs and industry certifications with Academic Excellence Ethiopia." />
+  
+  <link rel="icon" type="image/svg+xml" href="assets/logo.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Top-Right Orange Corner Accent -->
+  <div class="header-corner-accent" aria-hidden="true"></div>
+
+  <!-- SITE HEADER / NAVIGATION -->
+  <header class="site-header" id="top">
+    <div class="container nav-wrapper">
+      <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
+        <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
+      </a>
+
+      <nav class="nav-menu" id="primaryNav" aria-label="Main Navigation">
+        <a href="index.html" class="nav-link">Home</a>
+        <a href="index.html#about" class="nav-link">About</a>
+        <a href="courses.html" class="nav-link">Programs</a>
+        <a href="apply.html" class="nav-link active">Apply</a>
+        <a href="track.html" class="nav-link">Track</a>
+        <a href="contact.html" class="nav-link">Contact</a>
+        <a href="admin/login.html" class="nav-link" style="opacity: 0.85; font-size: 0.85rem;">Admin</a>
+      </nav>
+
+      <button class="mobile-nav-toggle" aria-controls="primaryNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span></span>
+        <span></span>
+        <span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <!-- HERO HEADER -->
+    <section class="hero-section apply-hero">
+      <div class="hero-overlay" style="opacity: 0.85;" aria-hidden="true"></div>
+      <div class="container hero-content">
+        <div class="hero-badge-wrap">
+          <span class="hero-badge-pill">Intake 2026</span>
+          <span class="hero-badge-text">Subsidized University Enrollment</span>
+        </div>
+        <h1 class="hero-title" style="font-size: 3.2rem;">Candidate Application</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;">
+          Complete your 3-step application form below. Your progress is autosaved locally.
+        </p>
+      </div>
+    </section>
+
+    <!-- APPLICATION FORM WIZARD -->
+    <section class="section-padding" style="background-color: #f8fafc; padding-top: 0;">
+      <div class="container">
+        
+        <div class="application-wrapper">
+          
+          <!-- Stepper Indicator -->
+          <div class="stepper-container">
+            <div class="step-item active" id="stepIndicator1">
+              <div class="step-circle">1</div>
+              <div class="step-label">Personal Details</div>
+            </div>
+            <div class="step-item" id="stepIndicator2">
+              <div class="step-circle">2</div>
+              <div class="step-label">Course &amp; Education Docs</div>
+            </div>
+            <div class="step-item" id="stepIndicator3">
+              <div class="step-circle">3</div>
+              <div class="step-label">FAYDA ID &amp; Signature</div>
+            </div>
+          </div>
+
+          <!-- Draft Status Alert -->
+          <div id="draftAlert" style="display: none; align-items: center; justify-content: space-between; background: #e8f4fa; border: 1px solid #bce1f3; padding: 12px 18px; margin-bottom: 25px;">
+            <div style="font-size: 0.88rem; color: #0b1b3d;">
+              <strong>Draft Restored:</strong> We found your previously saved application draft.
+            </div>
+            <button type="button" id="clearDraftBtn" style="background: none; border: none; color: #d93025; font-size: 0.85rem; font-weight: 700; cursor: pointer; text-decoration: underline;">
+              Clear Draft &amp; Start Fresh
+            </button>
+          </div>
+
+          <!-- Error Banner -->
+          <div id="formErrorBanner" style="display: none; background: #fdf2f2; border: 1px solid #f8b4b4; color: #9b1c1c; padding: 14px 18px; margin-bottom: 25px; font-size: 0.95rem;"></div>
+
+          <form id="applicationWizardForm">
+
+            <!-- STEP 1: PERSONAL DETAILS -->
+            <div class="form-step active" id="step1">
+              <h3 style="font-size: 1.5rem; color: #0b1b3d; margin-bottom: 24px; border-bottom: 2px solid var(--accent-orange); padding-bottom: 8px; display: inline-block;">
+                Step 1: Personal Information
+              </h3>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">First Name *</label>
+                  <input type="text" name="firstName" id="firstName" class="form-input" placeholder="e.g. Dawit" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Middle Name (Father's Name)</label>
+                  <input type="text" name="middleName" id="middleName" class="form-input" placeholder="e.g. Haile" />
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Last / Grandfather Name *</label>
+                  <input type="text" name="lastName" id="lastName" class="form-input" placeholder="e.g. Tadesse" required />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Age *</label>
+                  <input type="number" name="age" id="age" min="16" max="99" class="form-input" placeholder="Age (must be 16+)" required />
+                </div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Email Address *</label>
+                  <input type="email" name="email" id="email" class="form-input" placeholder="e.g. dawit.tadesse@example.com" required />
+                  <div class="form-hint">Official admission letters and Percipio access will be sent here.</div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Phone Number *</label>
+                  <input type="tel" name="phone" id="phone" class="form-input" placeholder="+251 9X XXX XXXX" required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Full Residential Address in Ethiopia *</label>
+                <input type="text" name="fullAddress" id="fullAddress" class="form-input" placeholder="House No, Woreda, Sub-City/Zone, City/Region" required />
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Place of Application *</label>
+                <input type="text" name="place" id="place" class="form-input" value="Addis Ababa" required />
+              </div>
+
+              <div class="step-actions">
+                <div></div>
+                <button type="button" class="btn btn-orange" id="btnStep1Next">Continue to Qualification &rarr;</button>
+              </div>
+            </div>
+
+            <!-- STEP 2: COURSE & EDUCATION DOCUMENTS (NEW REQUIREMENT INCLUDED) -->
+            <div class="form-step" id="step2">
+              <h3 style="font-size: 1.5rem; color: #0b1b3d; margin-bottom: 24px; border-bottom: 2px solid var(--accent-orange); padding-bottom: 8px; display: inline-block;">
+                Step 2: Course Selection &amp; Education Verification
+              </h3>
+
+              <div class="form-group">
+                <label class="form-label">Program Applied For *</label>
+                <select name="courseApplied" id="courseApplied" class="form-select" required>
+                  <!-- Populated by JS -->
+                </select>
+                <div class="form-hint">All tracks run for 24 weeks (or 12 months for PGD) with dual U.S. certification.</div>
+              </div>
+
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Highest Completed Qualification *</label>
+                  <select name="qualification" id="qualification" class="form-select" required>
+                    <option value="Bachelor's Degree (BA / BSc)">Bachelor's Degree (BA / BSc)</option>
+                    <option value="Associate Degree / College Diploma">Associate Degree / College Diploma</option>
+                    <option value="Master's Degree (MA / MSc / MBA)">Master's Degree (MA / MSc / MBA)</option>
+                    <option value="Doctorate / PhD">Doctorate / PhD</option>
+                    <option value="Secondary School (Grade 12)">Secondary School Completion (Grade 12)</option>
+                    <option value="Technical / TVET Certificate">Technical / TVET Certificate</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Major / Field of Study *</label>
+                  <input type="text" name="fieldOfStudy" id="fieldOfStudy" class="form-input" placeholder="e.g. Computer Science, Engineering, Economics..." required />
+                </div>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label">Previous Institution / University Name *</label>
+                <input type="text" name="previousInstitution" id="previousInstitution" class="form-input" placeholder="e.g. Addis Ababa University, Hawassa University..." required />
+              </div>
+
+              <!-- [NEW] MANDATORY EDUCATION DOCUMENTS UPLOAD -->
+              <div class="form-group" style="margin-top: 30px; background: #fdfdfd; padding: 25px; border: 1px solid var(--border-light);">
+                <label class="form-label" style="font-size: 1rem; color: #0b1b3d;">
+                  Academic Documents &amp; Transcripts *
+                </label>
+                <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                  Please upload your official <strong>Degree Certificate, College Diploma, or Academic Transcripts</strong> so the admissions committee can verify your educational background.
+                </p>
+
+                <div class="file-dropzone" id="educationDocDropzone">
+                  <div class="file-dropzone-icon">&#128196;</div>
+                  <div class="file-dropzone-text">Click or drag &amp; drop your education document here</div>
+                  <div class="file-dropzone-sub">Accepts PDF, PNG, JPG or JPEG (Maximum 10MB)</div>
+                  <input type="file" id="educationDocFileInput" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                </div>
+
+                <div id="educationDocPreview" class="file-preview-card" style="display: none;">
+                  <div class="file-preview-info">
+                    <span style="font-size: 1.5rem; color: var(--primary-blue);">&#128196;</span>
+                    <div>
+                      <div class="file-preview-name" id="educationDocFileName">degree_transcript.pdf</div>
+                      <div class="file-preview-size" id="educationDocFileSize">2.4 MB</div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-remove-file" id="removeEducationDocBtn" title="Remove file">&times;</button>
+                </div>
+              </div>
+
+              <div class="step-actions">
+                <button type="button" class="btn btn-black" id="btnStep2Back">&larr; Back to Personal Info</button>
+                <button type="button" class="btn btn-orange" id="btnStep2Next">Continue to FAYDA ID &rarr;</button>
+              </div>
+            </div>
+
+            <!-- STEP 3: FAYDA ID & DIGITAL SIGNATURE -->
+            <div class="form-step" id="step3">
+              <h3 style="font-size: 1.5rem; color: #0b1b3d; margin-bottom: 24px; border-bottom: 2px solid var(--accent-orange); padding-bottom: 8px; display: inline-block;">
+                Step 3: FAYDA ID Verification &amp; Signature
+              </h3>
+
+              <div class="form-group">
+                <label class="form-label">FAYDA Identification Number (FIN) *</label>
+                <input type="text" name="faydaIdNumber" id="faydaIdNumber" class="form-input" placeholder="e.g. FIN-ET-8923-0192" required />
+                <div class="form-hint">Enter your official Ethiopian National Identification Number.</div>
+              </div>
+
+              <!-- FAYDA DOCUMENT UPLOAD -->
+              <div class="form-group" style="background: #fdfdfd; padding: 25px; border: 1px solid var(--border-light); margin-bottom: 25px;">
+                <label class="form-label" style="font-size: 1rem; color: #0b1b3d;">
+                  Upload Official FAYDA ID Document / Photo *
+                </label>
+                <p style="font-size: 0.9rem; color: #475569; margin-bottom: 15px;">
+                  Upload a clear digital scan or photograph of your National FAYDA ID card or digital certificate.
+                </p>
+
+                <div class="file-dropzone" id="faydaDropzone">
+                  <div class="file-dropzone-icon">&#127380;</div>
+                  <div class="file-dropzone-text">Click or drag &amp; drop your FAYDA ID file here</div>
+                  <div class="file-dropzone-sub">Accepts PDF, PNG, JPG or JPEG (Maximum 10MB)</div>
+                  <input type="file" id="faydaFileInput" accept=".pdf,.png,.jpg,.jpeg" style="display: none;" />
+                </div>
+
+                <div id="faydaPreview" class="file-preview-card" style="display: none;">
+                  <div class="file-preview-info">
+                    <span style="font-size: 1.5rem; color: var(--primary-blue);">&#127380;</span>
+                    <div>
+                      <div class="file-preview-name" id="faydaFileName">fayda_id.png</div>
+                      <div class="file-preview-size" id="faydaFileSize">1.8 MB</div>
+                    </div>
+                  </div>
+                  <button type="button" class="btn-remove-file" id="removeFaydaBtn" title="Remove file">&times;</button>
+                </div>
+              </div>
+
+              <!-- DIGITAL SIGNATURE CANVAS PAD -->
+              <div class="form-group">
+                <label class="form-label">Digital Signature *</label>
+                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
+                  Draw your official signature in the box below using your mouse or finger/stylus on mobile.
+                </p>
+                <div class="signature-box">
+                  <canvas id="signatureCanvas" class="signature-canvas"></canvas>
+                  <div class="signature-actions">
+                    <button type="button" class="btn btn-sm" id="clearSignatureBtn">Clear Signature</button>
+                    <span style="font-size: 0.8rem; color: #64748b;">Legally binding electronic signature</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- CAPTCHA VERIFICATION -->
+              <div class="form-group" style="margin-top: 25px;">
+                <label class="form-label">Anti-Spam Verification *</label>
+                <div class="captcha-container">
+                  <div class="captcha-visual" id="captchaDisplay">AE89X</div>
+                  <button type="button" class="btn btn-sm" id="refreshCaptchaBtn" title="Refresh code">&#8635; Refresh</button>
+                </div>
+                <input type="text" id="captchaInput" class="form-input" placeholder="Type the 5 characters shown above" style="max-width: 280px;" required />
+              </div>
+
+              <!-- LEGAL DECLARATION -->
+              <div class="form-group" style="margin-top: 25px; background: #f8fafc; padding: 20px; border: 1px solid var(--border-light);">
+                <label style="display: flex; align-items: flex-start; gap: 12px; cursor: pointer; font-size: 0.92rem; color: #1e293b;">
+                  <input type="checkbox" id="declarationCheck" required style="margin-top: 4px; width: 18px; height: 18px;" />
+                  <span>
+                    I solemnly declare that all personal particulars, academic records, and uploaded credentials (FAYDA ID and educational transcripts) provided in this application are genuine and authentic. I authorize Academic Excellence and its certifying university partners to verify these records.
+                  </span>
+                </label>
+              </div>
+
+              <div class="step-actions">
+                <button type="button" class="btn btn-black" id="btnStep3Back">&larr; Back to Course &amp; Docs</button>
+                <button type="submit" class="btn btn-orange" id="btnSubmitApplication">Submit Application &amp; Proceed to Payment &rarr;</button>
+              </div>
+            </div>
+
+          </form>
+
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <!-- SITE FOOTER -->
+  <footer class="site-footer">
+    <div class="container footer-top">
+      <div class="footer-grid">
+        <div class="footer-brand">
+          <img src="assets/logo.svg" alt="Academic Excellence" style="height: 44px; margin-bottom: 20px;" />
+          <p>Academic Excellence connects Ethiopian learners with certified U.S. university programs.</p>
+        </div>
+        <div class="footer-col">
+          <h4>Program Tracks</h4>
+          <ul class="footer-links">
+            <li><a href="courses.html">All Programs</a></li>
+            <li><a href="track.html">Track Application</a></li>
+            <li><a href="contact.html">Contact Us</a></li>
+          </ul>
+        </div>
+        <div class="footer-col">
+          <h4>Quick Links</h4>
+          <ul class="footer-links">
+            <li><a href="index.html">Home</a></li>
+            <li><a href="courses.html">Courses</a></li>
+            <li><a href="admin/login.html">Admin Portal</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <p>&copy; 2026 Academic Excellence Education Initiative. All Rights Reserved.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/supabase-client.js"></script>
+  <script src="js/courses-service.js"></script>
+  <script src="js/applications-service.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // 1. Populate courses dropdown
+      const courseSelect = document.getElementById("courseApplied");
+      const courses = window.CoursesService.getAllCourses();
+      courseSelect.innerHTML = courses.map(c => `
+        <option value="${c.title}">${c.title} (${c.duration})</option>
+      `).join("");
+
+      // Check URL query param for course
+      const params = new URLSearchParams(window.location.search);
+      const queryCourse = params.get("course");
+      if (queryCourse) {
+        const found = courses.find(c => c.title.toLowerCase() === queryCourse.toLowerCase() || c.slug === queryCourse);
+        if (found) {
+          courseSelect.value = found.title;
+        }
+      }
+
+      // 2. Draft Autosave & Restore
+      const draft = window.ApplicationsService.getDraft();
+      const draftAlert = document.getElementById("draftAlert");
+      if (draft) {
+        draftAlert.style.display = "flex";
+        Object.keys(draft).forEach(key => {
+          const el = document.getElementById(key);
+          if (el) el.value = draft[key];
+        });
+        if (queryCourse) {
+          courseSelect.value = queryCourse;
+        }
+      }
+
+      document.getElementById("clearDraftBtn").addEventListener("click", () => {
+        window.ApplicationsService.clearDraft();
+        document.getElementById("applicationWizardForm").reset();
+        draftAlert.style.display = "none";
+      });
+
+      // 3. Captcha
+      let currentCaptcha = "";
+      function generateCaptcha() {
+        const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+        let code = "";
+        for (let i = 0; i < 5; i++) {
+          code += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        currentCaptcha = code;
+        document.getElementById("captchaDisplay").textContent = code;
+      }
+      generateCaptcha();
+      document.getElementById("refreshCaptchaBtn").addEventListener("click", generateCaptcha);
+
+      // 4. File Upload Handlers (Education Docs & FAYDA ID)
+      let selectedEducationDoc = null;
+      let selectedFaydaDoc = null;
+
+      function setupDropzone(dropzoneId, inputId, previewId, nameId, sizeId, removeBtnId, onSelect) {
+        const dropzone = document.getElementById(dropzoneId);
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        const nameEl = document.getElementById(nameId);
+        const sizeEl = document.getElementById(sizeId);
+        const removeBtn = document.getElementById(removeBtnId);
+
+        dropzone.addEventListener("click", () => input.click());
+
+        dropzone.addEventListener("dragover", (e) => {
+          e.preventDefault();
+          dropzone.classList.add("dragover");
+        });
+
+        dropzone.addEventListener("dragleave", () => {
+          dropzone.classList.remove("dragover");
+        });
+
+        dropzone.addEventListener("drop", (e) => {
+          e.preventDefault();
+          dropzone.classList.remove("dragover");
+          if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+            handleFile(e.dataTransfer.files[0]);
+          }
+        });
+
+        input.addEventListener("change", (e) => {
+          if (e.target.files && e.target.files[0]) {
+            handleFile(e.target.files[0]);
+          }
+        });
+
+        function handleFile(file) {
+          const val = window.ApplicationsService.validateFile(file);
+          if (!val.valid) {
+            showError(val.error);
+            return;
+          }
+          hideError();
+          nameEl.textContent = file.name;
+          sizeEl.textContent = window.ApplicationsService.formatBytes(file.size);
+          preview.style.display = "flex";
+          dropzone.style.display = "none";
+          onSelect(file);
+        }
+
+        removeBtn.addEventListener("click", () => {
+          input.value = "";
+          preview.style.display = "none";
+          dropzone.style.display = "block";
+          onSelect(null);
+        });
+      }
+
+      setupDropzone("educationDocDropzone", "educationDocFileInput", "educationDocPreview", "educationDocFileName", "educationDocFileSize", "removeEducationDocBtn", (file) => {
+        selectedEducationDoc = file;
+      });
+
+      setupDropzone("faydaDropzone", "faydaFileInput", "faydaPreview", "faydaFileName", "faydaFileSize", "removeFaydaBtn", (file) => {
+        selectedFaydaDoc = file;
+      });
+
+      // 5. Signature Canvas
+      const canvas = document.getElementById("signatureCanvas");
+      const ctx = canvas.getContext("2d");
+      let isDrawing = false;
+      let hasSigned = false;
+
+      function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+        ctx.lineWidth = 2.5;
+        ctx.lineCap = "round";
+        ctx.strokeStyle = "#0b1b3d";
+      }
+      resizeCanvas();
+      window.addEventListener("resize", resizeCanvas);
+
+      function getPos(e) {
+        const rect = canvas.getBoundingClientRect();
+        if (e.touches && e.touches[0]) {
+          return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
+        }
+        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
+      }
+
+      function startDraw(e) {
+        isDrawing = true;
+        hasSigned = true;
+        const pos = getPos(e);
+        ctx.beginPath();
+        ctx.moveTo(pos.x, pos.y);
+      }
+
+      function draw(e) {
+        if (!isDrawing) return;
+        e.preventDefault();
+        const pos = getPos(e);
+        ctx.lineTo(pos.x, pos.y);
+        ctx.stroke();
+      }
+
+      function stopDraw() {
+        isDrawing = false;
+      }
+
+      canvas.addEventListener("mousedown", startDraw);
+      canvas.addEventListener("mousemove", draw);
+      canvas.addEventListener("mouseup", stopDraw);
+      canvas.addEventListener("mouseleave", stopDraw);
+
+      canvas.addEventListener("touchstart", startDraw);
+      canvas.addEventListener("touchmove", draw);
+      canvas.addEventListener("touchend", stopDraw);
+
+      document.getElementById("clearSignatureBtn").addEventListener("click", () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        hasSigned = false;
+      });
+
+      // 6. Navigation between Steps & Validation
+      const step1 = document.getElementById("step1");
+      const step2 = document.getElementById("step2");
+      const step3 = document.getElementById("step3");
+
+      const ind1 = document.getElementById("stepIndicator1");
+      const ind2 = document.getElementById("stepIndicator2");
+      const ind3 = document.getElementById("stepIndicator3");
+
+      const errBanner = document.getElementById("formErrorBanner");
+
+      function showError(msg) {
+        errBanner.textContent = msg;
+        errBanner.style.display = "block";
+        errBanner.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+
+      function hideError() {
+        errBanner.style.display = "none";
+      }
+
+      // Step 1 -> Step 2
+      document.getElementById("btnStep1Next").addEventListener("click", () => {
+        hideError();
+        const firstName = document.getElementById("firstName").value.trim();
+        const lastName = document.getElementById("lastName").value.trim();
+        const age = parseInt(document.getElementById("age").value, 10);
+        const email = document.getElementById("email").value.trim();
+        const phone = document.getElementById("phone").value.trim();
+        const address = document.getElementById("fullAddress").value.trim();
+
+        if (!firstName) return showError("Please enter your First Name.");
+        if (!lastName) return showError("Please enter your Last / Family Name.");
+        if (!age || age < 16 || age > 99) return showError("Please enter a valid age (16 years or older).");
+        if (!email || !/\S+@\S+\.\S+/.test(email)) return showError("Please enter a valid Email address.");
+        if (!phone) return showError("Please enter your Phone number.");
+        if (!address) return showError("Please enter your Full Residential Address.");
+
+        // Autosave draft
+        window.ApplicationsService.saveDraft({
+          firstName, middleName: document.getElementById("middleName").value, lastName,
+          age, email, phone, fullAddress: address, place: document.getElementById("place").value
+        });
+
+        step1.classList.remove("active");
+        step2.classList.add("active");
+        ind1.classList.remove("active");
+        ind1.classList.add("completed");
+        ind2.classList.add("active");
+        window.scrollTo({ top: 300, behavior: "smooth" });
+      });
+
+      // Step 2 Back & Next
+      document.getElementById("btnStep2Back").addEventListener("click", () => {
+        hideError();
+        step2.classList.remove("active");
+        step1.classList.add("active");
+        ind2.classList.remove("active");
+        ind1.classList.add("active");
+        window.scrollTo({ top: 300, behavior: "smooth" });
+      });
+
+      document.getElementById("btnStep2Next").addEventListener("click", () => {
+        hideError();
+        const fieldOfStudy = document.getElementById("fieldOfStudy").value.trim();
+        const prevInst = document.getElementById("previousInstitution").value.trim();
+
+        if (!fieldOfStudy) return showError("Please enter your Major or Field of Study.");
+        if (!prevInst) return showError("Please enter your previous Institution / University name.");
+        
+        // MANDATORY EDUCATION DOCUMENT CHECK
+        if (!selectedEducationDoc) {
+          return showError("Mandatory: Please upload your Degree Certificate, Diploma, or Academic Transcripts so we can verify your qualification.");
+        }
+
+        step2.classList.remove("active");
+        step3.classList.add("active");
+        ind2.classList.remove("active");
+        ind2.classList.add("completed");
+        ind3.classList.add("active");
+        window.scrollTo({ top: 300, behavior: "smooth" });
+      });
+
+      // Step 3 Back
+      document.getElementById("btnStep3Back").addEventListener("click", () => {
+        hideError();
+        step3.classList.remove("active");
+        step2.classList.add("active");
+        ind3.classList.remove("active");
+        ind2.classList.add("active");
+        window.scrollTo({ top: 300, behavior: "smooth" });
+      });
+
+      // Final Submission
+      document.getElementById("applicationWizardForm").addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideError();
+
+        const faydaIdNumber = document.getElementById("faydaIdNumber").value.trim();
+        if (!faydaIdNumber) return showError("Please enter your FAYDA Identification Number (FIN).");
+
+        if (!selectedFaydaDoc) {
+          return showError("Mandatory: Please upload your official FAYDA ID document or card photo.");
+        }
+
+        if (!hasSigned) {
+          return showError("Please provide your digital signature on the canvas pad.");
+        }
+
+        const captchaInput = document.getElementById("captchaInput").value.trim().toUpperCase();
+        if (captchaInput !== currentCaptcha) {
+          generateCaptcha();
+          return showError("Invalid Anti-Spam verification code. Please try again with the new code.");
+        }
+
+        const declaration = document.getElementById("declarationCheck").checked;
+        if (!declaration) {
+          return showError("You must check the declaration confirming the authenticity of your information.");
+        }
+
+        const submitBtn = document.getElementById("btnSubmitApplication");
+        submitBtn.textContent = "Processing & Securing Application...";
+        submitBtn.disabled = true;
+
+        const signatureDataUrl = canvas.toDataURL("image/png");
+
+        const formData = {
+          firstName: document.getElementById("firstName").value,
+          middleName: document.getElementById("middleName").value,
+          lastName: document.getElementById("lastName").value,
+          age: document.getElementById("age").value,
+          email: document.getElementById("email").value,
+          phone: document.getElementById("phone").value,
+          fullAddress: document.getElementById("fullAddress").value,
+          place: document.getElementById("place").value,
+          courseApplied: document.getElementById("courseApplied").value,
+          qualification: document.getElementById("qualification").value,
+          fieldOfStudy: document.getElementById("fieldOfStudy").value,
+          previousInstitution: document.getElementById("previousInstitution").value,
+          faydaIdNumber,
+          signature: signatureDataUrl
+        };
+
+        try {
+          const result = await window.ApplicationsService.submitApplication(formData, selectedFaydaDoc, selectedEducationDoc);
+          if (result.success) {
+            window.location.href = `payment-instructions.html?ref=${encodeURIComponent(result.applicationId)}`;
+          } else {
+            showError("Failed to submit application. Please check your data and retry.");
+            submitBtn.textContent = "Submit Application & Proceed to Payment \u2192";
+            submitBtn.disabled = false;
+          }
+        } catch (err) {
+          console.error(err);
+          showError("An unexpected error occurred during submission. Please retry.");
+          submitBtn.textContent = "Submit Application & Proceed to Payment \u2192";
+          submitBtn.disabled = false;
+        }
+      });
+    });
+  </script>
+</body>
+</html>
