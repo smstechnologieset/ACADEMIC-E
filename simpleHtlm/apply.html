@@ -77,7 +77,7 @@
             </div>
             <div class="step-item" id="stepIndicator3">
               <div class="step-circle">3</div>
-              <div class="step-label">FAYDA ID &amp; Signature</div>
+              <div class="step-label">FAYDA ID Verification</div>
             </div>
           </div>
 
@@ -137,13 +137,8 @@
               </div>
 
               <div class="form-group">
-                <label class="form-label">Full Residential Address in Ethiopia *</label>
-                <input type="text" name="fullAddress" id="fullAddress" class="form-input" placeholder="House No, Woreda, Sub-City/Zone, City/Region" required />
-              </div>
-
-              <div class="form-group">
                 <label class="form-label">Place of Application *</label>
-                <input type="text" name="place" id="place" class="form-input" value="Addis Ababa" required />
+                <input type="text" name="place" id="place" class="form-input" value="Addis Ababa" placeholder="e.g. Addis Ababa, Hawassa, Dire Dawa..." required />
               </div>
 
               <div class="step-actions">
@@ -166,23 +161,16 @@
                 <div class="form-hint">All tracks run for 24 weeks (or 12 months for PGD) with dual U.S. certification.</div>
               </div>
 
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label class="form-label">Highest Completed Qualification *</label>
-                  <select name="qualification" id="qualification" class="form-select" required>
-                    <option value="Bachelor's Degree (BA / BSc)">Bachelor's Degree (BA / BSc)</option>
-                    <option value="Associate Degree / College Diploma">Associate Degree / College Diploma</option>
-                    <option value="Master's Degree (MA / MSc / MBA)">Master's Degree (MA / MSc / MBA)</option>
-                    <option value="Doctorate / PhD">Doctorate / PhD</option>
-                    <option value="Secondary School (Grade 12)">Secondary School Completion (Grade 12)</option>
-                    <option value="Technical / TVET Certificate">Technical / TVET Certificate</option>
-                  </select>
-                </div>
-
-                <div class="form-group">
-                  <label class="form-label">Major / Field of Study *</label>
-                  <input type="text" name="fieldOfStudy" id="fieldOfStudy" class="form-input" placeholder="e.g. Computer Science, Engineering, Economics..." required />
-                </div>
+              <div class="form-group">
+                <label class="form-label">Highest Completed Qualification *</label>
+                <select name="qualification" id="qualification" class="form-select" required>
+                  <option value="Bachelor's Degree (BA / BSc)">Bachelor's Degree (BA / BSc)</option>
+                  <option value="Associate Degree / College Diploma">Associate Degree / College Diploma</option>
+                  <option value="Master's Degree (MA / MSc / MBA)">Master's Degree (MA / MSc / MBA)</option>
+                  <option value="Doctorate / PhD">Doctorate / PhD</option>
+                  <option value="Secondary School (Grade 12)">Secondary School Completion (Grade 12)</option>
+                  <option value="Technical / TVET Certificate">Technical / TVET Certificate</option>
+                </select>
               </div>
 
               <div class="form-group">
@@ -224,17 +212,11 @@
               </div>
             </div>
 
-            <!-- STEP 3: FAYDA ID & DIGITAL SIGNATURE -->
+            <!-- STEP 3: FAYDA ID VERIFICATION -->
             <div class="form-step" id="step3">
               <h3 style="font-size: 1.5rem; color: #0b1b3d; margin-bottom: 24px; border-bottom: 2px solid var(--accent-orange); padding-bottom: 8px; display: inline-block;">
-                Step 3: FAYDA ID Verification &amp; Signature
+                Step 3: FAYDA ID Verification
               </h3>
-
-              <div class="form-group">
-                <label class="form-label">FAYDA Identification Number (FIN) *</label>
-                <input type="text" name="faydaIdNumber" id="faydaIdNumber" class="form-input" placeholder="e.g. FIN-ET-8923-0192" required />
-                <div class="form-hint">Enter your official Ethiopian National Identification Number.</div>
-              </div>
 
               <!-- FAYDA DOCUMENT UPLOAD -->
               <div class="form-group" style="background: #fdfdfd; padding: 25px; border: 1px solid var(--border-light); margin-bottom: 25px;">
@@ -261,21 +243,6 @@
                     </div>
                   </div>
                   <button type="button" class="btn-remove-file" id="removeFaydaBtn" title="Remove file">&times;</button>
-                </div>
-              </div>
-
-              <!-- DIGITAL SIGNATURE CANVAS PAD -->
-              <div class="form-group">
-                <label class="form-label">Digital Signature *</label>
-                <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 8px;">
-                  Draw your official signature in the box below using your mouse or finger/stylus on mobile.
-                </p>
-                <div class="signature-box">
-                  <canvas id="signatureCanvas" class="signature-canvas"></canvas>
-                  <div class="signature-actions">
-                    <button type="button" class="btn btn-sm" id="clearSignatureBtn">Clear Signature</button>
-                    <span style="font-size: 0.8rem; color: #64748b;">Legally binding electronic signature</span>
-                  </div>
                 </div>
               </div>
 
@@ -471,66 +438,7 @@
         selectedFaydaDoc = file;
       });
 
-      // 5. Signature Canvas
-      const canvas = document.getElementById("signatureCanvas");
-      const ctx = canvas.getContext("2d");
-      let isDrawing = false;
-      let hasSigned = false;
-
-      function resizeCanvas() {
-        const rect = canvas.getBoundingClientRect();
-        canvas.width = rect.width;
-        canvas.height = rect.height;
-        ctx.lineWidth = 2.5;
-        ctx.lineCap = "round";
-        ctx.strokeStyle = "#0b1b3d";
-      }
-      resizeCanvas();
-      window.addEventListener("resize", resizeCanvas);
-
-      function getPos(e) {
-        const rect = canvas.getBoundingClientRect();
-        if (e.touches && e.touches[0]) {
-          return { x: e.touches[0].clientX - rect.left, y: e.touches[0].clientY - rect.top };
-        }
-        return { x: e.clientX - rect.left, y: e.clientY - rect.top };
-      }
-
-      function startDraw(e) {
-        isDrawing = true;
-        hasSigned = true;
-        const pos = getPos(e);
-        ctx.beginPath();
-        ctx.moveTo(pos.x, pos.y);
-      }
-
-      function draw(e) {
-        if (!isDrawing) return;
-        e.preventDefault();
-        const pos = getPos(e);
-        ctx.lineTo(pos.x, pos.y);
-        ctx.stroke();
-      }
-
-      function stopDraw() {
-        isDrawing = false;
-      }
-
-      canvas.addEventListener("mousedown", startDraw);
-      canvas.addEventListener("mousemove", draw);
-      canvas.addEventListener("mouseup", stopDraw);
-      canvas.addEventListener("mouseleave", stopDraw);
-
-      canvas.addEventListener("touchstart", startDraw);
-      canvas.addEventListener("touchmove", draw);
-      canvas.addEventListener("touchend", stopDraw);
-
-      document.getElementById("clearSignatureBtn").addEventListener("click", () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        hasSigned = false;
-      });
-
-      // 6. Navigation between Steps & Validation
+      // 5. Navigation between Steps & Validation
       const step1 = document.getElementById("step1");
       const step2 = document.getElementById("step2");
       const step3 = document.getElementById("step3");
@@ -559,19 +467,19 @@
         const age = parseInt(document.getElementById("age").value, 10);
         const email = document.getElementById("email").value.trim();
         const phone = document.getElementById("phone").value.trim();
-        const address = document.getElementById("fullAddress").value.trim();
+        const place = document.getElementById("place").value.trim();
 
         if (!firstName) return showError("Please enter your First Name.");
         if (!lastName) return showError("Please enter your Last / Family Name.");
         if (!age || age < 16 || age > 99) return showError("Please enter a valid age (16 years or older).");
         if (!email || !/\S+@\S+\.\S+/.test(email)) return showError("Please enter a valid Email address.");
         if (!phone) return showError("Please enter your Phone number.");
-        if (!address) return showError("Please enter your Full Residential Address.");
+        if (!place) return showError("Please enter your Place of Application.");
 
         // Autosave draft
         window.ApplicationsService.saveDraft({
           firstName, middleName: document.getElementById("middleName").value, lastName,
-          age, email, phone, fullAddress: address, place: document.getElementById("place").value
+          age, email, phone, place
         });
 
         step1.classList.remove("active");
@@ -594,10 +502,8 @@
 
       document.getElementById("btnStep2Next").addEventListener("click", () => {
         hideError();
-        const fieldOfStudy = document.getElementById("fieldOfStudy").value.trim();
         const prevInst = document.getElementById("previousInstitution").value.trim();
 
-        if (!fieldOfStudy) return showError("Please enter your Major or Field of Study.");
         if (!prevInst) return showError("Please enter your previous Institution / University name.");
         
         // MANDATORY EDUCATION DOCUMENT CHECK
@@ -628,15 +534,8 @@
         e.preventDefault();
         hideError();
 
-        const faydaIdNumber = document.getElementById("faydaIdNumber").value.trim();
-        if (!faydaIdNumber) return showError("Please enter your FAYDA Identification Number (FIN).");
-
         if (!selectedFaydaDoc) {
           return showError("Mandatory: Please upload your official FAYDA ID document or card photo.");
-        }
-
-        if (!hasSigned) {
-          return showError("Please provide your digital signature on the canvas pad.");
         }
 
         const captchaInput = document.getElementById("captchaInput").value.trim().toUpperCase();
@@ -654,8 +553,6 @@
         submitBtn.textContent = "Processing & Securing Application...";
         submitBtn.disabled = true;
 
-        const signatureDataUrl = canvas.toDataURL("image/png");
-
         const formData = {
           firstName: document.getElementById("firstName").value,
           middleName: document.getElementById("middleName").value,
@@ -663,14 +560,10 @@
           age: document.getElementById("age").value,
           email: document.getElementById("email").value,
           phone: document.getElementById("phone").value,
-          fullAddress: document.getElementById("fullAddress").value,
           place: document.getElementById("place").value,
           courseApplied: document.getElementById("courseApplied").value,
           qualification: document.getElementById("qualification").value,
-          fieldOfStudy: document.getElementById("fieldOfStudy").value,
-          previousInstitution: document.getElementById("previousInstitution").value,
-          faydaIdNumber,
-          signature: signatureDataUrl
+          previousInstitution: document.getElementById("previousInstitution").value
         };
 
         try {

@@ -96,23 +96,23 @@ window.ApplicationsService = {
       age: parseInt(appData.age, 10),
       phone: appData.phone.trim(),
       email: appData.email.trim().toLowerCase(),
-      fullAddress: appData.fullAddress.trim(),
-      place: appData.place || "Addis Ababa",
+      fullAddress: (appData.fullAddress || appData.place || "Addis Ababa").trim(),
+      place: (appData.place || "Addis Ababa").trim(),
       qualification: appData.qualification,
       previousInstitution: (appData.previousInstitution || "").trim(),
       fieldOfStudy: (appData.fieldOfStudy || "").trim(),
       courseApplied: appData.courseApplied,
       
       // Verification Documents
-      faydaIdNumber: (appData.faydaIdNumber || "").trim(),
+      faydaIdNumber: (appData.faydaIdNumber || "FAYDA Document Attached").trim(),
       faydaFileName: faydaFile ? faydaFile.name : "",
       faydaFileUrl: faydaFileData || "assets/students.jpg",
       
-      // NEW: Mandatory Education Documents / Transcripts
+      // Mandatory Education Documents / Transcripts
       educationDocName: educationDocFile ? educationDocFile.name : "",
       educationDocUrl: educationDocData || "assets/campus.jpg",
       
-      signature: appData.signature || appData.fullName,
+      signature: appData.signature || `${appData.firstName.trim()} ${appData.lastName.trim()}`,
       status: "pending",
       paymentMethod: "",
       paymentRef: "",

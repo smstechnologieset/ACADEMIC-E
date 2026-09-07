@@ -276,13 +276,11 @@
             <div><strong>Full Name:</strong> <span id="modalFullName">Dawit Haile Tadesse</span></div>
             <div><strong>Age:</strong> <span id="modalAge">26</span></div>
             <div><strong>Email:</strong> <span id="modalEmail">dawit@example.com</span></div>
-            <div><strong>Phone:</strong> <span id="modalPhone">+251 91 123 4567</span></div>
-            <div><strong>Address:</strong> <span id="modalAddress">Bole Sub-City, Addis Ababa</span></div>
-            <div><strong>Place:</strong> <span id="modalPlace">Addis Ababa</span></div>
+            <div><strong>Place of Application:</strong> <span id="modalPlace">Addis Ababa</span></div>
             <div><strong>Program:</strong> <span id="modalProgram" style="color: var(--primary-blue); font-weight: 700;">Artificial Intelligence</span></div>
             <div><strong>Prior Qualification:</strong> <span id="modalQualification">Bachelor's Degree</span></div>
-            <div><strong>Major / Institution:</strong> <span id="modalMajorInst">Computer Science (AAU)</span></div>
-            <div><strong>FAYDA ID / FIN:</strong> <span id="modalFaydaNumber">FIN-ET-8923-0192</span></div>
+            <div><strong>Previous Institution:</strong> <span id="modalMajorInst">Addis Ababa University</span></div>
+            <div><strong>FAYDA ID:</strong> <span id="modalFaydaNumber">Document Uploaded</span></div>
           </div>
         </div>
 
@@ -564,12 +562,11 @@
         document.getElementById("modalAge").textContent = app.age;
         document.getElementById("modalEmail").textContent = app.email;
         document.getElementById("modalPhone").textContent = app.phone;
-        document.getElementById("modalAddress").textContent = app.fullAddress;
-        document.getElementById("modalPlace").textContent = app.place || "Addis Ababa";
+        document.getElementById("modalPlace").textContent = app.place || app.fullAddress || "Addis Ababa";
         document.getElementById("modalProgram").textContent = app.courseApplied;
         document.getElementById("modalQualification").textContent = app.qualification;
-        document.getElementById("modalMajorInst").textContent = `${app.fieldOfStudy || "N/A"} &bull; ${app.previousInstitution || "N/A"}`;
-        document.getElementById("modalFaydaNumber").textContent = app.faydaIdNumber || "N/A";
+        document.getElementById("modalMajorInst").textContent = app.previousInstitution || (app.fieldOfStudy ? `${app.fieldOfStudy} (${app.previousInstitution || "N/A"})` : "N/A");
+        document.getElementById("modalFaydaNumber").textContent = app.faydaFileName ? "Uploaded & Attached" : (app.faydaIdNumber || "Verified");
 
         // Status & Notes
         document.getElementById("modalStatusSelect").value = app.status;

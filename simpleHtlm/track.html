@@ -254,8 +254,8 @@
         document.getElementById("trackFullName").textContent = app.fullName || `${app.firstName} ${app.lastName}`;
         document.getElementById("trackCourse").textContent = app.courseApplied;
         document.getElementById("trackEmail").textContent = app.email;
-        document.getElementById("trackFayda").textContent = app.faydaIdNumber || "Verified";
-        document.getElementById("trackQualification").textContent = `${app.qualification} (${app.fieldOfStudy || "General"})`;
+        document.getElementById("trackFayda").textContent = app.faydaFileName ? "Uploaded & Verified" : (app.faydaIdNumber || "Verified");
+        document.getElementById("trackQualification").textContent = app.fieldOfStudy ? `${app.qualification} (${app.fieldOfStudy})` : (app.qualification || "Completed");
 
         // Badge & Stepper Status
         const badge = document.getElementById("trackStatusBadge");
