@@ -17,11 +17,17 @@
   <div class="admin-layout">
     
     <!-- SIDEBAR -->
+    <!-- MOBILE SIDEBAR OVERLAY -->
+    <div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
+
     <aside class="admin-sidebar">
       <div class="admin-brand">
-        <a href="../index.html">
-          <img src="../assets/logo.svg" alt="Academic Excellence" style="height: 38px;" />
-        </a>
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <a href="../index.html">
+            <img src="../assets/logo.svg" alt="Academic Excellence" style="height: 38px;" />
+          </a>
+          <button type="button" class="admin-sidebar-close-btn" id="closeAdminSidebarBtn" aria-label="Close navigation">&times;</button>
+        </div>
         <div style="font-size: 0.72rem; color: #7ebec5; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; font-weight: 700;">
           Admissions Administration
         </div>
@@ -55,13 +61,22 @@
       
       <!-- TOPBAR -->
       <header class="admin-topbar">
-        <div>
-          <h2 style="font-size: 1.35rem; color: #0b1b3d;" id="adminPageHeaderTitle">Admissions Overview</h2>
+        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+          <button type="button" class="admin-menu-toggle" id="adminSidebarToggle" aria-label="Toggle navigation">
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <h2 style="font-size: 1.35rem; color: #0b1b3d; margin: 0;" id="adminPageHeaderTitle">Admissions Overview</h2>
+          <span id="dbSyncBadge" class="db-sync-badge"><span class="spinner-dot"></span> Connecting Live DB...</span>
+          <button type="button" class="btn-sm btn-sync-db" id="topbarSyncBtn" title="Sync live records from Supabase">
+            &#8635; Refresh Data
+          </button>
         </div>
         <div style="display: flex; align-items: center; gap: 15px;">
           <div style="text-align: right;">
             <strong style="font-size: 0.9rem; color: #0b1b3d;">Staff Administrator</strong>
-            <div style="font-size: 0.78rem; color: #64748b;">superadmin@academice.edu.et</div>
+            <div style="font-size: 0.78rem; color: #64748b;" id="adminHeaderEmail">admin@academice.edu.et</div>
           </div>
           <div style="width: 40px; height: 40px; border-radius: 50%; background: #0b1b3d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700;">
             SA
@@ -144,7 +159,10 @@
                 </select>
               </div>
 
-              <div>
+              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button type="button" class="btn-sm btn-sync-db" id="appRefreshBtn" style="background: #f8fafc; color: #0b1b3d; border: 1px solid #cbd5e1; padding: 10px 16px;">
+                  &#8635; Refresh Live Data
+                </button>
                 <button type="button" class="btn-sm" id="exportCsvBtn" style="background: #0b1b3d; color: #ffffff; border: none; padding: 10px 18px;">
                   Export to CSV
                 </button>
@@ -422,6 +440,7 @@
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/courses-service.js"></script>
   <script src="../js/applications-service.js"></script>
@@ -430,10 +449,34 @@
     document.addEventListener("DOMContentLoaded", () => {
       // 1. Authentication Check
       window.AdminService.requireAuth();
+      const currentAuth = window.AdminService.checkAuth();
+      if (currentAuth && currentAuth.email) {
+        const hEmail = document.getElementById("adminHeaderEmail");
+        if (hEmail) hEmail.textContent = currentAuth.email;
+      }
 
       document.getElementById("adminLogoutBtn").addEventListener("click", () => {
         window.AdminService.logout();
       });
+
+      // Mobile Admin Sidebar Toggle
+      const sidebarToggle = document.getElementById("adminSidebarToggle");
+      const closeSidebarBtn = document.getElementById("closeAdminSidebarBtn");
+      const adminSidebar = document.querySelector(".admin-sidebar");
+      const adminOverlay = document.getElementById("adminSidebarOverlay");
+
+      function openSidebar() {
+        if (adminSidebar) adminSidebar.classList.add("open");
+        if (adminOverlay) adminOverlay.classList.add("open");
+      }
+      function closeSidebar() {
+        if (adminSidebar) adminSidebar.classList.remove("open");
+        if (adminOverlay) adminOverlay.classList.remove("open");
+      }
+
+      if (sidebarToggle) sidebarToggle.addEventListener("click", openSidebar);
+      if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
+      if (adminOverlay) adminOverlay.addEventListener("click", closeSidebar);
 
       // 2. Tab Navigation
       const tabs = document.querySelectorAll(".admin-nav-item[data-tab]");
@@ -451,6 +494,11 @@
           if (target === "tabApplications") titleEl.textContent = "Applications Management";
           if (target === "tabCourses") titleEl.textContent = "Academic Programs CMS";
           if (target === "tabSettings") titleEl.textContent = "Intake & Payment Settings";
+
+          // Auto-close sidebar on mobile after selecting tab
+          if (window.innerWidth < 992) {
+            closeSidebar();
+          }
         });
       });
 
@@ -468,7 +516,7 @@
         const barWrap = document.getElementById("courseBreakdownBars");
         const entries = Object.entries(m.courseCounts);
         if (entries.length === 0) {
-          barWrap.innerHTML = "<p style='color: #64748b;'>No applications recorded yet.</p>";
+          barWrap.innerHTML = "<p style='color: #64748b;'>No applications recorded in the database yet.</p>";
         } else {
           barWrap.innerHTML = entries.map(([course, count]) => {
             const pct = Math.round((count / Math.max(m.total, 1)) * 100);
@@ -486,7 +534,6 @@
           }).join("");
         }
       }
-      loadOverview();
 
       // 4. Load Applications Table
       const appsTableBody = document.getElementById("applicationsTableBody");
@@ -540,14 +587,58 @@
       searchInput.addEventListener("input", renderApplications);
       statusSelect.addEventListener("change", renderApplications);
       courseSelect.addEventListener("change", renderApplications);
-      renderApplications();
 
       // Export CSV
       document.getElementById("exportCsvBtn").addEventListener("click", () => {
         window.AdminService.exportApplicationsToCSV();
       });
 
-      // 5. Application Review Modal
+      // 5. LIVE DATABASE SYNC ENGINE
+      const syncBadge = document.getElementById("dbSyncBadge");
+
+      async function syncWithDatabase() {
+        if (syncBadge) {
+          syncBadge.innerHTML = `<span class="spinner-dot"></span> Syncing Supabase DB...`;
+          syncBadge.className = "db-sync-badge syncing";
+        }
+        document.querySelectorAll(".btn-sync-db").forEach(btn => {
+          btn.disabled = true;
+          btn.innerHTML = `&#8635; Syncing...`;
+        });
+
+        try {
+          await window.AdminService.fetchApplications();
+          if (syncBadge) {
+            syncBadge.innerHTML = `<span class="status-dot-green"></span> Live Supabase DB Connected`;
+            syncBadge.className = "db-sync-badge connected";
+          }
+        } catch (err) {
+          console.warn("Sync warning:", err);
+          if (syncBadge) {
+            syncBadge.innerHTML = `<span class="status-dot-orange"></span> Cached / Offline Data`;
+            syncBadge.className = "db-sync-badge warning";
+          }
+        } finally {
+          document.querySelectorAll(".btn-sync-db").forEach(btn => {
+            btn.disabled = false;
+            btn.innerHTML = `&#8635; Refresh Live Data`;
+          });
+          loadOverview();
+          renderApplications();
+        }
+      }
+
+      // Initial render & sync
+      loadOverview();
+      renderApplications();
+      syncWithDatabase();
+
+      // Wire refresh buttons
+      document.querySelectorAll(".btn-sync-db").forEach(btn => {
+        btn.addEventListener("click", syncWithDatabase);
+      });
+
+      // 6. Application Review Modal
       const appModal = document.getElementById("appReviewModal");
       let currentViewingApp = null;
 
@@ -620,19 +711,31 @@
       document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
       document.getElementById("closeAppModalFooterBtn").addEventListener("click", closeAppModal);
 
-      // Save Status & Notes
-      document.getElementById("modalSaveStatusBtn").addEventListener("click", () => {
+      // Save Status & Notes (Live Supabase Update)
+      document.getElementById("modalSaveStatusBtn").addEventListener("click", async () => {
         if (!currentViewingApp) return;
+        const saveBtn = document.getElementById("modalSaveStatusBtn");
+        const originalText = saveBtn.textContent;
+        saveBtn.textContent = "Saving to Database...";
+        saveBtn.disabled = true;
+
         const newStatus = document.getElementById("modalStatusSelect").value;
         const notes = document.getElementById("modalInternalNotes").value;
-        const res = window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes);
-        if (res.success) {
-          alert(`Status for ${currentViewingApp.id} updated to ${newStatus.toUpperCase()}`);
-          closeAppModal();
-          loadOverview();
-          renderApplications();
-        } else {
-          alert(res.error || "Failed to update status.");
+        try {
+          const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes);
+          if (res && res.success) {
+            closeAppModal();
+            loadOverview();
+            renderApplications();
+            alert(`Application ${currentViewingApp.id} status successfully updated to ${newStatus.toUpperCase().replace("_", " ")}`);
+          } else {
+            alert((res && res.error) || "Failed to update status in database.");
+          }
+        } catch (e) {
+          alert("Error saving status: " + (e.message || "Network issue"));
+        } finally {
+          saveBtn.textContent = originalText;
+          saveBtn.disabled = false;
         }
       });
 

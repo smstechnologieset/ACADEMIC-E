@@ -16,7 +16,7 @@
 
   <div class="admin-login-wrapper">
     <div class="admin-login-card">
-      <div style="text-align: center; margin-bottom: 30px;">
+      <div style="text-align: center; margin-bottom: 25px;">
         <img src="../assets/logo-dark.svg" alt="Academic Excellence" style="height: 48px; margin: 0 auto 16px auto;" />
         <h2 style="font-size: 1.6rem; color: #0b1b3d; margin-bottom: 6px;">Staff Administration</h2>
         <p style="font-size: 0.9rem; color: #64748b;">Sign in to access candidate applications, courses CMS &amp; financials.</p>
@@ -24,55 +24,73 @@
 
       <div id="loginErrorMsg" style="display: none; background: #fdf2f2; border: 1px solid #f8b4b4; color: #9b1c1c; padding: 12px; font-size: 0.88rem; margin-bottom: 20px;"></div>
 
-      <form id="adminLoginForm">
+      <form id="adminLoginForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
         <div class="form-group">
-          <label class="form-label">Email or Username</label>
-          <input type="text" id="adminEmail" class="form-input" placeholder="admin@academice.edu.et" required />
+          <label class="form-label">Administrator Email</label>
+          <input type="email" id="adminEmail" class="form-input" placeholder="admin@academice.edu.et" required autocomplete="username" />
         </div>
 
         <div class="form-group">
           <label class="form-label">Password</label>
-          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required />
+          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password" />
         </div>
 
         <div style="margin-top: 25px;">
-          <button type="submit" class="btn btn-orange" style="width: 100%;">Sign In to Dashboard &rarr;</button>
+          <button type="submit" id="adminSubmitBtn" class="btn btn-orange" style="width: 100%;">Sign In to Dashboard &rarr;</button>
         </div>
       </form>
 
       <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.82rem; color: #64748b; text-align: center;">
-        Academic Excellence Ethiopian Intake Management Portal &bull; <a href="../index.html" style="color: var(--primary-blue); font-weight: 600;">Return to Website</a>
+        Academic Excellence Admissions &amp; FAYDA Registry Portal &bull; <a href="../index.html" style="color: var(--primary-blue); font-weight: 600;">Return to Website</a>
       </div>
     </div>
   </div>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/admin-service.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // If already authenticated, redirect to dashboard
-      if (window.AdminService.checkAuth()) {
-        window.location.href = "index.html";
+      // Check if already authenticated and not explicitly in logout mode
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("logout") !== "1" && window.AdminService.checkAuth()) {
+        window.location.replace("index.html?auth=1");
+        return;
       }
 
       const form = document.getElementById("adminLoginForm");
       const errBox = document.getElementById("loginErrorMsg");
+      const submitBtn = document.getElementById("adminSubmitBtn");
+
+      async function submitLogin(email, pass) {
+        errBox.style.display = "none";
+        submitBtn.textContent = "Authenticating with Supabase...";
+        submitBtn.disabled = true;
+
+        try {
+          const res = await window.AdminService.login(email, pass);
+          if (res.success) {
+            window.location.replace("index.html?auth=1");
+          } else {
+            errBox.textContent = res.error;
+            errBox.style.display = "block";
+            submitBtn.textContent = "Sign In to Dashboard \u2192";
+            submitBtn.disabled = false;
+          }
+        } catch (e) {
+          errBox.textContent = "Authentication error: " + (e.message || "Failed to log in");
+          errBox.style.display = "block";
+          submitBtn.textContent = "Sign In to Dashboard \u2192";
+          submitBtn.disabled = false;
+        }
+      }
 
       form.addEventListener("submit", (e) => {
         e.preventDefault();
-        errBox.style.display = "none";
-
         const email = document.getElementById("adminEmail").value;
         const pass = document.getElementById("adminPassword").value;
-
-        const res = window.AdminService.login(email, pass);
-        if (res.success) {
-          window.location.href = "index.html";
-        } else {
-          errBox.textContent = res.error;
-          errBox.style.display = "block";
-        }
+        submitLogin(email, pass);
       });
     });
   </script>

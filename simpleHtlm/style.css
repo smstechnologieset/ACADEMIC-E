@@ -200,6 +200,7 @@ p:last-child {
   background-color: var(--accent-orange);
   z-index: 99;
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
+  pointer-events: none; /* Never block hamburger button or navigation clicks */
 }
 
 /* Mobile Toggle */
@@ -209,6 +210,8 @@ p:last-child {
   border: none;
   cursor: pointer;
   padding: 8px;
+  position: relative;
+  z-index: 101;
 }
 
 .mobile-nav-toggle span {
@@ -217,7 +220,21 @@ p:last-child {
   height: 3px;
   background-color: #ffffff;
   margin: 5px 0;
-  transition: var(--transition);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 2px;
+}
+
+.mobile-nav-toggle.open span:nth-child(1) {
+  transform: translateY(8px) rotate(45deg);
+}
+
+.mobile-nav-toggle.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.mobile-nav-toggle.open span:nth-child(3) {
+  transform: translateY(-8px) rotate(-45deg);
 }
 
 /* ==========================================================================
@@ -1947,4 +1964,498 @@ p:last-child {
   gap: 12px;
   background: #f8fafc;
 }
+
+/* ==========================================================================
+   LIVE DATABASE SYNC INDICATORS & ADMIN RESPONSIVE CONTROLS
+   ========================================================================== */
+.db-sync-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #eff6ff;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  transition: all 0.25s ease;
+}
+
+.db-sync-badge.connected {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: #a7f3d0;
+}
+
+.db-sync-badge.syncing {
+  background: #fdf4ff;
+  color: #86198f;
+  border-color: #f5d0fe;
+}
+
+.db-sync-badge.warning {
+  background: #fffbeb;
+  color: #92400e;
+  border-color: #fde68a;
+}
+
+.status-dot-green {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #10b981;
+  display: inline-block;
+  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.25);
+}
+
+.status-dot-orange {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background-color: #f59e0b;
+  display: inline-block;
+}
+
+.spinner-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid #3b82f6;
+  border-top-color: transparent;
+  display: inline-block;
+  animation: adminSpin 0.75s linear infinite;
+}
+
+@keyframes adminSpin {
+  to { transform: rotate(360deg); }
+}
+
+.admin-sidebar-overlay {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(11, 27, 61, 0.6);
+  backdrop-filter: blur(3px);
+  z-index: 998;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.admin-sidebar-overlay.open {
+  display: block;
+  opacity: 1;
+}
+
+.admin-sidebar-close-btn {
+  display: none;
+  background: none;
+  border: none;
+  color: #ffffff;
+  font-size: 1.8rem;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}
+
+.admin-menu-toggle {
+  display: none;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 4px;
+  padding: 7px 10px;
+  cursor: pointer;
+}
+
+.admin-menu-toggle span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background-color: #0b1b3d;
+  margin: 4px 0;
+  transition: all 0.25s ease;
+  border-radius: 1px;
+}
+
+/* ==========================================================================
+   GLOBAL COMPREHENSIVE RESPONSIVE DESIGN (ALL PAGES)
+   ========================================================================== */
+
+/* Medium Devices (Tablets & Small Laptops: <= 991px) */
+@media (max-width: 991px) {
+  /* Navigation Drawer starts at 991px for better tablet support */
+  .mobile-nav-toggle {
+    display: block;
+  }
+
+  .nav-menu {
+    position: fixed;
+    top: 0;
+    right: -100%;
+    width: 82%;
+    max-width: 320px;
+    height: 100vh;
+    background-color: var(--primary-navy);
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 85px 30px;
+    box-shadow: -5px 0 25px rgba(0, 0, 0, 0.5);
+    transition: right 0.35s ease;
+    z-index: 98;
+    overflow-y: auto;
+  }
+
+  .nav-menu.open {
+    right: 0;
+  }
+
+  /* Admin Dashboard Layout */
+  .admin-layout {
+    flex-direction: column;
+    min-height: 100vh;
+  }
+
+  .admin-sidebar {
+    position: fixed;
+    top: 0;
+    left: -290px;
+    width: 280px;
+    height: 100vh;
+    z-index: 999;
+    box-shadow: 10px 0 35px rgba(0, 0, 0, 0.4);
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .admin-sidebar.open {
+    left: 0;
+  }
+
+  .admin-sidebar-close-btn {
+    display: block;
+  }
+
+  .admin-menu-toggle {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .admin-topbar {
+    padding: 14px 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+
+  .admin-content {
+    padding: 24px 18px;
+  }
+
+  /* Courses & Course Detail Layout */
+  .course-detail-layout {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+
+  .course-sidebar-card {
+    position: static;
+    top: auto;
+    margin-top: 15px;
+  }
+
+  .catalog-filter-bar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .search-box-wrap {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .category-tabs {
+    overflow-x: auto;
+    white-space: nowrap;
+    padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+/* Small Devices (Mobile Phones: <= 768px) */
+@media (max-width: 768px) {
+  /* Containers & Section Spacing */
+  .container {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .section-padding {
+    padding: 55px 0;
+  }
+
+  /* General Inputs & Buttons: Touch-friendly & Prevent iOS auto-zoom */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="tel"],
+  input[type="number"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Heroes across all subpages */
+  .apply-hero,
+  .contact-hero,
+  .detail-hero {
+    min-height: auto;
+    padding-top: 110px;
+    padding-bottom: 45px;
+  }
+
+  .hero-title {
+    font-size: 2.1rem;
+    line-height: 1.25;
+  }
+
+  .hero-subtitle {
+    font-size: 1.2rem;
+  }
+
+  .hero-actions {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .hero-actions .btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  /* Application Form Wizard (apply.html) */
+  .application-wrapper {
+    padding: 22px 16px;
+    margin-top: -20px;
+    box-shadow: 0 10px 30px rgba(11, 27, 61, 0.08);
+  }
+
+  .stepper-container {
+    padding-bottom: 18px;
+    margin-bottom: 25px;
+    position: relative;
+    gap: 6px;
+  }
+
+  .stepper-container::before {
+    top: 18px;
+    left: 12%;
+    right: 12%;
+    height: 2px;
+  }
+
+  .step-circle {
+    width: 36px;
+    height: 36px;
+    font-size: 0.9rem;
+    border-width: 2px;
+    margin-bottom: 6px;
+  }
+
+  .step-label {
+    font-size: 0.72rem;
+    max-width: 70px;
+    line-height: 1.2;
+  }
+
+  .form-grid-2 {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .form-label {
+    font-size: 0.82rem;
+    margin-bottom: 6px;
+  }
+
+  .file-dropzone {
+    padding: 22px 14px;
+  }
+
+  .file-dropzone-icon {
+    font-size: 2rem;
+    margin-bottom: 6px;
+  }
+
+  .file-dropzone-text {
+    font-size: 0.92rem;
+  }
+
+  .file-preview-card {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .step-actions {
+    flex-direction: column-reverse;
+    gap: 12px;
+    margin-top: 25px;
+    padding-top: 20px;
+  }
+
+  .step-actions .btn {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
+  }
+
+  /* Application Tracker (track.html) */
+  .track-search-card {
+    padding: 24px 18px;
+    margin: -25px auto 30px auto;
+  }
+
+  .status-timeline {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+    padding-left: 8px;
+    margin: 30px 0;
+  }
+
+  .status-timeline::before {
+    top: 15px;
+    bottom: 15px;
+    left: 31px;
+    width: 3px;
+    height: auto;
+    right: auto;
+  }
+
+  .status-node {
+    flex-direction: row;
+    align-items: center;
+    gap: 15px;
+    text-align: left;
+    width: 100%;
+  }
+
+  .status-icon {
+    width: 42px;
+    height: 42px;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+  }
+
+  /* Payment Instructions (payment-instructions.html) */
+  .payment-ref-banner {
+    padding: 20px 18px;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 16px;
+  }
+
+  .ref-value {
+    font-size: 1.45rem;
+    word-break: break-all;
+  }
+
+  .copy-btn {
+    width: 100%;
+    text-align: center;
+  }
+
+  .account-number-box {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 1.15rem;
+    word-break: break-all;
+  }
+
+  /* Admin Dashboard (admin/index.html) */
+  .kpi-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+  }
+
+  .kpi-card {
+    padding: 16px;
+  }
+
+  .kpi-value {
+    font-size: 1.55rem;
+  }
+
+  .table-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 14px;
+  }
+
+  .table-toolbar > div {
+    width: 100%;
+  }
+
+  #appFilterSearch,
+  #appFilterStatus,
+  #appFilterCourse {
+    width: 100% !important;
+    max-width: 100%;
+  }
+
+  .modal-card {
+    max-width: 96vw;
+    max-height: 94vh;
+    margin: 8px;
+  }
+
+  .modal-header,
+  .modal-body,
+  .modal-footer {
+    padding: 18px 16px;
+  }
+
+  .admin-login-card {
+    padding: 32px 20px;
+  }
+
+  /* Footer */
+  .footer-grid {
+    grid-template-columns: 1fr;
+    gap: 35px;
+  }
+}
+
+/* Extra Small Devices (Phones: <= 480px) */
+@media (max-width: 480px) {
+  .kpi-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-title {
+    font-size: 1.85rem;
+  }
+
+  .section-title {
+    font-size: 1.85rem;
+  }
+
+  .header-corner-accent {
+    width: 48px;
+    height: 48px;
+  }
+
+  .site-header {
+    padding: 12px 0;
+  }
+
+  .logo-img {
+    height: 34px;
+  }
+}
+
 

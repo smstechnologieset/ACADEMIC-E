@@ -6,15 +6,18 @@
 const SUPABASE_URL = "https://ujljnfhmzlnegzokneia.supabase.co";
 const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
 
-// Initialize Supabase if SDK is loaded
-let supabaseInstance = null;
-if (typeof window !== "undefined" && window.supabase && window.supabase.createClient) {
-  try {
-    supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-  } catch (err) {
-    console.warn("Supabase init error:", err);
+// Dynamic Supabase Client Initializer
+function getSupabaseInstance() {
+  if (typeof window !== "undefined" && !window.supabaseInstance && window.supabase && window.supabase.createClient) {
+    try {
+      window.supabaseInstance = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    } catch (err) {
+      console.warn("Supabase init error:", err);
+    }
   }
+  return window.supabaseInstance || null;
 }
+getSupabaseInstance();
 
 // LocalStorage Persistence Layer
 const StorageKeys = {
@@ -216,7 +219,11 @@ if (typeof window !== "undefined") {
 
 // Global DB Gateway API
 window.AcademicDB = {
-  supabase: supabaseInstance,
+  get supabase() {
+    return getSupabaseInstance();
+  },
+  SUPABASE_URL,
+  SUPABASE_ANON_KEY,
   keys: StorageKeys,
   getLocal: getLocalData,
   setLocal: setLocalData,
