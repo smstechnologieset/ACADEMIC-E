@@ -5,146 +5,186 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Admin Dashboard | Academic Excellence</title>
-  
   <link rel="icon" type="image/svg+xml" href="../assets/logo.svg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../style.css" />
+  <style>
+    .star-rating { display:flex; gap:3px; }
+    .star-rating span { cursor:pointer; font-size:1.2rem; color:#e2e8f0; transition:color .15s; }
+    .star-rating span.active { color:#f59e0b; }
+    #adminToast {
+      position:fixed; bottom:24px; right:24px; background:#0b1b3d; color:#fff;
+      padding:14px 22px; border-radius:10px; font-size:0.9rem; font-weight:600;
+      box-shadow:0 8px 28px rgba(0,0,0,0.22); opacity:0; pointer-events:none;
+      transition:opacity .3s; z-index:9999; max-width:340px;
+    }
+    #adminToast.show { opacity:1; pointer-events:auto; }
+    #adminToast.toast-success { background:#065f46; }
+    #adminToast.toast-error   { background:#991b1b; }
+    .bulk-bar {
+      display:none; align-items:center; gap:12px; background:#eff6ff;
+      border:1px solid #bfdbfe; padding:10px 18px; margin-bottom:14px;
+      border-radius:8px; flex-wrap:wrap;
+    }
+    .bulk-bar.visible { display:flex; }
+    .chart-bar-wrap { display:flex; align-items:flex-end; gap:6px; height:120px; padding:0 8px; }
+    .chart-bar { flex:1; background:var(--accent-orange); border-radius:4px 4px 0 0; min-width:24px; transition:height .4s; position:relative; cursor:default; }
+    .chart-bar:hover::after {
+      content:attr(data-label);
+      position:absolute; top:-28px; left:50%; transform:translateX(-50%);
+      background:#0b1b3d; color:#fff; font-size:0.72rem; padding:3px 8px;
+      border-radius:4px; white-space:nowrap;
+    }
+    .faq-item { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:18px 20px; margin-bottom:12px; }
+    .faq-question { font-weight:700; color:#0b1b3d; margin-bottom:6px; }
+    .faq-answer { color:#475569; font-size:0.9rem; line-height:1.6; }
+    .testimonial-card { background:#fff; border:1px solid #e2e8f0; border-radius:10px; padding:20px; position:relative; }
+    .testimonial-stars { color:#f59e0b; font-size:1rem; margin-bottom:8px; }
+    .inquiry-card { background:#fff; border:1px solid #e2e8f0; border-radius:8px; padding:18px 20px; margin-bottom:12px; }
+    .inquiry-card .iq-meta { display:flex; gap:14px; font-size:0.8rem; color:#64748b; margin-bottom:6px; flex-wrap:wrap; }
+    .al-entry { display:flex; align-items:flex-start; gap:12px; padding:12px 16px; border-bottom:1px solid #f1f5f9; }
+    .al-icon { width:36px; height:36px; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:1rem; flex-shrink:0; }
+    .al-icon.approve { background:#d1fae5; color:#065f46; }
+    .al-icon.reject  { background:#fee2e2; color:#991b1b; }
+    .al-icon.edit    { background:#eff6ff; color:#1854a1; }
+    .al-icon.create  { background:#f0fdf4; color:#065f46; }
+    .al-icon.delete  { background:#fff1f2; color:#be123c; }
+    .al-icon.setting { background:#faf5ff; color:#7c3aed; }
+    .al-icon.default { background:#f1f5f9; color:#64748b; }
+    .kpi-grid-new { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin-bottom:28px; }
+    .kpi-card-new { background:#fff; border:1px solid #e2e8f0; padding:24px; border-radius:10px; }
+    .kpi-card-blue { background:linear-gradient(135deg,#0b1b3d,#1854a1); color:#fff; }
+  </style>
 </head>
 <body>
 
+  <div id="adminToast"></div>
   <div class="admin-layout">
-    
-    <!-- SIDEBAR -->
-    <!-- MOBILE SIDEBAR OVERLAY -->
     <div class="admin-sidebar-overlay" id="adminSidebarOverlay"></div>
 
+    <!-- SIDEBAR -->
     <aside class="admin-sidebar">
       <div class="admin-brand">
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-          <a href="../index.html">
-            <img src="../assets/logo.svg" alt="Academic Excellence" style="height: 38px;" />
-          </a>
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <a href="../index.html"><img src="../assets/logo.svg" alt="Academic Excellence" style="height:38px;" /></a>
           <button type="button" class="admin-sidebar-close-btn" id="closeAdminSidebarBtn" aria-label="Close navigation">&times;</button>
         </div>
-        <div style="font-size: 0.72rem; color: #7ebec5; text-transform: uppercase; letter-spacing: 1px; margin-top: 8px; font-weight: 700;">
-          Admissions Administration
-        </div>
+        <div style="font-size:0.72rem;color:#7ebec5;text-transform:uppercase;letter-spacing:1px;margin-top:8px;font-weight:700;">Admissions Administration</div>
       </div>
-
       <nav class="admin-nav">
-        <div class="admin-nav-item active" data-tab="tabOverview">
-          <span>&#128202;</span> Overview &amp; KPIs
+        <div style="padding:6px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Analytics</div>
+        <div class="admin-nav-item active" data-tab="tabOverview">&#128202; Overview &amp; Finance</div>
+        <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Operations</div>
+        <div class="admin-nav-item" data-tab="tabApplications" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>&#128221; Applications</span>
+          <span id="navBadgePending" style="display:none;background:#ef4444;color:#fff;font-size:0.65rem;padding:1px 7px;border-radius:10px;"></span>
         </div>
-        <div class="admin-nav-item" data-tab="tabApplications">
-          <span>&#128221;</span> Applications Manager
+        <div class="admin-nav-item" data-tab="tabCourses">&#127891; Programs &amp; Courses</div>
+        <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Content CMS</div>
+        <div class="admin-nav-item" data-tab="tabStats">&#128200; Homepage Stats</div>
+        <div class="admin-nav-item" data-tab="tabFaqs">&#10067; FAQ Editor</div>
+        <div class="admin-nav-item" data-tab="tabTestimonials">&#11088; Testimonials</div>
+        <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Communication</div>
+        <div class="admin-nav-item" data-tab="tabInquiries" style="display:flex;justify-content:space-between;align-items:center;">
+          <span>&#128140; Contact Inquiries</span>
+          <span id="navBadgeInquiries" style="display:none;background:#0284c7;color:#fff;font-size:0.65rem;padding:1px 7px;border-radius:10px;"></span>
         </div>
-        <div class="admin-nav-item" data-tab="tabCourses">
-          <span>&#127891;</span> Courses CMS
-        </div>
-        <div class="admin-nav-item" data-tab="tabSettings">
-          <span>&#9881;</span> Payment &amp; Settings
-        </div>
-        <div style="margin: 20px 24px; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 15px;"></div>
-        <a href="../index.html" class="admin-nav-item" style="text-decoration: none;">
-          <span>&#127760;</span> Live Website
-        </a>
-        <div class="admin-nav-item" id="adminLogoutBtn" style="color: #f87171;">
-          <span>&#128682;</span> Log Out
-        </div>
+        <div class="admin-nav-item" data-tab="tabActivity">&#128336; Activity Log</div>
+        <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Configuration</div>
+        <div class="admin-nav-item" data-tab="tabSettings">&#9881; Payment &amp; Settings</div>
+        <div style="margin:16px 14px;border-top:1px solid rgba(255,255,255,0.1);"></div>
+        <a href="../index.html" class="admin-nav-item" style="text-decoration:none;">&#127760; Live Website</a>
+        <div class="admin-nav-item" id="adminLogoutBtn" style="color:#f87171;">&#128682; Log Out</div>
       </nav>
     </aside>
 
-    <!-- MAIN AREA -->
+    <!-- MAIN -->
     <main class="admin-main">
-      
-      <!-- TOPBAR -->
       <header class="admin-topbar">
-        <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap;">
+        <div style="display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
           <button type="button" class="admin-menu-toggle" id="adminSidebarToggle" aria-label="Toggle navigation">
-            <span></span>
-            <span></span>
-            <span></span>
+            <span></span><span></span><span></span>
           </button>
-          <h2 style="font-size: 1.35rem; color: #0b1b3d; margin: 0;" id="adminPageHeaderTitle">Admissions Overview</h2>
+          <h2 style="font-size:1.35rem;color:#0b1b3d;margin:0;" id="adminPageHeaderTitle">Admissions Overview</h2>
           <span id="dbSyncBadge" class="db-sync-badge"><span class="spinner-dot"></span> Connecting Live DB...</span>
-          <button type="button" class="btn-sm btn-sync-db" id="topbarSyncBtn" title="Sync live records from Supabase">
-            &#8635; Refresh Data
-          </button>
+          <button type="button" class="btn-sm btn-sync-db" id="topbarSyncBtn">&#8635; Refresh Data</button>
         </div>
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <div style="text-align: right;">
-            <strong style="font-size: 0.9rem; color: #0b1b3d;">Staff Administrator</strong>
-            <div style="font-size: 0.78rem; color: #64748b;" id="adminHeaderEmail">admin@academice.edu.et</div>
+        <div style="display:flex;align-items:center;gap:15px;">
+          <div style="text-align:right;">
+            <strong style="font-size:0.9rem;color:#0b1b3d;">Staff Administrator</strong>
+            <div style="font-size:0.78rem;color:#64748b;" id="adminHeaderEmail">admin@academice.edu.et</div>
           </div>
-          <div style="width: 40px; height: 40px; border-radius: 50%; background: #0b1b3d; color: #ffffff; display: flex; align-items: center; justify-content: center; font-weight: 700;">
-            SA
-          </div>
+          <div style="width:40px;height:40px;border-radius:50%;background:#0b1b3d;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;">SA</div>
         </div>
       </header>
 
-      <!-- CONTENT SECTIONS -->
       <div class="admin-content">
 
-        <!-- 1. TAB: OVERVIEW & FINANCIAL KPIS -->
+        <!-- TAB: OVERVIEW -->
         <section id="tabOverview" class="admin-tab-pane active">
-          
-          <!-- KPI Cards Grid -->
-          <div class="kpi-grid">
-            <div class="kpi-card kpi-blue">
-              <div class="kpi-title">Total Applications</div>
-              <div class="kpi-value" id="kpiTotalApps">0</div>
-              <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Registered Candidates</div>
+          <div class="kpi-grid-new">
+            <div class="kpi-card-new kpi-card-blue" style="position:relative;overflow:hidden;">
+              <div style="position:absolute;right:-16px;bottom:-16px;width:90px;height:90px;background:rgba(255,255,255,0.08);border-radius:50%;"></div>
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;opacity:.75;margin-bottom:10px;">Total Revenue (ETB)</div>
+              <div style="font-size:2rem;font-weight:800;" id="kpiRevenueETB">0 ETB</div>
+              <div style="font-size:0.78rem;opacity:.7;margin-top:4px;" id="kpiRevenueUSD">approx $0 USD</div>
+              <div style="margin-top:12px;padding-top:10px;border-top:1px solid rgba(255,255,255,0.15);font-size:0.77rem;opacity:.75;">From approved applicants</div>
             </div>
-
-            <div class="kpi-card kpi-orange">
-              <div class="kpi-title">Pending Payment</div>
-              <div class="kpi-value" id="kpiPendingApps">0</div>
-              <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Awaiting Slip Upload</div>
+            <div class="kpi-card-new">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#78350f;margin-bottom:10px;">Pending Revenue (ETB)</div>
+              <div style="font-size:2rem;font-weight:800;color:#0b1b3d;" id="kpiPendingRevenue">0 ETB</div>
+              <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Awaiting confirmation</div>
             </div>
-
-            <div class="kpi-card kpi-blue">
-              <div class="kpi-title">Under Review</div>
-              <div class="kpi-value" id="kpiReviewApps">0</div>
-              <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Transcripts &amp; Fayda Checking</div>
+            <div class="kpi-card-new">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#0284c7;margin-bottom:10px;">Total Applications</div>
+              <div style="font-size:2rem;font-weight:800;color:#0b1b3d;" id="kpiTotalApps">0</div>
+              <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Registered candidates</div>
             </div>
-
-            <div class="kpi-card kpi-green">
-              <div class="kpi-title">Admitted / Approved</div>
-              <div class="kpi-value" id="kpiApprovedApps">0</div>
-              <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;">Enrolled Students</div>
+            <div class="kpi-card-new">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#be185d;margin-bottom:10px;">Pending Payment</div>
+              <div style="font-size:2rem;font-weight:800;color:#0b1b3d;" id="kpiPendingApps">0</div>
+              <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Awaiting slip upload</div>
             </div>
-
-            <div class="kpi-card kpi-green">
-              <div class="kpi-title">Estimated Revenue (ETB)</div>
-              <div class="kpi-value" id="kpiRevenueETB">0 ETB</div>
-              <div style="font-size: 0.8rem; color: #64748b; margin-top: 4px;" id="kpiRevenueUSD">≈ $0 USD</div>
+            <div class="kpi-card-new">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#6d28d9;margin-bottom:10px;">Under Review</div>
+              <div style="font-size:2rem;font-weight:800;color:#0b1b3d;" id="kpiReviewApps">0</div>
+              <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Docs being verified</div>
             </div>
-          </div>
-
-          <!-- Popular Courses Breakdown -->
-          <div class="data-table-card">
-            <div class="table-toolbar">
-              <h3 style="font-size: 1.15rem; color: #0b1b3d;">Intake Breakdown by Program</h3>
-            </div>
-            <div style="padding: 24px;" id="courseBreakdownBars">
-              <!-- Populated by JS -->
+            <div class="kpi-card-new">
+              <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#065f46;margin-bottom:10px;">Admitted / Approved</div>
+              <div style="font-size:2rem;font-weight:800;color:#0b1b3d;" id="kpiApprovedApps">0</div>
+              <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Enrolled students</div>
             </div>
           </div>
 
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:22px;margin-bottom:28px;" id="chartsRow">
+            <div class="data-table-card" style="padding:24px;">
+              <div style="font-weight:700;color:#0b1b3d;font-size:1rem;margin-bottom:4px;">Applicant Inflow (Last 14 Days)</div>
+              <div style="font-size:0.8rem;color:#64748b;margin-bottom:18px;">Daily registrations</div>
+              <div class="chart-bar-wrap" id="inflowChart"><div style="color:#64748b;font-size:0.85rem;align-self:center;">No data yet</div></div>
+              <div style="display:flex;justify-content:space-between;font-size:0.72rem;color:#94a3b8;margin-top:6px;padding:0 8px;" id="inflowChartLabels"></div>
+            </div>
+            <div class="data-table-card" style="padding:24px;">
+              <div style="font-weight:700;color:#0b1b3d;font-size:1rem;margin-bottom:18px;">Applications by Program</div>
+              <div id="courseBreakdownBars"><p style="color:#64748b;">No applications yet.</p></div>
+            </div>
+          </div>
+
+          <div class="data-table-card" style="padding:24px;">
+            <div style="font-weight:700;color:#0b1b3d;font-size:1rem;margin-bottom:18px;">Application Status Distribution</div>
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;" id="statusDistGrid"></div>
+          </div>
         </section>
 
-        <!-- 2. TAB: APPLICATIONS MANAGER -->
-        <section id="tabApplications" class="admin-tab-pane" style="display: none;">
-          
+        <!-- TAB: APPLICATIONS -->
+        <section id="tabApplications" class="admin-tab-pane" style="display:none;">
           <div class="data-table-card">
-            
             <div class="table-toolbar">
-              <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                <input type="text" id="appFilterSearch" class="form-input" placeholder="Search by name, email, ref..." style="width: 260px;" />
-                
-                <select id="appFilterStatus" class="form-select" style="width: 170px;">
+              <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+                <input type="text" id="appFilterSearch" class="form-input" placeholder="Search name, email, ref..." style="width:240px;" />
+                <select id="appFilterStatus" class="form-select" style="width:165px;">
                   <option value="all">All Statuses</option>
                   <option value="pending">Pending Payment</option>
                   <option value="under_review">Under Review</option>
@@ -152,84 +192,137 @@
                   <option value="rejected">Rejected</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
-
-                <select id="appFilterCourse" class="form-select" style="width: 220px;">
-                  <option value="all">All Programs</option>
-                  <!-- Populated by JS -->
-                </select>
+                <select id="appFilterCourse" class="form-select" style="width:200px;"><option value="all">All Programs</option></select>
               </div>
-
-              <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-                <button type="button" class="btn-sm btn-sync-db" id="appRefreshBtn" style="background: #f8fafc; color: #0b1b3d; border: 1px solid #cbd5e1; padding: 10px 16px;">
-                  &#8635; Refresh Live Data
-                </button>
-                <button type="button" class="btn-sm" id="exportCsvBtn" style="background: #0b1b3d; color: #ffffff; border: none; padding: 10px 18px;">
-                  Export to CSV
-                </button>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+                <button type="button" class="btn-sm btn-sync-db" id="appRefreshBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;padding:10px 16px;">&#8635; Refresh</button>
+                <button type="button" class="btn-sm" id="exportCsvBtn" style="background:#0b1b3d;color:#fff;border:none;padding:10px 18px;">Export CSV</button>
               </div>
             </div>
-
-            <!-- Table -->
+            <div class="bulk-bar" id="bulkBar">
+              <strong id="bulkCountLabel">0 selected</strong>
+              <button type="button" class="btn-sm" id="bulkApproveBtn" style="background:#065f46;color:#fff;border:none;">&#10003; Approve Selected</button>
+              <button type="button" class="btn-sm" id="bulkRejectBtn" style="background:#991b1b;color:#fff;border:none;">&#10005; Reject Selected</button>
+              <button type="button" class="btn-sm" id="bulkClearBtn" style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;">Clear</button>
+            </div>
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
                   <tr>
+                    <th style="width:36px;"><input type="checkbox" id="selectAllApps" /></th>
                     <th>Ref ID</th>
                     <th>Candidate</th>
                     <th>Course Applied</th>
                     <th>Qualification</th>
-                    <th>Fayda ID</th>
                     <th>Status</th>
                     <th>Date</th>
                     <th>Action</th>
                   </tr>
                 </thead>
-                <tbody id="applicationsTableBody">
-                  <!-- Populated by JS -->
-                </tbody>
+                <tbody id="applicationsTableBody"></tbody>
               </table>
             </div>
-
           </div>
-
         </section>
 
-        <!-- 3. TAB: COURSES CMS -->
-        <section id="tabCourses" class="admin-tab-pane" style="display: none;">
-          
+        <!-- TAB: COURSES -->
+        <section id="tabCourses" class="admin-tab-pane" style="display:none;">
           <div class="data-table-card">
             <div class="table-toolbar">
-              <h3 style="font-size: 1.15rem; color: #0b1b3d;">Academic Programs &amp; Diplomas CMS</h3>
+              <h3 style="font-size:1.15rem;color:#0b1b3d;">Academic Programs &amp; Diplomas CMS</h3>
               <button type="button" class="btn btn-orange btn-sm" id="btnAddNewCourse">+ Add New Program</button>
             </div>
-
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
-                  <tr>
-                    <th>Title</th>
-                    <th>Category</th>
-                    <th>Duration</th>
-                    <th>Level</th>
-                    <th>Featured</th>
-                    <th>Actions</th>
-                  </tr>
+                  <tr><th>Title</th><th>Category</th><th>Duration</th><th>Level</th><th>Featured</th><th>Actions</th></tr>
                 </thead>
-                <tbody id="coursesTableBody">
-                  <!-- Populated by JS -->
-                </tbody>
+                <tbody id="coursesTableBody"></tbody>
               </table>
             </div>
           </div>
-
         </section>
 
-        <!-- 4. TAB: SYSTEM SETTINGS & PAYMENT METHODS -->
-        <section id="tabSettings" class="admin-tab-pane" style="display: none;">
-          
-          <div style="background: #ffffff; border: 1px solid #e2e8f0; padding: 35px; max-width: 780px;">
-            <h3 style="font-size: 1.35rem; color: #0b1b3d; margin-bottom: 20px;">Intake &amp; Payment Settings</h3>
+        <!-- TAB: STATS -->
+        <section id="tabStats" class="admin-tab-pane" style="display:none;">
+          <div class="data-table-card">
+            <div class="table-toolbar">
+              <h3 style="font-size:1.15rem;color:#0b1b3d;">Homepage Statistics Editor</h3>
+              <button type="button" class="btn btn-orange btn-sm" id="btnAddStat">+ Add Stat Block</button>
+            </div>
+            <div class="table-responsive">
+              <table class="admin-table">
+                <thead><tr><th>Icon</th><th>Label</th><th>Value</th><th>Sort</th><th>Actions</th></tr></thead>
+                <tbody id="statsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
 
+        <!-- TAB: FAQS -->
+        <section id="tabFaqs" class="admin-tab-pane" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div>
+              <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">FAQ Editor</h3>
+              <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Manage frequently asked questions on the public site.</p>
+            </div>
+            <button type="button" class="btn btn-orange btn-sm" id="btnAddFaq">+ Add Question</button>
+          </div>
+          <div id="faqList"><p style="color:#64748b;">Loading FAQs...</p></div>
+        </section>
+
+        <!-- TAB: TESTIMONIALS -->
+        <section id="tabTestimonials" class="admin-tab-pane" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div>
+              <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">Testimonials Manager</h3>
+              <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Manage student testimonials shown on the homepage.</p>
+            </div>
+            <button type="button" class="btn btn-orange btn-sm" id="btnAddTestimonial">+ Add Testimonial</button>
+          </div>
+          <div id="testimonialGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
+            <p style="color:#64748b;">Loading testimonials...</p>
+          </div>
+        </section>
+
+        <!-- TAB: INQUIRIES -->
+        <section id="tabInquiries" class="admin-tab-pane" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+            <div>
+              <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">Contact Inquiries</h3>
+              <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Messages submitted via the public contact form.</p>
+            </div>
+            <button type="button" class="btn-sm btn-sync-db" id="refreshInquiriesBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;">&#8635; Refresh</button>
+          </div>
+          <div id="inquiryList"><p style="color:#64748b;">Loading inquiries...</p></div>
+        </section>
+
+        <!-- TAB: ACTIVITY LOG -->
+        <section id="tabActivity" class="admin-tab-pane" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+            <div>
+              <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">Activity Log</h3>
+              <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Admin audit trail — who did what, when.</p>
+            </div>
+            <button type="button" class="btn-sm btn-sync-db" id="refreshActivityBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;">&#8635; Refresh</button>
+          </div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;" id="activityFilters">
+            <button class="btn-sm al-filter-btn" data-type="all" style="background:#0b1b3d;color:#fff;border:none;">All</button>
+            <button class="btn-sm al-filter-btn" data-type="application">Applications</button>
+            <button class="btn-sm al-filter-btn" data-type="course">Courses</button>
+            <button class="btn-sm al-filter-btn" data-type="faq">FAQs</button>
+            <button class="btn-sm al-filter-btn" data-type="settings">Settings</button>
+            <button class="btn-sm al-filter-btn" data-type="testimonial">Testimonials</button>
+          </div>
+          <div class="data-table-card" style="overflow:hidden;" id="activityLogContainer">
+            <p style="padding:24px;color:#64748b;">Loading activity log...</p>
+          </div>
+        </section>
+
+        <!-- TAB: SETTINGS -->
+        <section id="tabSettings" class="admin-tab-pane" style="display:none;">
+          <div style="background:#fff;border:1px solid #e2e8f0;padding:35px;max-width:780px;border-radius:10px;">
+            <h3 style="font-size:1.35rem;color:#0b1b3d;margin-bottom:20px;">Intake &amp; Payment Settings</h3>
             <form id="settingsForm">
               <div class="form-grid-2">
                 <div class="form-group">
@@ -241,108 +334,88 @@
                   <input type="number" id="settingFeeAmount" class="form-input" value="1500" required />
                 </div>
               </div>
-
               <div class="form-group">
                 <label class="form-label">Telebirr Merchant / Phone Number</label>
                 <input type="text" id="settingTelebirr" class="form-input" value="0911 55 2345" required />
               </div>
-
               <div class="form-group">
                 <label class="form-label">Commercial Bank of Ethiopia (CBE) Account</label>
                 <input type="text" id="settingCBE" class="form-input" value="1000 3948 29384" required />
               </div>
-
               <div class="form-group">
                 <label class="form-label">Awash Bank Account</label>
                 <input type="text" id="settingAwash" class="form-input" value="0132 0876 5432 10" required />
               </div>
-
-              <div style="margin-top: 25px;">
+              <div style="margin-top:25px;">
                 <button type="submit" class="btn btn-orange">Save Settings Changes</button>
               </div>
-
-              <div id="settingsSuccessAlert" style="display: none; background: #d1fae5; border: 1px solid #6ee7b7; color: #065f46; padding: 12px; margin-top: 15px;">
-                &check; Settings updated successfully!
+              <div id="settingsSuccessAlert" style="display:none;background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px;margin-top:15px;border-radius:6px;">
+                &#10003; Settings updated successfully!
               </div>
             </form>
           </div>
-
         </section>
 
       </div>
     </main>
   </div>
 
-  <!-- APPLICATION REVIEW MODAL (With Fayda ID, Education Documents & Payment Slip Preview) -->
+  <!-- APPLICATION REVIEW MODAL -->
   <div class="admin-modal" id="appReviewModal">
-    <div class="modal-card" style="max-width: 900px;">
-      
+    <div class="modal-card" style="max-width:900px;">
       <div class="modal-header">
         <div>
-          <h3 style="font-size: 1.35rem; color: #0b1b3d;" id="modalAppRef">AE-2026-7014</h3>
-          <div style="font-size: 0.85rem; color: #64748b;" id="modalAppDate">Submitted on Aug 28, 2026</div>
+          <h3 style="font-size:1.35rem;color:#0b1b3d;" id="modalAppRef">AE-XXXXXXXX</h3>
+          <div style="font-size:0.85rem;color:#64748b;" id="modalAppDate">Submitted on —</div>
         </div>
         <button type="button" class="btn-remove-file" id="closeAppModalBtn">&times;</button>
       </div>
-
       <div class="modal-body">
-        
-        <!-- Applicant Profile -->
-        <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 22px; margin-bottom: 25px;">
-          <h4 style="font-size: 1.1rem; color: #0b1b3d; margin-bottom: 14px;">Applicant Particulars</h4>
-          <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 15px; font-size: 0.92rem;">
-            <div><strong>Full Name:</strong> <span id="modalFullName">Dawit Haile Tadesse</span></div>
-            <div><strong>Age:</strong> <span id="modalAge">26</span></div>
-            <div><strong>Email:</strong> <span id="modalEmail">dawit@example.com</span></div>
-            <div><strong>Place of Application:</strong> <span id="modalPlace">Addis Ababa</span></div>
-            <div><strong>Program:</strong> <span id="modalProgram" style="color: var(--primary-blue); font-weight: 700;">Artificial Intelligence</span></div>
-            <div><strong>Prior Qualification:</strong> <span id="modalQualification">Bachelor's Degree</span></div>
-            <div><strong>Previous Institution:</strong> <span id="modalMajorInst">Addis Ababa University</span></div>
-            <div><strong>FAYDA ID:</strong> <span id="modalFaydaNumber">Document Uploaded</span></div>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:22px;margin-bottom:25px;border-radius:8px;">
+          <h4 style="font-size:1.1rem;color:#0b1b3d;margin-bottom:14px;">Applicant Particulars</h4>
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;font-size:0.9rem;">
+            <div><strong>Full Name:</strong> <span id="modalFullName">—</span></div>
+            <div><strong>Age:</strong> <span id="modalAge">—</span></div>
+            <div><strong>Email:</strong> <span id="modalEmail">—</span></div>
+            <div><strong>Phone:</strong> <span id="modalPhone">—</span></div>
+            <div><strong>Place of Application:</strong> <span id="modalPlace">—</span></div>
+            <div><strong>Program:</strong> <span id="modalProgram" style="color:var(--primary-blue);font-weight:700;">—</span></div>
+            <div><strong>Prior Qualification:</strong> <span id="modalQualification">—</span></div>
+            <div><strong>Previous Institution:</strong> <span id="modalMajorInst">—</span></div>
           </div>
         </div>
 
-        <!-- DOCUMENTS & VERIFICATION GRID (FAYDA, EDUCATION TRANSCRIPTS & PAYMENT SLIP) -->
-        <h4 style="font-size: 1.15rem; color: #0b1b3d; margin-bottom: 15px;">Uploaded Documents &amp; Credentials</h4>
-        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; margin-bottom: 25px;">
-          
-          <!-- 1. FAYDA ID CARD -->
-          <div style="border: 1px solid #cbd5e1; padding: 18px; background: #ffffff;">
-            <div style="font-weight: 700; color: #0b1b3d; font-size: 0.95rem; margin-bottom: 6px;">FAYDA National ID</div>
-            <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 12px;" id="modalFaydaFileName">fayda_id.pdf</div>
-            <div style="height: 140px; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;" id="modalFaydaThumb">
-              <!-- Image or PDF icon -->
-            </div>
-            <a href="#" id="modalFaydaLink" target="_blank" class="btn btn-sm" style="width: 100%; text-align: center; border-color: #0b1b3d;">View / Download ID</a>
-          </div>
-
-          <!-- 2. [NEW] EDUCATION TRANSCRIPTS & DEGREE DOCUMENTS -->
-          <div style="border: 1px solid #cbd5e1; padding: 18px; background: #ffffff;">
-            <div style="font-weight: 700; color: #0b1b3d; font-size: 0.95rem; margin-bottom: 6px;">Academic Degree / Transcripts</div>
-            <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 12px;" id="modalEducationDocName">degree_transcripts.pdf</div>
-            <div style="height: 140px; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;" id="modalEducationDocThumb">
-              <!-- Image or PDF icon -->
-            </div>
-            <a href="#" id="modalEducationDocLink" target="_blank" class="btn btn-sm" style="width: 100%; text-align: center; border-color: #0b1b3d;">View Transcripts</a>
-          </div>
-
-          <!-- 3. PAYMENT SLIP RECEIPT -->
-          <div style="border: 1px solid #cbd5e1; padding: 18px; background: #ffffff;">
-            <div style="font-weight: 700; color: #0b1b3d; font-size: 0.95rem; margin-bottom: 6px;">Payment Deposit Slip</div>
-            <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 4px;" id="modalPaymentChannel">Channel: CBE</div>
-            <div style="font-size: 0.82rem; color: #64748b; margin-bottom: 12px;" id="modalPaymentRef">Ref: CBE-TX-9840293</div>
-            <div style="height: 140px; background: #f1f5f9; border: 1px solid #e2e8f0; display: flex; align-items: center; justify-content: center; overflow: hidden; margin-bottom: 10px;" id="modalSlipThumb">
-              <!-- Image or PDF icon -->
-            </div>
-            <a href="#" id="modalSlipLink" target="_blank" class="btn btn-sm" style="width: 100%; text-align: center; border-color: #0b1b3d;">View Transfer Receipt</a>
-          </div>
-
+        <!-- Timeline -->
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:18px;margin-bottom:25px;border-radius:8px;">
+          <h4 style="font-size:1rem;color:#0b1b3d;margin-bottom:14px;">&#9201; Application Timeline</h4>
+          <div id="timelineContent" style="display:flex;gap:0;overflow-x:auto;padding-bottom:4px;"></div>
         </div>
 
-        <!-- Status Changer & Admin Review Notes -->
-        <div style="background: #fdfaf6; border: 1px solid #fde6d2; padding: 22px;">
-          <h4 style="font-size: 1.1rem; color: #0b1b3d; margin-bottom: 14px;">Admissions Decision &amp; Internal Notes</h4>
-          
+        <h4 style="font-size:1.1rem;color:#0b1b3d;margin-bottom:15px;">Uploaded Documents &amp; Credentials</h4>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:18px;margin-bottom:25px;">
+          <div style="border:1px solid #cbd5e1;padding:18px;background:#fff;border-radius:8px;">
+            <div style="font-weight:700;color:#0b1b3d;font-size:0.95rem;margin-bottom:6px;">FAYDA National ID</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:12px;" id="modalFaydaFileName">—</div>
+            <div style="height:120px;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px;border-radius:6px;" id="modalFaydaThumb"></div>
+            <a href="#" id="modalFaydaLink" target="_blank" class="btn btn-sm" style="width:100%;text-align:center;border-color:#0b1b3d;display:block;">View / Download ID</a>
+          </div>
+          <div style="border:1px solid #cbd5e1;padding:18px;background:#fff;border-radius:8px;">
+            <div style="font-weight:700;color:#0b1b3d;font-size:0.95rem;margin-bottom:6px;">Academic Degree / Transcripts</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:12px;" id="modalEducationDocName">—</div>
+            <div style="height:120px;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px;border-radius:6px;" id="modalEducationDocThumb"></div>
+            <a href="#" id="modalEducationDocLink" target="_blank" class="btn btn-sm" style="width:100%;text-align:center;border-color:#0b1b3d;display:block;">View Transcripts</a>
+          </div>
+          <div style="border:1px solid #cbd5e1;padding:18px;background:#fff;border-radius:8px;">
+            <div style="font-weight:700;color:#0b1b3d;font-size:0.95rem;margin-bottom:6px;">Payment Deposit Slip</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:4px;" id="modalPaymentChannel">Channel: —</div>
+            <div style="font-size:0.82rem;color:#64748b;margin-bottom:12px;" id="modalPaymentRef">Ref: —</div>
+            <div style="height:120px;background:#f1f5f9;border:1px solid #e2e8f0;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:10px;border-radius:6px;" id="modalSlipThumb"></div>
+            <a href="#" id="modalSlipLink" target="_blank" class="btn btn-sm" style="width:100%;text-align:center;border-color:#0b1b3d;display:block;">View Transfer Receipt</a>
+          </div>
+        </div>
+
+        <div style="background:#fdfaf6;border:1px solid #fde6d2;padding:22px;border-radius:8px;">
+          <h4 style="font-size:1.1rem;color:#0b1b3d;margin-bottom:14px;">Admissions Decision &amp; Internal Notes</h4>
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label">Application Status</label>
@@ -356,41 +429,35 @@
             </div>
             <div class="form-group">
               <label class="form-label">Save Action</label>
-              <button type="button" class="btn btn-orange" id="modalSaveStatusBtn" style="width: 100%;">Update Status &amp; Save</button>
+              <button type="button" class="btn btn-orange" id="modalSaveStatusBtn" style="width:100%;">Update Status &amp; Save</button>
             </div>
           </div>
-
           <div class="form-group">
             <label class="form-label">Internal Verification Notes</label>
-            <textarea id="modalInternalNotes" class="form-textarea" placeholder="Enter notes regarding Fayda verification, education document authentication, or scholarship remarks..."></textarea>
+            <textarea id="modalInternalNotes" class="form-textarea" placeholder="Enter verification notes, scholarship remarks..."></textarea>
           </div>
         </div>
-
       </div>
-
       <div class="modal-footer">
         <button type="button" class="btn btn-sm" id="closeAppModalFooterBtn">Close</button>
       </div>
-
     </div>
   </div>
 
-  <!-- ADD / EDIT COURSE MODAL -->
+  <!-- COURSE MODAL -->
   <div class="admin-modal" id="courseModal">
-    <div class="modal-card" style="max-width: 650px;">
+    <div class="modal-card" style="max-width:650px;">
       <div class="modal-header">
-        <h3 style="font-size: 1.25rem; color: #0b1b3d;" id="courseModalTitle">Add New Program</h3>
+        <h3 style="font-size:1.25rem;color:#0b1b3d;" id="courseModalTitle">Add New Program</h3>
         <button type="button" class="btn-remove-file" id="closeCourseModalBtn">&times;</button>
       </div>
       <div class="modal-body">
         <form id="courseForm">
           <input type="hidden" id="editCourseId" />
-
           <div class="form-group">
             <label class="form-label">Program Title *</label>
             <input type="text" id="courseInputTitle" class="form-input" placeholder="e.g. Applied Machine Learning" required />
           </div>
-
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label">Category *</label>
@@ -405,7 +472,6 @@
               <input type="text" id="courseInputDuration" class="form-input" value="24 Weeks" required />
             </div>
           </div>
-
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label">Level *</label>
@@ -419,17 +485,14 @@
               </select>
             </div>
           </div>
-
           <div class="form-group">
             <label class="form-label">Overview &amp; Description *</label>
-            <textarea id="courseInputDescription" class="form-textarea" placeholder="Program overview and objectives..." required></textarea>
+            <textarea id="courseInputDescription" class="form-textarea" placeholder="Program overview..." required></textarea>
           </div>
-
           <div class="form-group">
             <label class="form-label">Prerequisites</label>
-            <input type="text" id="courseInputPrereq" class="form-input" placeholder="e.g. Bachelor's or Diploma in related discipline" />
+            <input type="text" id="courseInputPrereq" class="form-input" placeholder="e.g. Bachelor's or Diploma" />
           </div>
-
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelCourseBtn">Cancel</button>
             <button type="submit" class="btn btn-orange btn-sm">Save Program</button>
@@ -439,438 +502,769 @@
     </div>
   </div>
 
-  <!-- Scripts -->
+  <!-- STAT MODAL -->
+  <div class="admin-modal" id="statModal">
+    <div class="modal-card" style="max-width:480px;">
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem;color:#0b1b3d;" id="statModalTitle">Add Stat Block</h3>
+        <button type="button" class="btn-remove-file" id="closeStatModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="statForm">
+          <input type="hidden" id="editStatId" />
+          <div class="form-group"><label class="form-label">Icon / Emoji</label><input type="text" id="statInputIcon" class="form-input" value="&#127891;" /></div>
+          <div class="form-group"><label class="form-label">Label *</label><input type="text" id="statInputLabel" class="form-input" placeholder="e.g. Graduates" required /></div>
+          <div class="form-group"><label class="form-label">Value *</label><input type="text" id="statInputValue" class="form-input" placeholder="e.g. 1,200+" required /></div>
+          <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="statInputSort" class="form-input" value="1" min="1" /></div>
+          <div class="step-actions">
+            <button type="button" class="btn btn-sm" id="cancelStatBtn">Cancel</button>
+            <button type="submit" class="btn btn-orange btn-sm">Save Stat</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- FAQ MODAL -->
+  <div class="admin-modal" id="faqModal">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem;color:#0b1b3d;" id="faqModalTitle">Add FAQ</h3>
+        <button type="button" class="btn-remove-file" id="closeFaqModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="faqForm">
+          <input type="hidden" id="editFaqId" />
+          <div class="form-group"><label class="form-label">Question *</label><input type="text" id="faqInputQuestion" class="form-input" placeholder="Enter the question..." required /></div>
+          <div class="form-group"><label class="form-label">Answer *</label><textarea id="faqInputAnswer" class="form-textarea" placeholder="Enter the answer..." required></textarea></div>
+          <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="faqInputSort" class="form-input" value="1" min="1" /></div>
+          <div class="step-actions">
+            <button type="button" class="btn btn-sm" id="cancelFaqBtn">Cancel</button>
+            <button type="submit" class="btn btn-orange btn-sm">Save FAQ</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- TESTIMONIAL MODAL -->
+  <div class="admin-modal" id="testimonialModal">
+    <div class="modal-card" style="max-width:560px;">
+      <div class="modal-header">
+        <h3 style="font-size:1.15rem;color:#0b1b3d;" id="testimonialModalTitle">Add Testimonial</h3>
+        <button type="button" class="btn-remove-file" id="closeTestimonialModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="testimonialForm">
+          <input type="hidden" id="editTestimonialId" />
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Full Name *</label><input type="text" id="testimonialInputName" class="form-input" placeholder="e.g. Hanna Tesfaye" required /></div>
+            <div class="form-group"><label class="form-label">Role / Title</label><input type="text" id="testimonialInputRole" class="form-input" placeholder="e.g. Software Engineer" /></div>
+          </div>
+          <div class="form-group"><label class="form-label">Testimonial Quote *</label><textarea id="testimonialInputQuote" class="form-textarea" placeholder="Their testimonial..." required></textarea></div>
+          <div class="form-grid-2">
+            <div class="form-group"><label class="form-label">Course Completed</label><input type="text" id="testimonialInputCourse" class="form-input" placeholder="e.g. Machine Learning Engineering" /></div>
+            <div class="form-group">
+              <label class="form-label">Star Rating</label>
+              <div class="star-rating" id="testimonialStarPicker">
+                <span data-val="1">&#9733;</span><span data-val="2">&#9733;</span><span data-val="3">&#9733;</span><span data-val="4">&#9733;</span><span data-val="5">&#9733;</span>
+              </div>
+              <input type="hidden" id="testimonialInputRating" value="5" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label"><input type="checkbox" id="testimonialInputFeatured" checked /> Feature on Homepage</label>
+          </div>
+          <div class="step-actions">
+            <button type="button" class="btn btn-sm" id="cancelTestimonialBtn">Cancel</button>
+            <button type="submit" class="btn btn-orange btn-sm">Save Testimonial</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/courses-service.js"></script>
   <script src="../js/applications-service.js"></script>
   <script src="../js/admin-service.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // 1. Authentication Check
-      window.AdminService.requireAuth();
-      const currentAuth = window.AdminService.checkAuth();
-      if (currentAuth && currentAuth.email) {
-        const hEmail = document.getElementById("adminHeaderEmail");
-        if (hEmail) hEmail.textContent = currentAuth.email;
-      }
+  document.addEventListener("DOMContentLoaded", () => {
 
-      document.getElementById("adminLogoutBtn").addEventListener("click", () => {
-        window.AdminService.logout();
+    // AUTH
+    window.AdminService.requireAuth();
+    const currentAuth = window.AdminService.checkAuth();
+    if (currentAuth && currentAuth.email) {
+      const el = document.getElementById("adminHeaderEmail");
+      if (el) el.textContent = currentAuth.email;
+    }
+    document.getElementById("adminLogoutBtn").addEventListener("click", () => window.AdminService.logout());
+
+    // TOAST
+    function showToast(msg, type = "success") {
+      const t = document.getElementById("adminToast");
+      t.textContent = msg;
+      t.className = "show toast-" + type;
+      clearTimeout(t._tid);
+      t._tid = setTimeout(() => { t.className = ""; }, 3500);
+    }
+
+    // MOBILE SIDEBAR
+    const adminSidebar = document.querySelector(".admin-sidebar");
+    const adminOverlay = document.getElementById("adminSidebarOverlay");
+    const openSidebar  = () => { adminSidebar && adminSidebar.classList.add("open"); adminOverlay && adminOverlay.classList.add("open"); };
+    const closeSidebar = () => { adminSidebar && adminSidebar.classList.remove("open"); adminOverlay && adminOverlay.classList.remove("open"); };
+    document.getElementById("adminSidebarToggle").addEventListener("click", openSidebar);
+    document.getElementById("closeAdminSidebarBtn").addEventListener("click", closeSidebar);
+    adminOverlay && adminOverlay.addEventListener("click", closeSidebar);
+
+    // TABS
+    const TAB_TITLES = {
+      tabOverview: "Admissions Overview & Financials",
+      tabApplications: "Applications Management",
+      tabCourses: "Academic Programs CMS",
+      tabStats: "Homepage Statistics Editor",
+      tabFaqs: "FAQ Editor",
+      tabTestimonials: "Testimonials Manager",
+      tabInquiries: "Contact Inquiries",
+      tabActivity: "Activity Log",
+      tabSettings: "Intake & Payment Settings"
+    };
+    const tabs  = document.querySelectorAll(".admin-nav-item[data-tab]");
+    const panes = document.querySelectorAll(".admin-tab-pane");
+    const titleEl = document.getElementById("adminPageHeaderTitle");
+    let lazyLoaded = {};
+
+    function switchTab(targetId) {
+      tabs.forEach(t => t.classList.remove("active"));
+      tabs.forEach(t => { if (t.dataset.tab === targetId) t.classList.add("active"); });
+      panes.forEach(p => p.style.display = p.id === targetId ? "block" : "none");
+      if (TAB_TITLES[targetId]) titleEl.textContent = TAB_TITLES[targetId];
+      if (window.innerWidth < 992) closeSidebar();
+      if (targetId === "tabStats"        && !lazyLoaded.stats)        { lazyLoaded.stats = true;        renderStats(true); }
+      if (targetId === "tabFaqs"         && !lazyLoaded.faqs)         { lazyLoaded.faqs = true;         loadFaqs(); }
+      if (targetId === "tabTestimonials" && !lazyLoaded.testimonials) { lazyLoaded.testimonials = true; loadTestimonials(); }
+      if (targetId === "tabInquiries"    && !lazyLoaded.inquiries)    { lazyLoaded.inquiries = true;    loadInquiries(); }
+      if (targetId === "tabActivity"     && !lazyLoaded.activity)     { lazyLoaded.activity = true;     loadActivityLog(); }
+    }
+    tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+
+    // SUPABASE REST
+    const SUPA_URL = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
+    const SUPA_KEY = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+    const BASE_HEADERS = { "apikey": SUPA_KEY, "Authorization": "Bearer " + SUPA_KEY, "Content-Type": "application/json" };
+
+    async function supaFetch(table, opts = {}) {
+      const { method = "GET", filter = "", body = null, upsert = false } = opts;
+      let url = SUPA_URL + "/rest/v1/" + table;
+      if (filter) url += "?" + filter;
+      const headers = Object.assign({}, BASE_HEADERS);
+      if (upsert) headers["Prefer"] = "resolution=merge-duplicates,return=representation";
+      else if (method !== "GET") headers["Prefer"] = "return=representation";
+      const init = { method, headers };
+      if (body) init.body = JSON.stringify(body);
+      const res = await fetch(url, init);
+      if (!res.ok) { const t = await res.text(); throw new Error(table + " " + method + ": " + res.status + " " + t); }
+      if (method === "DELETE") return null;
+      return res.json();
+    }
+
+    function logActivity(action, targetType, targetId) {
+      try {
+        const auth = window.AdminService.checkAuth();
+        supaFetch("admin_activity_log", { method: "POST", body: { action, target_type: targetType, target_id: targetId || null, actor_email: (auth && auth.email) || "admin" } }).catch(() => {});
+      } catch(e) {}
+    }
+
+    // OVERVIEW ANALYTICS
+    function loadOverview() {
+      const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+      const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
+      const feeETB = parseInt(String(settings.applicationFeeAmount || settings.feeNumeric || "1500").replace(/[^0-9]/g, ""), 10) || 1500;
+      const total      = apps.length;
+      const pending    = apps.filter(a => a.status === "pending").length;
+      const underRev   = apps.filter(a => a.status === "under_review").length;
+      const approved   = apps.filter(a => a.status === "approved").length;
+      const rejected   = apps.filter(a => a.status === "rejected").length;
+      const cancelled  = apps.filter(a => a.status === "cancelled").length;
+      const revETB     = approved * feeETB;
+      const pendRevETB = underRev * feeETB;
+
+      document.getElementById("kpiTotalApps").textContent     = total;
+      document.getElementById("kpiPendingApps").textContent   = pending;
+      document.getElementById("kpiReviewApps").textContent    = underRev;
+      document.getElementById("kpiApprovedApps").textContent  = approved;
+      document.getElementById("kpiRevenueETB").textContent    = revETB.toLocaleString() + " ETB";
+      document.getElementById("kpiRevenueUSD").textContent    = "approx $" + Math.round(revETB / 58).toLocaleString() + " USD";
+      document.getElementById("kpiPendingRevenue").textContent = pendRevETB.toLocaleString() + " ETB";
+
+      const badge = document.getElementById("navBadgePending");
+      if (badge) { const n = pending + underRev; badge.textContent = n; badge.style.display = n > 0 ? "inline-block" : "none"; }
+
+      // Course breakdown
+      const courseCounts = {};
+      apps.forEach(a => { const c = a.courseApplied || "Unknown"; courseCounts[c] = (courseCounts[c] || 0) + 1; });
+      const bw = document.getElementById("courseBreakdownBars");
+      const entries = Object.entries(courseCounts).sort((a,b) => b[1]-a[1]);
+      if (!entries.length) { bw.innerHTML = "<p style='color:#64748b;'>No applications yet.</p>"; }
+      else bw.innerHTML = entries.map(([c, n]) => {
+        const pct = Math.round((n / Math.max(total, 1)) * 100);
+        return "<div style='margin-bottom:12px;'><div style='display:flex;justify-content:space-between;font-size:0.87rem;font-weight:600;margin-bottom:4px;'><span>" + c + "</span><span style='color:var(--primary-blue);'>" + n + " (" + pct + "%)</span></div><div style='height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;'><div style='width:" + pct + "%;height:100%;background:var(--accent-orange);border-radius:4px;'></div></div></div>";
+      }).join("");
+
+      // Status distribution
+      const sd = [
+        { label:"Pending", count:pending, color:"#f59e0b" },
+        { label:"Under Review", count:underRev, color:"#6366f1" },
+        { label:"Approved", count:approved, color:"#10b981" },
+        { label:"Rejected", count:rejected, color:"#ef4444" },
+        { label:"Cancelled", count:cancelled, color:"#94a3b8" }
+      ];
+      document.getElementById("statusDistGrid").innerHTML = sd.map(s =>
+        "<div style='text-align:center;padding:16px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;border-top:3px solid " + s.color + ";'><div style='font-size:1.6rem;font-weight:800;color:" + s.color + ";'>" + s.count + "</div><div style='font-size:0.78rem;color:#64748b;margin-top:4px;font-weight:600;'>" + s.label + "</div></div>"
+      ).join("");
+
+      // Inflow chart
+      const now = new Date();
+      const days = [];
+      for (let i = 13; i >= 0; i--) { const d = new Date(now); d.setDate(now.getDate() - i); days.push(d.toISOString().split("T")[0]); }
+      const counts = {}; days.forEach(d => counts[d] = 0);
+      apps.forEach(a => { const day = (a.created_at || "").split("T")[0]; if (counts[day] !== undefined) counts[day]++; });
+      const vals = days.map(d => counts[d]);
+      const max = Math.max(...vals, 1);
+      const chartEl = document.getElementById("inflowChart");
+      const labelsEl = document.getElementById("inflowChartLabels");
+      if (chartEl) {
+        chartEl.innerHTML = vals.map((v, i) => {
+          const h = Math.max(8, Math.round((v / max) * 110));
+          return "<div class='chart-bar' style='height:" + h + "px;' data-label='" + days[i].slice(5) + " (" + v + ")'></div>";
+        }).join("");
+      }
+      if (labelsEl) labelsEl.innerHTML = days.map((d, i) => i % 3 === 0 ? "<span style='flex:1;text-align:center;'>" + d.slice(5) + "</span>" : "<span style='flex:1;'></span>").join("");
+    }
+
+    // APPLICATIONS TABLE
+    const appsTableBody = document.getElementById("applicationsTableBody");
+    const searchInput   = document.getElementById("appFilterSearch");
+    const statusSelect  = document.getElementById("appFilterStatus");
+    const courseSelect  = document.getElementById("appFilterCourse");
+    const bulkBar       = document.getElementById("bulkBar");
+    let selectedIds     = new Set();
+
+    // Populate course filter
+    window.CoursesService.getAllCourses().forEach(c => {
+      const opt = document.createElement("option");
+      opt.value = c.title; opt.textContent = c.title;
+      courseSelect.appendChild(opt);
+    });
+
+    function updateBulkBar() {
+      const n = selectedIds.size;
+      bulkBar.classList.toggle("visible", n > 0);
+      document.getElementById("bulkCountLabel").textContent = n + " selected";
+    }
+
+    function renderApplications() {
+      const query = searchInput.value.toLowerCase();
+      const st = statusSelect.value;
+      const cs = courseSelect.value;
+      const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+      const list = apps.filter(app => {
+        const name = (app.fullName || ((app.firstName||"") + " " + (app.lastName||""))).toLowerCase();
+        const ms = !query || name.includes(query) || (app.email||"").toLowerCase().includes(query) || (app.id||"").toLowerCase().includes(query) || (app.courseApplied||"").toLowerCase().includes(query);
+        return ms && (st === "all" || app.status === st) && (cs === "all" || app.courseApplied === cs);
       });
-
-      // Mobile Admin Sidebar Toggle
-      const sidebarToggle = document.getElementById("adminSidebarToggle");
-      const closeSidebarBtn = document.getElementById("closeAdminSidebarBtn");
-      const adminSidebar = document.querySelector(".admin-sidebar");
-      const adminOverlay = document.getElementById("adminSidebarOverlay");
-
-      function openSidebar() {
-        if (adminSidebar) adminSidebar.classList.add("open");
-        if (adminOverlay) adminOverlay.classList.add("open");
+      if (!list.length) {
+        appsTableBody.innerHTML = "<tr><td colspan='8' style='text-align:center;color:#64748b;padding:40px;'>No applications found.</td></tr>";
+        return;
       }
-      function closeSidebar() {
-        if (adminSidebar) adminSidebar.classList.remove("open");
-        if (adminOverlay) adminOverlay.classList.remove("open");
-      }
+      appsTableBody.innerHTML = list.map(app => {
+        const name = app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim();
+        const chk  = selectedIds.has(app.id) ? "checked" : "";
+        return "<tr>" +
+          "<td><input type='checkbox' class='app-checkbox' data-id='" + app.id + "' " + chk + " /></td>" +
+          "<td><strong style='font-family:monospace;color:#0b1b3d;font-size:0.85rem;'>" + app.id + "</strong></td>" +
+          "<td><strong>" + name + "</strong><div style='font-size:0.78rem;color:#64748b;'>" + (app.email||"") + "</div></td>" +
+          "<td><span style='color:var(--primary-blue);font-weight:600;'>" + (app.courseApplied||"") + "</span></td>" +
+          "<td>" + (app.qualification ? app.qualification.split("(")[0].trim() : "—") + "</td>" +
+          "<td><span class='badge-status status-" + app.status + "'>" + app.status.replace("_"," ") + "</span></td>" +
+          "<td>" + window.AcademicDB.formatDate(app.created_at) + "</td>" +
+          "<td><button type='button' class='btn-sm btn-review-app' data-id='" + app.id + "' style='white-space:nowrap;'>Review</button></td>" +
+          "</tr>";
+      }).join("");
 
-      if (sidebarToggle) sidebarToggle.addEventListener("click", openSidebar);
-      if (closeSidebarBtn) closeSidebarBtn.addEventListener("click", closeSidebar);
-      if (adminOverlay) adminOverlay.addEventListener("click", closeSidebar);
-
-      // 2. Tab Navigation
-      const tabs = document.querySelectorAll(".admin-nav-item[data-tab]");
-      const panes = document.querySelectorAll(".admin-tab-pane");
-      const titleEl = document.getElementById("adminPageHeaderTitle");
-
-      tabs.forEach(tab => {
-        tab.addEventListener("click", () => {
-          tabs.forEach(t => t.classList.remove("active"));
-          tab.classList.add("active");
-          const target = tab.dataset.tab;
-          panes.forEach(p => p.style.display = p.id === target ? "block" : "none");
-
-          if (target === "tabOverview") titleEl.textContent = "Admissions Overview & Financials";
-          if (target === "tabApplications") titleEl.textContent = "Applications Management";
-          if (target === "tabCourses") titleEl.textContent = "Academic Programs CMS";
-          if (target === "tabSettings") titleEl.textContent = "Intake & Payment Settings";
-
-          // Auto-close sidebar on mobile after selecting tab
-          if (window.innerWidth < 992) {
-            closeSidebar();
-          }
+      document.querySelectorAll(".app-checkbox").forEach(cb => {
+        cb.addEventListener("change", () => {
+          if (cb.checked) selectedIds.add(cb.dataset.id); else selectedIds.delete(cb.dataset.id);
+          updateBulkBar();
+          const sa = document.getElementById("selectAllApps");
+          if (sa) sa.checked = selectedIds.size === list.length;
         });
       });
+      document.querySelectorAll(".btn-review-app").forEach(btn => btn.addEventListener("click", () => openAppModal(btn.dataset.id)));
+    }
 
-      // 3. Load Metrics & Overview
-      function loadOverview() {
-        const m = window.AdminService.getMetrics();
-        document.getElementById("kpiTotalApps").textContent = m.total;
-        document.getElementById("kpiPendingApps").textContent = m.pending;
-        document.getElementById("kpiReviewApps").textContent = m.underReview;
-        document.getElementById("kpiApprovedApps").textContent = m.approved;
-        document.getElementById("kpiRevenueETB").textContent = window.AcademicDB.formatCurrency(m.revenueETB);
-        document.getElementById("kpiRevenueUSD").textContent = `≈ $${m.revenueUSD.toLocaleString()} USD`;
+    document.getElementById("selectAllApps").addEventListener("change", e => {
+      const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+      if (e.target.checked) apps.forEach(a => selectedIds.add(a.id)); else selectedIds.clear();
+      updateBulkBar(); renderApplications();
+    });
 
-        // Course Breakdown Bars
-        const barWrap = document.getElementById("courseBreakdownBars");
-        const entries = Object.entries(m.courseCounts);
-        if (entries.length === 0) {
-          barWrap.innerHTML = "<p style='color: #64748b;'>No applications recorded in the database yet.</p>";
-        } else {
-          barWrap.innerHTML = entries.map(([course, count]) => {
-            const pct = Math.round((count / Math.max(m.total, 1)) * 100);
-            return `
-              <div style="margin-bottom: 16px;">
-                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; font-weight: 600; margin-bottom: 4px;">
-                  <span>${course}</span>
-                  <span style="color: var(--primary-blue);">${count} candidates (${pct}%)</span>
-                </div>
-                <div style="height: 10px; background: #e2e8f0; border-radius: 5px; overflow: hidden;">
-                  <div style="width: ${pct}%; height: 100%; background: var(--accent-orange);"></div>
-                </div>
-              </div>
-            `;
-          }).join("");
-        }
+    async function doBulkUpdate(newStatus) {
+      if (!selectedIds.size) return;
+      const ids = Array.from(selectedIds);
+      if (!confirm((newStatus === "approved" ? "Approve" : "Reject") + " " + ids.length + " application(s)?")) return;
+      let ok = 0;
+      for (const id of ids) { try { const r = await window.AdminService.updateApplicationStatus(id, newStatus, ""); if (r && r.success) ok++; } catch(e) {} }
+      logActivity(newStatus === "approved" ? "bulk_approved" : "bulk_rejected", "application", null);
+      selectedIds.clear(); updateBulkBar();
+      showToast("Updated " + ok + "/" + ids.length + " to " + newStatus + ".", "success");
+      await syncWithDatabase();
+    }
+    document.getElementById("bulkApproveBtn").addEventListener("click", () => doBulkUpdate("approved"));
+    document.getElementById("bulkRejectBtn").addEventListener("click",  () => doBulkUpdate("rejected"));
+    document.getElementById("bulkClearBtn").addEventListener("click",   () => { selectedIds.clear(); updateBulkBar(); renderApplications(); });
+    searchInput.addEventListener("input", renderApplications);
+    statusSelect.addEventListener("change", renderApplications);
+    courseSelect.addEventListener("change", renderApplications);
+    document.getElementById("exportCsvBtn").addEventListener("click", () => window.AdminService.exportApplicationsToCSV());
+
+    // DATABASE SYNC
+    const syncBadge = document.getElementById("dbSyncBadge");
+    async function syncWithDatabase() {
+      if (syncBadge) { syncBadge.innerHTML = "<span class='spinner-dot'></span> Syncing..."; syncBadge.className = "db-sync-badge syncing"; }
+      document.querySelectorAll(".btn-sync-db").forEach(b => { b.disabled = true; b.innerHTML = "&#8635; Syncing..."; });
+      try {
+        await window.AdminService.fetchApplications();
+        if (syncBadge) { syncBadge.innerHTML = "<span class='status-dot-green'></span> Live DB Connected"; syncBadge.className = "db-sync-badge connected"; }
+      } catch(e) {
+        if (syncBadge) { syncBadge.innerHTML = "<span class='status-dot-orange'></span> Cached / Offline"; syncBadge.className = "db-sync-badge warning"; }
+      } finally {
+        document.querySelectorAll(".btn-sync-db").forEach(b => { b.disabled = false; b.innerHTML = "&#8635; Refresh Data"; });
+        loadOverview(); renderApplications();
       }
+    }
+    loadOverview(); renderApplications(); syncWithDatabase();
+    document.querySelectorAll(".btn-sync-db").forEach(btn => btn.addEventListener("click", syncWithDatabase));
 
-      // 4. Load Applications Table
-      const appsTableBody = document.getElementById("applicationsTableBody");
-      const searchInput = document.getElementById("appFilterSearch");
-      const statusSelect = document.getElementById("appFilterStatus");
-      const courseSelect = document.getElementById("appFilterCourse");
+    // APP REVIEW MODAL
+    const appModal = document.getElementById("appReviewModal");
+    let currentViewingApp = null;
 
-      // Populate course filter
-      const allCourses = window.CoursesService.getAllCourses();
-      courseSelect.innerHTML = `<option value="all">All Programs</option>` + allCourses.map(c => `
-        <option value="${c.title}">${c.title}</option>
-      `).join("");
+    function buildTimeline(app) {
+      const steps = [
+        { label:"Applied",           done:true,                                                                   color:"#10b981" },
+        { label:"Payment Submitted", done:!!(app.paymentRef || ["under_review","approved","rejected"].includes(app.status)), color:"#6366f1" },
+        { label:"Under Review",      done:["under_review","approved","rejected"].includes(app.status),             color:"#f59e0b" },
+        { label:"Decision",          done:["approved","rejected"].includes(app.status),                            color:app.status === "approved" ? "#10b981" : "#ef4444" }
+      ];
+      return steps.map((s, i) => {
+        const bar = i > 0 ? "<div style='position:absolute;top:14px;left:-50%;width:100%;height:2px;background:" + (s.done ? s.color : "#e2e8f0") + ";'></div>" : "";
+        return "<div style='display:flex;flex-direction:column;align-items:center;flex:1;min-width:80px;position:relative;'>" +
+          bar +
+          "<div style='width:28px;height:28px;border-radius:50%;background:" + (s.done ? s.color : "#e2e8f0") + ";color:#fff;display:flex;align-items:center;justify-content:center;font-size:0.75rem;font-weight:700;z-index:1;'>" + (s.done ? "✓" : (i+1)) + "</div>" +
+          "<div style='font-size:0.72rem;font-weight:600;margin-top:6px;text-align:center;color:" + (s.done ? "#0b1b3d" : "#94a3b8") + ";'>" + s.label + "</div></div>";
+      }).join("");
+    }
 
-      function renderApplications() {
-        const query = searchInput.value;
-        const status = statusSelect.value;
-        const course = courseSelect.value;
-        const list = window.AdminService.getApplications(status, course, query);
+    function openAppModal(id) {
+      const app = window.AdminService.getApplicationById(id);
+      if (!app) return;
+      currentViewingApp = app;
+      document.getElementById("modalAppRef").textContent = app.id;
+      document.getElementById("modalAppDate").textContent = "Submitted: " + window.AcademicDB.formatDate(app.created_at);
+      document.getElementById("modalFullName").textContent = app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim();
+      document.getElementById("modalAge").textContent = app.age || "—";
+      document.getElementById("modalEmail").textContent = app.email || "—";
+      document.getElementById("modalPhone").textContent = app.phone || "—";
+      document.getElementById("modalPlace").textContent = app.place || app.fullAddress || "—";
+      document.getElementById("modalProgram").textContent = app.courseApplied || "—";
+      document.getElementById("modalQualification").textContent = app.qualification || "—";
+      document.getElementById("modalMajorInst").textContent = app.previousInstitution || "—";
+      document.getElementById("modalStatusSelect").value = app.status || "pending";
+      document.getElementById("modalInternalNotes").value = app.internalNotes || "";
+      document.getElementById("timelineContent").innerHTML = buildTimeline(app);
 
-        if (list.length === 0) {
-          appsTableBody.innerHTML = `<tr><td colspan="8" style="text-align: center; color: #64748b; padding: 40px;">No applications found matching criteria.</td></tr>`;
-          return;
-        }
-
-        appsTableBody.innerHTML = list.map(app => `
-          <tr>
-            <td><strong style="font-family: monospace; color: #0b1b3d;">${app.id}</strong></td>
-            <td>
-              <strong>${app.fullName || (app.firstName + " " + app.lastName)}</strong>
-              <div style="font-size: 0.78rem; color: #64748b;">${app.email}</div>
-            </td>
-            <td><span style="color: var(--primary-blue); font-weight: 600;">${app.courseApplied}</span></td>
-            <td>${app.qualification ? app.qualification.split("(")[0].trim() : "—"}</td>
-            <td><span style="font-size: 0.85rem; font-family: monospace;">${app.faydaIdNumber || "Verified"}</span></td>
-            <td><span class="badge-status status-${app.status}">${app.status.replace("_", " ")}</span></td>
-            <td>${window.AcademicDB.formatDate(app.created_at)}</td>
-            <td>
-              <button type="button" class="btn-sm btn-review-app" data-id="${app.id}">Review</button>
-            </td>
-          </tr>
-        `).join("");
-
-        // Review buttons
-        document.querySelectorAll(".btn-review-app").forEach(btn => {
-          btn.addEventListener("click", () => {
-            openAppModal(btn.dataset.id);
-          });
-        });
+      function setDoc(thumbId, nameId, linkId, fileUrl, fileName, emColor) {
+        document.getElementById(nameId).textContent = fileName || "Not Uploaded";
+        const t = document.getElementById(thumbId);
+        const l = document.getElementById(linkId);
+        if (fileUrl && fileUrl.startsWith("data:image")) t.innerHTML = "<img src='" + fileUrl + "' style='max-height:100%;max-width:100%;object-fit:contain;' />";
+        else if (fileUrl) t.innerHTML = "<span style='font-size:2rem;color:" + emColor + ";'>&#128196;</span>";
+        else t.innerHTML = "<span style='font-size:0.8rem;color:#94a3b8;'>No file uploaded</span>";
+        l.href = fileUrl || "#";
       }
+      setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", app.faydaFileUrl, app.faydaFileName, "#1854a1");
+      setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", app.educationDocUrl, app.educationDocName, "#10b981");
+      document.getElementById("modalPaymentChannel").textContent = "Channel: " + (app.paymentMethod || "Pending");
+      document.getElementById("modalPaymentRef").textContent = "Ref: " + (app.paymentRef || "Pending");
+      setDoc("modalSlipThumb", null, "modalSlipLink", app.paymentSlipUrl, null, "#df6b26");
+      // Slip name — no dedicated span needed but set link href
+      document.getElementById("modalSlipLink").href = app.paymentSlipUrl || "#";
 
-      searchInput.addEventListener("input", renderApplications);
-      statusSelect.addEventListener("change", renderApplications);
-      courseSelect.addEventListener("change", renderApplications);
+      appModal.classList.add("open");
+    }
+    const closeAppModal = () => appModal.classList.remove("open");
+    document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
+    document.getElementById("closeAppModalFooterBtn").addEventListener("click", closeAppModal);
 
-      // Export CSV
-      document.getElementById("exportCsvBtn").addEventListener("click", () => {
-        window.AdminService.exportApplicationsToCSV();
-      });
+    document.getElementById("modalSaveStatusBtn").addEventListener("click", async () => {
+      if (!currentViewingApp) return;
+      const btn = document.getElementById("modalSaveStatusBtn");
+      const orig = btn.textContent; btn.textContent = "Saving..."; btn.disabled = true;
+      const newStatus = document.getElementById("modalStatusSelect").value;
+      const notes = document.getElementById("modalInternalNotes").value;
+      try {
+        const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes);
+        if (res && res.success) {
+          logActivity(newStatus === "approved" ? "approved_application" : (newStatus === "rejected" ? "rejected_application" : "updated_application"), "application", currentViewingApp.id);
+          closeAppModal(); loadOverview(); renderApplications();
+          showToast("Application " + currentViewingApp.id + " updated to " + newStatus.replace("_"," ").toUpperCase() + ".", "success");
+        } else { showToast((res && res.error) || "Failed to update.", "error"); }
+      } catch(e) { showToast("Error: " + (e.message || "Network issue"), "error"); }
+      finally { btn.textContent = orig; btn.disabled = false; }
+    });
 
-      // 5. LIVE DATABASE SYNC ENGINE
-      const syncBadge = document.getElementById("dbSyncBadge");
+    // COURSES CMS
+    const coursesTableBody = document.getElementById("coursesTableBody");
+    const courseModal = document.getElementById("courseModal");
+    function renderCourses() {
+      const list = window.CoursesService.getAllCourses();
+      coursesTableBody.innerHTML = list.map(c =>
+        "<tr><td><strong>" + c.title + "</strong></td><td><span class='program-badge' style='font-size:0.7rem;'>" + (c.categoryLabel || c.category) + "</span></td><td>" + c.duration + "</td><td>" + c.level + "</td>" +
+        "<td>" + (c.isFeatured ? "<span style='color:#10b981;font-weight:700;'>Featured</span>" : "No") + "</td>" +
+        "<td><button type='button' class='btn-sm btn-edit-course' data-id='" + c.id + "'>Edit</button> " +
+        "<button type='button' class='btn-sm btn-delete-course' data-id='" + c.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button></td></tr>"
+      ).join("");
 
-      async function syncWithDatabase() {
-        if (syncBadge) {
-          syncBadge.innerHTML = `<span class="spinner-dot"></span> Syncing Supabase DB...`;
-          syncBadge.className = "db-sync-badge syncing";
-        }
-        document.querySelectorAll(".btn-sync-db").forEach(btn => {
-          btn.disabled = true;
-          btn.innerHTML = `&#8635; Syncing...`;
-        });
-
-        try {
-          await window.AdminService.fetchApplications();
-          if (syncBadge) {
-            syncBadge.innerHTML = `<span class="status-dot-green"></span> Live Supabase DB Connected`;
-            syncBadge.className = "db-sync-badge connected";
-          }
-        } catch (err) {
-          console.warn("Sync warning:", err);
-          if (syncBadge) {
-            syncBadge.innerHTML = `<span class="status-dot-orange"></span> Cached / Offline Data`;
-            syncBadge.className = "db-sync-badge warning";
-          }
-        } finally {
-          document.querySelectorAll(".btn-sync-db").forEach(btn => {
-            btn.disabled = false;
-            btn.innerHTML = `&#8635; Refresh Live Data`;
-          });
-          loadOverview();
-          renderApplications();
-        }
-      }
-
-      // Initial render & sync
-      loadOverview();
-      renderApplications();
-      syncWithDatabase();
-
-      // Wire refresh buttons
-      document.querySelectorAll(".btn-sync-db").forEach(btn => {
-        btn.addEventListener("click", syncWithDatabase);
-      });
-
-      // 6. Application Review Modal
-      const appModal = document.getElementById("appReviewModal");
-      let currentViewingApp = null;
-
-      function openAppModal(id) {
-        const app = window.AdminService.getApplicationById(id);
-        if (!app) return;
-        currentViewingApp = app;
-
-        document.getElementById("modalAppRef").textContent = app.id;
-        document.getElementById("modalAppDate").textContent = `Submitted: ${window.AcademicDB.formatDate(app.created_at)}`;
-        document.getElementById("modalFullName").textContent = app.fullName || `${app.firstName} ${app.lastName}`;
-        document.getElementById("modalAge").textContent = app.age;
-        document.getElementById("modalEmail").textContent = app.email;
-        document.getElementById("modalPhone").textContent = app.phone;
-        document.getElementById("modalPlace").textContent = app.place || app.fullAddress || "Addis Ababa";
-        document.getElementById("modalProgram").textContent = app.courseApplied;
-        document.getElementById("modalQualification").textContent = app.qualification;
-        document.getElementById("modalMajorInst").textContent = app.previousInstitution || (app.fieldOfStudy ? `${app.fieldOfStudy} (${app.previousInstitution || "N/A"})` : "N/A");
-        document.getElementById("modalFaydaNumber").textContent = app.faydaFileName ? "Uploaded & Attached" : (app.faydaIdNumber || "Verified");
-
-        // Status & Notes
-        document.getElementById("modalStatusSelect").value = app.status;
-        document.getElementById("modalInternalNotes").value = app.internalNotes || "";
-
-        // Fayda Document Preview
-        const faydaName = document.getElementById("modalFaydaFileName");
-        const faydaThumb = document.getElementById("modalFaydaThumb");
-        const faydaLink = document.getElementById("modalFaydaLink");
-        faydaName.textContent = app.faydaFileName || "FAYDA_Document.pdf";
-        if (app.faydaFileUrl && app.faydaFileUrl.startsWith("data:image")) {
-          faydaThumb.innerHTML = `<img src="${app.faydaFileUrl}" style="max-height: 100%;" />`;
-        } else {
-          faydaThumb.innerHTML = `<span style="font-size: 2.5rem; color: #1854a1;">&#128196;</span>`;
-        }
-        faydaLink.href = app.faydaFileUrl || "#";
-
-        // [NEW] Education Document & Transcripts Preview
-        const eduName = document.getElementById("modalEducationDocName");
-        const eduThumb = document.getElementById("modalEducationDocThumb");
-        const eduLink = document.getElementById("modalEducationDocLink");
-        eduName.textContent = app.educationDocName || "Academic_Transcripts.pdf";
-        if (app.educationDocUrl && app.educationDocUrl.startsWith("data:image")) {
-          eduThumb.innerHTML = `<img src="${app.educationDocUrl}" style="max-height: 100%;" />`;
-        } else {
-          eduThumb.innerHTML = `<span style="font-size: 2.5rem; color: #10b981;">&#128196;</span>`;
-        }
-        eduLink.href = app.educationDocUrl || "#";
-
-        // Payment Slip Preview
-        const slipThumb = document.getElementById("modalSlipThumb");
-        const slipLink = document.getElementById("modalSlipLink");
-        document.getElementById("modalPaymentChannel").textContent = `Channel: ${app.paymentMethod || "Pending"}`;
-        document.getElementById("modalPaymentRef").textContent = `Ref: ${app.paymentRef || "Pending"}`;
-        if (app.paymentSlipUrl && app.paymentSlipUrl.startsWith("data:image")) {
-          slipThumb.innerHTML = `<img src="${app.paymentSlipUrl}" style="max-height: 100%;" />`;
-        } else if (app.paymentSlipUrl) {
-          slipThumb.innerHTML = `<span style="font-size: 2.5rem; color: #df6b26;">&#128179;</span>`;
-        } else {
-          slipThumb.innerHTML = `<span style="font-size: 0.85rem; color: #64748b;">No slip uploaded</span>`;
-        }
-        slipLink.href = app.paymentSlipUrl || "#";
-
-        appModal.classList.add("open");
-      }
-
-      function closeAppModal() {
-        appModal.classList.remove("open");
-      }
-
-      document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
-      document.getElementById("closeAppModalFooterBtn").addEventListener("click", closeAppModal);
-
-      // Save Status & Notes (Live Supabase Update)
-      document.getElementById("modalSaveStatusBtn").addEventListener("click", async () => {
-        if (!currentViewingApp) return;
-        const saveBtn = document.getElementById("modalSaveStatusBtn");
-        const originalText = saveBtn.textContent;
-        saveBtn.textContent = "Saving to Database...";
-        saveBtn.disabled = true;
-
-        const newStatus = document.getElementById("modalStatusSelect").value;
-        const notes = document.getElementById("modalInternalNotes").value;
-        try {
-          const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes);
-          if (res && res.success) {
-            closeAppModal();
-            loadOverview();
-            renderApplications();
-            alert(`Application ${currentViewingApp.id} status successfully updated to ${newStatus.toUpperCase().replace("_", " ")}`);
-          } else {
-            alert((res && res.error) || "Failed to update status in database.");
-          }
-        } catch (e) {
-          alert("Error saving status: " + (e.message || "Network issue"));
-        } finally {
-          saveBtn.textContent = originalText;
-          saveBtn.disabled = false;
-        }
-      });
-
-      // 6. Courses CMS Manager
-      const coursesTableBody = document.getElementById("coursesTableBody");
-      const courseModal = document.getElementById("courseModal");
-
-      function renderCourses() {
-        const list = window.CoursesService.getAllCourses();
-        coursesTableBody.innerHTML = list.map(c => `
-          <tr>
-            <td><strong>${c.title}</strong></td>
-            <td><span class="program-badge" style="font-size: 0.7rem;">${c.categoryLabel || c.category}</span></td>
-            <td>${c.duration}</td>
-            <td>${c.level}</td>
-            <td>${c.isFeatured ? "<span style='color: #10b981; font-weight: bold;'>Featured</span>" : "No"}</td>
-            <td>
-              <button type="button" class="btn-sm btn-edit-course" data-id="${c.id}">Edit</button>
-              <button type="button" class="btn-sm btn-delete-course" data-id="${c.id}" style="color: #d93025; border-color: #fca5a5;">Delete</button>
-            </td>
-          </tr>
-        `).join("");
-
-        // Edit course
-        document.querySelectorAll(".btn-edit-course").forEach(btn => {
-          btn.addEventListener("click", () => {
-            const course = list.find(c => c.id === btn.dataset.id);
-            if (!course) return;
-            document.getElementById("editCourseId").value = course.id;
-            document.getElementById("courseModalTitle").textContent = `Edit Program: ${course.title}`;
-            document.getElementById("courseInputTitle").value = course.title;
-            document.getElementById("courseInputCategory").value = course.category || "job-ready";
-            document.getElementById("courseInputDuration").value = course.duration || "24 Weeks";
-            document.getElementById("courseInputLevel").value = course.level || "Accredited Certificate / Diploma";
-            document.getElementById("courseInputFeatured").value = course.isFeatured ? "true" : "false";
-            document.getElementById("courseInputDescription").value = course.description || "";
-            document.getElementById("courseInputPrereq").value = course.prerequisites || "";
-            courseModal.classList.add("open");
-          });
-        });
-
-        // Delete course
-        document.querySelectorAll(".btn-delete-course").forEach(btn => {
-          btn.addEventListener("click", () => {
-            if (confirm("Are you sure you want to delete this course from the catalog?")) {
-              window.AdminService.deleteCourse(btn.dataset.id);
-              renderCourses();
-            }
-          });
-        });
-      }
-      renderCourses();
-
-      // Add New Course
-      document.getElementById("btnAddNewCourse").addEventListener("click", () => {
-        document.getElementById("courseForm").reset();
-        document.getElementById("editCourseId").value = "";
-        document.getElementById("courseModalTitle").textContent = "Add New Program";
+      document.querySelectorAll(".btn-edit-course").forEach(btn => btn.addEventListener("click", () => {
+        const c = list.find(x => x.id === btn.dataset.id); if (!c) return;
+        document.getElementById("editCourseId").value = c.id;
+        document.getElementById("courseModalTitle").textContent = "Edit: " + c.title;
+        document.getElementById("courseInputTitle").value = c.title;
+        document.getElementById("courseInputCategory").value = c.category || "job-ready";
+        document.getElementById("courseInputDuration").value = c.duration || "24 Weeks";
+        document.getElementById("courseInputLevel").value = c.level || "Accredited Certificate / Diploma";
+        document.getElementById("courseInputFeatured").value = c.isFeatured ? "true" : "false";
+        document.getElementById("courseInputDescription").value = c.description || "";
+        document.getElementById("courseInputPrereq").value = c.prerequisites || "";
         courseModal.classList.add("open");
-      });
+      }));
+      document.querySelectorAll(".btn-delete-course").forEach(btn => btn.addEventListener("click", () => {
+        if (!confirm("Delete this course?")) return;
+        window.AdminService.deleteCourse(btn.dataset.id);
+        logActivity("deleted_course", "course", btn.dataset.id);
+        renderCourses(); showToast("Course deleted.", "success");
+      }));
+    }
+    renderCourses();
+    document.getElementById("btnAddNewCourse").addEventListener("click", () => {
+      document.getElementById("courseForm").reset(); document.getElementById("editCourseId").value = "";
+      document.getElementById("courseModalTitle").textContent = "Add New Program"; courseModal.classList.add("open");
+    });
+    const closeCourseModal = () => courseModal.classList.remove("open");
+    document.getElementById("closeCourseModalBtn").addEventListener("click", closeCourseModal);
+    document.getElementById("cancelCourseBtn").addEventListener("click", closeCourseModal);
+    document.getElementById("courseForm").addEventListener("submit", e => {
+      e.preventDefault();
+      const id = document.getElementById("editCourseId").value;
+      const cat = document.getElementById("courseInputCategory").value;
+      const catLabels = { "job-ready":"Job-Ready (24 Weeks)", "pgd":"Postgraduate Diploma (PGD)", "executive":"Executive Track" };
+      const payload = {
+        id: id || undefined,
+        title: document.getElementById("courseInputTitle").value.trim(),
+        category: cat, categoryLabel: catLabels[cat] || "Certified Program",
+        duration: document.getElementById("courseInputDuration").value.trim(),
+        level: document.getElementById("courseInputLevel").value.trim(),
+        isFeatured: document.getElementById("courseInputFeatured").value === "true",
+        description: document.getElementById("courseInputDescription").value.trim(),
+        prerequisites: document.getElementById("courseInputPrereq").value.trim()
+      };
+      window.AdminService.saveCourse(payload);
+      logActivity(id ? "updated_course" : "created_course", "course", payload.title);
+      closeCourseModal(); renderCourses(); showToast("Program saved!", "success");
+    });
 
-      function closeCourseModal() {
-        courseModal.classList.remove("open");
+    // HOMEPAGE STATS
+    const STATS_KEY = "ae_db_stats";
+    const statsTableBody = document.getElementById("statsTableBody");
+    const statModal = document.getElementById("statModal");
+    function getStats() { return window.AcademicDB.getLocal(STATS_KEY, []); }
+    function saveStats(s) { window.AcademicDB.setLocal(STATS_KEY, s); }
+
+    function renderStats(firstLoad) {
+      if (firstLoad) {
+        supaFetch("cms_stats", { filter: "order=sort_order.asc" }).then(rows => { if (rows && rows.length) saveStats(rows); renderStats(); }).catch(() => renderStats());
+        return;
       }
-      document.getElementById("closeCourseModalBtn").addEventListener("click", closeCourseModal);
-      document.getElementById("cancelCourseBtn").addEventListener("click", closeCourseModal);
+      const stats = getStats();
+      if (!stats.length) { statsTableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:32px;'>No stat blocks yet.</td></tr>"; return; }
+      statsTableBody.innerHTML = stats.map(s =>
+        "<tr><td style='font-size:1.4rem;text-align:center;'>" + (s.icon||"📊") + "</td><td><strong>" + (s.label||s.stat_label||"") + "</strong></td><td>" + (s.value||s.stat_value||"") + "</td><td>" + (s.sort_order||"—") + "</td>" +
+        "<td><button type='button' class='btn-sm btn-edit-stat' data-id='" + s.id + "'>Edit</button> <button type='button' class='btn-sm btn-delete-stat' data-id='" + s.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button></td></tr>"
+      ).join("");
+      document.querySelectorAll(".btn-edit-stat").forEach(btn => btn.addEventListener("click", () => {
+        const s = getStats().find(x => x.id === btn.dataset.id); if (!s) return;
+        document.getElementById("editStatId").value = s.id;
+        document.getElementById("statModalTitle").textContent = "Edit Stat Block";
+        document.getElementById("statInputIcon").value = s.icon || "📊";
+        document.getElementById("statInputLabel").value = s.label || s.stat_label || "";
+        document.getElementById("statInputValue").value = s.value || s.stat_value || "";
+        document.getElementById("statInputSort").value = s.sort_order || 1;
+        statModal.classList.add("open");
+      }));
+      document.querySelectorAll(".btn-delete-stat").forEach(btn => btn.addEventListener("click", async () => {
+        if (!confirm("Delete this stat?")) return;
+        try { await supaFetch("cms_stats", { method:"DELETE", filter:"id=eq."+btn.dataset.id }); } catch(e) {}
+        saveStats(getStats().filter(s => s.id !== btn.dataset.id));
+        logActivity("deleted_stat", "stat", btn.dataset.id); renderStats(); showToast("Stat deleted.", "success");
+      }));
+    }
+    document.getElementById("btnAddStat").addEventListener("click", () => {
+      document.getElementById("statForm").reset(); document.getElementById("editStatId").value = "";
+      document.getElementById("statModalTitle").textContent = "Add Stat Block";
+      document.getElementById("statInputSort").value = getStats().length + 1; statModal.classList.add("open");
+    });
+    const closeStatModal = () => statModal.classList.remove("open");
+    document.getElementById("closeStatModalBtn").addEventListener("click", closeStatModal);
+    document.getElementById("cancelStatBtn").addEventListener("click", closeStatModal);
+    document.getElementById("statForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("editStatId").value;
+      const label = document.getElementById("statInputLabel").value.trim();
+      const value = document.getElementById("statInputValue").value.trim();
+      const payload = { id: id || ("stat-" + Date.now()), icon: document.getElementById("statInputIcon").value.trim(), label, stat_label: label, value, stat_value: value, sort_order: parseInt(document.getElementById("statInputSort").value,10)||1 };
+      try { await supaFetch("cms_stats", { method:"POST", body:payload, upsert:true }); } catch(e) {}
+      const stats = getStats(); const idx = stats.findIndex(s => s.id === payload.id);
+      if (idx >= 0) stats[idx] = payload; else stats.push(payload);
+      saveStats(stats); logActivity(id ? "updated_stat" : "created_stat", "stat", payload.id);
+      closeStatModal(); renderStats(); showToast("Stat saved!", "success");
+    });
 
-      document.getElementById("courseForm").addEventListener("submit", (e) => {
-        e.preventDefault();
-        const id = document.getElementById("editCourseId").value;
-        const title = document.getElementById("courseInputTitle").value.trim();
-        const category = document.getElementById("courseInputCategory").value;
-        const duration = document.getElementById("courseInputDuration").value.trim();
-        const level = document.getElementById("courseInputLevel").value.trim();
-        const isFeatured = document.getElementById("courseInputFeatured").value === "true";
-        const description = document.getElementById("courseInputDescription").value.trim();
-        const prerequisites = document.getElementById("courseInputPrereq").value.trim();
+    // FAQ EDITOR
+    const FAQ_KEY = "ae_db_faqs";
+    const faqListEl = document.getElementById("faqList");
+    const faqModal = document.getElementById("faqModal");
+    function getFaqs() { return window.AcademicDB.getLocal(FAQ_KEY, []); }
+    function saveFaqs(f) { window.AcademicDB.setLocal(FAQ_KEY, f); }
 
-        const catLabels = {
-          "job-ready": "Job-Ready (24 Weeks)",
-          "pgd": "Postgraduate Diploma (PGD)",
-          "executive": "Executive Track"
-        };
+    async function loadFaqs() {
+      try { const rows = await supaFetch("cms_faqs", { filter:"order=sort_order.asc" }); if (rows && rows.length) saveFaqs(rows); } catch(e) {}
+      renderFaqs();
+    }
+    function renderFaqs() {
+      const faqs = getFaqs();
+      if (!faqs.length) { faqListEl.innerHTML = "<p style='color:#64748b;'>No FAQs yet.</p>"; return; }
+      faqListEl.innerHTML = faqs.map(f =>
+        "<div class='faq-item'><div class='faq-question'>Q: " + f.question + "</div><div class='faq-answer'>A: " + f.answer + "</div>" +
+        "<div style='margin-top:12px;display:flex;gap:10px;'><button type='button' class='btn-sm btn-edit-faq' data-id='" + f.id + "'>Edit</button><button type='button' class='btn-sm btn-delete-faq' data-id='" + f.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button></div></div>"
+      ).join("");
+      document.querySelectorAll(".btn-edit-faq").forEach(btn => btn.addEventListener("click", () => {
+        const f = getFaqs().find(x => x.id === btn.dataset.id); if (!f) return;
+        document.getElementById("editFaqId").value = f.id;
+        document.getElementById("faqModalTitle").textContent = "Edit FAQ";
+        document.getElementById("faqInputQuestion").value = f.question;
+        document.getElementById("faqInputAnswer").value = f.answer;
+        document.getElementById("faqInputSort").value = f.sort_order || 1;
+        faqModal.classList.add("open");
+      }));
+      document.querySelectorAll(".btn-delete-faq").forEach(btn => btn.addEventListener("click", async () => {
+        if (!confirm("Delete this FAQ?")) return;
+        try { await supaFetch("cms_faqs", { method:"DELETE", filter:"id=eq."+btn.dataset.id }); } catch(e) {}
+        saveFaqs(getFaqs().filter(f => f.id !== btn.dataset.id));
+        logActivity("deleted_faq", "faq", btn.dataset.id); renderFaqs(); showToast("FAQ deleted.", "success");
+      }));
+    }
+    document.getElementById("btnAddFaq").addEventListener("click", () => {
+      document.getElementById("faqForm").reset(); document.getElementById("editFaqId").value = "";
+      document.getElementById("faqModalTitle").textContent = "Add FAQ";
+      document.getElementById("faqInputSort").value = getFaqs().length + 1; faqModal.classList.add("open");
+    });
+    const closeFaqModal = () => faqModal.classList.remove("open");
+    document.getElementById("closeFaqModalBtn").addEventListener("click", closeFaqModal);
+    document.getElementById("cancelFaqBtn").addEventListener("click", closeFaqModal);
+    document.getElementById("faqForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("editFaqId").value;
+      const payload = { id: id || ("faq-" + Date.now()), question: document.getElementById("faqInputQuestion").value.trim(), answer: document.getElementById("faqInputAnswer").value.trim(), sort_order: parseInt(document.getElementById("faqInputSort").value,10)||1, is_published: true };
+      try { await supaFetch("cms_faqs", { method:"POST", body:payload, upsert:true }); } catch(e) {}
+      const faqs = getFaqs(); const idx = faqs.findIndex(f => f.id === payload.id);
+      if (idx >= 0) faqs[idx] = payload; else faqs.push(payload);
+      saveFaqs(faqs); logActivity(id ? "updated_faq" : "created_faq", "faq", payload.id);
+      closeFaqModal(); renderFaqs(); showToast("FAQ saved!", "success");
+    });
 
-        const payload = {
-          id: id || undefined,
-          title,
-          category,
-          categoryLabel: catLabels[category] || "Certified Program",
-          duration,
-          level,
-          isFeatured,
-          description,
-          prerequisites
-        };
+    // TESTIMONIALS
+    const TEST_KEY = "ae_db_testimonials";
+    const testimonialGrid = document.getElementById("testimonialGrid");
+    const testimonialModal = document.getElementById("testimonialModal");
+    let testimonialRating = 5;
+    function getTestimonials() { return window.AcademicDB.getLocal(TEST_KEY, []); }
+    function saveTestimonials(t) { window.AcademicDB.setLocal(TEST_KEY, t); }
 
-        window.AdminService.saveCourse(payload);
-        closeCourseModal();
-        renderCourses();
-        alert("Program saved successfully to catalog!");
-      });
+    async function loadTestimonials() {
+      try { const rows = await supaFetch("cms_testimonials", { filter:"order=sort_order.asc" }); if (rows && rows.length) saveTestimonials(rows); } catch(e) {}
+      renderTestimonials();
+    }
+    function renderTestimonials() {
+      const list = getTestimonials();
+      if (!list.length) { testimonialGrid.innerHTML = "<p style='color:#64748b;grid-column:1/-1;'>No testimonials yet.</p>"; return; }
+      testimonialGrid.innerHTML = list.map(t => {
+        const stars = "★".repeat(t.rating||5) + "☆".repeat(5-(t.rating||5));
+        return "<div class='testimonial-card'>" +
+          (t.is_featured ? "<span style='position:absolute;top:12px;right:12px;background:#fef3c7;color:#92400e;font-size:0.7rem;font-weight:700;padding:2px 8px;border-radius:10px;'>Featured</span>" : "") +
+          "<div class='testimonial-stars'>" + stars + "</div>" +
+          "<p style='color:#334155;font-size:0.9rem;line-height:1.6;margin-bottom:12px;'>&ldquo;" + t.quote + "&rdquo;</p>" +
+          "<div style='font-weight:700;color:#0b1b3d;'>" + t.name + "</div>" +
+          "<div style='font-size:0.8rem;color:#64748b;'>" + (t.role||"") + "</div>" +
+          (t.course_completed ? "<div style='font-size:0.78rem;color:var(--primary-blue);margin-top:4px;'>Course: " + t.course_completed + "</div>" : "") +
+          "<div style='margin-top:14px;display:flex;gap:8px;'><button type='button' class='btn-sm btn-edit-testimonial' data-id='" + t.id + "'>Edit</button><button type='button' class='btn-sm btn-delete-testimonial' data-id='" + t.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button></div></div>";
+      }).join("");
+      document.querySelectorAll(".btn-edit-testimonial").forEach(btn => btn.addEventListener("click", () => {
+        const t = getTestimonials().find(x => x.id === btn.dataset.id); if (!t) return;
+        document.getElementById("editTestimonialId").value = t.id;
+        document.getElementById("testimonialModalTitle").textContent = "Edit Testimonial";
+        document.getElementById("testimonialInputName").value = t.name;
+        document.getElementById("testimonialInputRole").value = t.role || "";
+        document.getElementById("testimonialInputQuote").value = t.quote;
+        document.getElementById("testimonialInputCourse").value = t.course_completed || "";
+        document.getElementById("testimonialInputFeatured").checked = !!t.is_featured;
+        testimonialRating = t.rating || 5;
+        document.getElementById("testimonialInputRating").value = testimonialRating;
+        updateStarPicker(testimonialRating); testimonialModal.classList.add("open");
+      }));
+      document.querySelectorAll(".btn-delete-testimonial").forEach(btn => btn.addEventListener("click", async () => {
+        if (!confirm("Delete this testimonial?")) return;
+        try { await supaFetch("cms_testimonials", { method:"DELETE", filter:"id=eq."+btn.dataset.id }); } catch(e) {}
+        saveTestimonials(getTestimonials().filter(x => x.id !== btn.dataset.id));
+        logActivity("deleted_testimonial", "testimonial", btn.dataset.id); renderTestimonials(); showToast("Testimonial deleted.", "success");
+      }));
+    }
+    function updateStarPicker(r) { document.querySelectorAll("#testimonialStarPicker span").forEach(s => s.classList.toggle("active", parseInt(s.dataset.val) <= r)); }
+    document.querySelectorAll("#testimonialStarPicker span").forEach(s => {
+      s.addEventListener("click", () => { testimonialRating = parseInt(s.dataset.val); document.getElementById("testimonialInputRating").value = testimonialRating; updateStarPicker(testimonialRating); });
+      s.addEventListener("mouseover", () => updateStarPicker(parseInt(s.dataset.val)));
+      s.addEventListener("mouseout", () => updateStarPicker(testimonialRating));
+    });
+    updateStarPicker(5);
+    document.getElementById("btnAddTestimonial").addEventListener("click", () => {
+      document.getElementById("testimonialForm").reset(); document.getElementById("editTestimonialId").value = "";
+      document.getElementById("testimonialModalTitle").textContent = "Add Testimonial";
+      testimonialRating = 5; document.getElementById("testimonialInputRating").value = 5;
+      document.getElementById("testimonialInputFeatured").checked = true; updateStarPicker(5); testimonialModal.classList.add("open");
+    });
+    const closeTestimonialModal = () => testimonialModal.classList.remove("open");
+    document.getElementById("closeTestimonialModalBtn").addEventListener("click", closeTestimonialModal);
+    document.getElementById("cancelTestimonialBtn").addEventListener("click", closeTestimonialModal);
+    document.getElementById("testimonialForm").addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("editTestimonialId").value;
+      const payload = {
+        id: id || ("test-" + Date.now()),
+        name: document.getElementById("testimonialInputName").value.trim(),
+        role: document.getElementById("testimonialInputRole").value.trim(),
+        quote: document.getElementById("testimonialInputQuote").value.trim(),
+        course_completed: document.getElementById("testimonialInputCourse").value.trim(),
+        rating: testimonialRating,
+        is_featured: document.getElementById("testimonialInputFeatured").checked,
+        sort_order: getTestimonials().length + 1
+      };
+      try { await supaFetch("cms_testimonials", { method:"POST", body:payload, upsert:true }); } catch(e) {}
+      const list = getTestimonials(); const idx = list.findIndex(x => x.id === payload.id);
+      if (idx >= 0) list[idx] = payload; else list.push(payload);
+      saveTestimonials(list); logActivity(id ? "updated_testimonial" : "created_testimonial", "testimonial", payload.id);
+      closeTestimonialModal(); renderTestimonials(); showToast("Testimonial saved!", "success");
+    });
 
-      // 7. System Settings Form
-      const settingsForm = document.getElementById("settingsForm");
-      const currentSettings = window.AdminService.getSettings();
-      if (currentSettings) {
-        if (currentSettings.applicationFee) document.getElementById("settingFeeDisplay").value = currentSettings.applicationFee;
-        if (currentSettings.applicationFeeAmount) document.getElementById("settingFeeAmount").value = currentSettings.applicationFeeAmount;
-        if (currentSettings.telebirrNumber) document.getElementById("settingTelebirr").value = currentSettings.telebirrNumber;
-        if (currentSettings.cbeAccount) document.getElementById("settingCBE").value = currentSettings.cbeAccount;
-        if (currentSettings.awashAccount) document.getElementById("settingAwash").value = currentSettings.awashAccount;
-      }
+    // CONTACT INQUIRIES
+    const inquiryListEl = document.getElementById("inquiryList");
+    async function loadInquiries() {
+      inquiryListEl.innerHTML = "<p style='color:#64748b;'>Loading inquiries...</p>";
+      try {
+        const rows = await supaFetch("contact_messages", { filter:"order=created_at.desc&limit=100" });
+        if (!rows || !rows.length) { inquiryListEl.innerHTML = "<p style='color:#64748b;'>No contact inquiries yet.</p>"; return; }
+        const badge = document.getElementById("navBadgeInquiries");
+        if (badge) { badge.textContent = rows.length; badge.style.display = "inline-block"; }
+        inquiryListEl.innerHTML = rows.map(r => {
+          const ts = r.created_at ? new Date(r.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+          return "<div class='inquiry-card'><div class='iq-meta'><strong style='color:#0b1b3d;'>" + (r.name||"Anonymous") + "</strong><span>" + (r.email||"—") + "</span>" + (r.phone ? "<span>" + r.phone + "</span>" : "") + "<span style='margin-left:auto;'>" + ts + "</span></div>" + (r.subject ? "<div style='font-weight:600;color:#0b1b3d;margin-bottom:6px;'>Subject: " + r.subject + "</div>" : "") + "<div style='color:#475569;font-size:0.9rem;line-height:1.6;'>" + (r.message||"—") + "</div></div>";
+        }).join("");
+      } catch(e) { inquiryListEl.innerHTML = "<p style='color:#d93025;'>Could not load: " + e.message + "</p>"; }
+    }
+    document.getElementById("refreshInquiriesBtn").addEventListener("click", loadInquiries);
 
-      settingsForm.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const appFee = document.getElementById("settingFeeDisplay").value.trim();
-        const appFeeAmount = parseInt(document.getElementById("settingFeeAmount").value, 10) || 1500;
-        const telebirr = document.getElementById("settingTelebirr").value.trim();
-        const cbe = document.getElementById("settingCBE").value.trim();
-        const awash = document.getElementById("settingAwash").value.trim();
-
-        window.AdminService.updateSettings({
-          applicationFee: appFee,
-          applicationFeeAmount: appFeeAmount,
-          telebirrNumber: telebirr,
-          cbeAccount: cbe,
-          awashAccount: awash
-        });
-
-        loadOverview();
-        const alertBox = document.getElementById("settingsSuccessAlert");
-        alertBox.style.display = "block";
-        setTimeout(() => alertBox.style.display = "none", 3500);
+    // ACTIVITY LOG
+    const activityContainer = document.getElementById("activityLogContainer");
+    let activityFilter = "all";
+    function alClass(action) {
+      if (action.includes("approved")) return "approve";
+      if (action.includes("rejected")) return "reject";
+      if (action.includes("created")) return "create";
+      if (action.includes("deleted")) return "delete";
+      if (action.includes("setting")) return "setting";
+      return "edit";
+    }
+    async function loadActivityLog() {
+      activityContainer.innerHTML = "<p style='padding:24px;color:#64748b;'>Loading...</p>";
+      try {
+        let filter = "order=created_at.desc&limit=100";
+        if (activityFilter !== "all") filter += "&target_type=eq." + activityFilter;
+        const rows = await supaFetch("admin_activity_log", { filter });
+        if (!rows || !rows.length) { activityContainer.innerHTML = "<p style='padding:24px;color:#64748b;'>No activity recorded yet.</p>"; return; }
+        activityContainer.innerHTML = rows.map(entry => {
+          const action = entry.action || "";
+          const label = action.replace(/_/g, " ").replace(/\b\w/g, l => l.toUpperCase());
+          const cls = alClass(action);
+          const icon = action.includes("approved") ? "✓" : action.includes("rejected") ? "✗" : action.includes("created") ? "+" : action.includes("deleted") ? "🗑" : "✎";
+          const ts = entry.created_at ? new Date(entry.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
+          return "<div class='al-entry'><div class='al-icon " + cls + "'>" + icon + "</div><div style='flex:1;min-width:0;'><div style='font-size:0.9rem;font-weight:600;color:#0b1b3d;'>" + label + "</div><div style='font-size:0.78rem;color:#64748b;'>" + (entry.actor_email||"admin") + (entry.target_id ? " · <span style='font-family:monospace;'>" + entry.target_id.slice(0,20) + "</span>" : "") + "</div></div><div style='font-size:0.75rem;color:#94a3b8;white-space:nowrap;flex-shrink:0;'>" + ts + "</div></div>";
+        }).join("");
+      } catch(e) { activityContainer.innerHTML = "<p style='padding:24px;color:#d93025;'>Could not load: " + e.message + "</p>"; }
+    }
+    document.getElementById("activityFilters").querySelectorAll(".al-filter-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".al-filter-btn").forEach(b => { b.style.background="#f1f5f9"; b.style.color="#475569"; b.style.border="1px solid #e2e8f0"; });
+        btn.style.background="#0b1b3d"; btn.style.color="#fff"; btn.style.border="none";
+        activityFilter = btn.dataset.type; loadActivityLog();
       });
     });
+    document.getElementById("refreshActivityBtn").addEventListener("click", loadActivityLog);
+
+    // SETTINGS
+    const settingsForm = document.getElementById("settingsForm");
+    const cs = window.AdminService.getSettings();
+    if (cs) {
+      if (cs.applicationFee)       document.getElementById("settingFeeDisplay").value = cs.applicationFee;
+      if (cs.applicationFeeAmount) document.getElementById("settingFeeAmount").value   = cs.applicationFeeAmount;
+      if (cs.telebirrNumber)        document.getElementById("settingTelebirr").value   = cs.telebirrNumber;
+      if (cs.cbeAccount)            document.getElementById("settingCBE").value         = cs.cbeAccount;
+      if (cs.awashAccount)          document.getElementById("settingAwash").value       = cs.awashAccount;
+    }
+    settingsForm.addEventListener("submit", e => {
+      e.preventDefault();
+      const updated = {
+        applicationFee:       document.getElementById("settingFeeDisplay").value.trim(),
+        applicationFeeAmount: parseInt(document.getElementById("settingFeeAmount").value,10)||1500,
+        telebirrNumber:       document.getElementById("settingTelebirr").value.trim(),
+        cbeAccount:           document.getElementById("settingCBE").value.trim(),
+        awashAccount:         document.getElementById("settingAwash").value.trim()
+      };
+      window.AdminService.updateSettings(updated);
+      logActivity("updated_settings", "settings");
+      loadOverview();
+      const ab = document.getElementById("settingsSuccessAlert"); ab.style.display="block"; setTimeout(() => ab.style.display="none", 3500);
+      showToast("Settings saved!", "success");
+    });
+
+    // RESPONSIVE CHARTS
+    const chartsRow = document.getElementById("chartsRow");
+    if (chartsRow) {
+      const adj = () => chartsRow.style.gridTemplateColumns = window.innerWidth < 768 ? "1fr" : "1fr 1fr";
+      adj(); window.addEventListener("resize", adj);
+    }
+
+  });
   </script>
 </body>
 </html>
