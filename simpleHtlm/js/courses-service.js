@@ -1,10 +1,12 @@
 /**
  * Academic Excellence — Courses Data & Catalog Service
+ * Course list matches client-approved content exactly.
  */
 
 const defaultCourses = [
+  // ── JOB-READY 24-WEEK PROGRAMS ──────────────────────────────────
   {
-    id: "course-1",
+    id: "course-ai",
     title: "Artificial Intelligence (AI)",
     slug: "artificial-intelligence",
     category: "job-ready",
@@ -12,7 +14,7 @@ const defaultCourses = [
     duration: "24 Weeks",
     level: "Accredited Certificate / Diploma",
     isFeatured: true,
-    description: "Master industry-aligned technical and leadership skills certified in collaboration with University in New York and delivered via the Skillsoft Percipio platform.",
+    description: "Master core neural networks, deep learning, LLMs, and generative AI. Certified in collaboration with University in New York and delivered via the Skillsoft Percipio platform.",
     highlights: [
       "Core Neural Networks, Deep Learning & LLMs",
       "Python, TensorFlow & PyTorch Lab Exercises",
@@ -26,10 +28,10 @@ const defaultCourses = [
       { module: "Module 4: Enterprise Generative AI, APIs & Capstone Project", weeks: "Weeks 17-24" }
     ],
     prerequisites: "Basic programming familiarity or mathematical aptitude; Bachelor's, Diploma, or relevant analytical background recommended.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-2",
+    id: "course-data-science",
     title: "Data Science and Big Data",
     slug: "data-science-and-big-data",
     category: "job-ready",
@@ -51,10 +53,10 @@ const defaultCourses = [
       { module: "Module 4: Enterprise BI Dashboards & Capstone Project", weeks: "Weeks 19-24" }
     ],
     prerequisites: "Interest in quantitative methods, business metrics, or software tooling.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-3",
+    id: "course-cybersecurity",
     title: "Cybersecurity and Ethical Hacking",
     slug: "cybersecurity-and-ethical-hacking",
     category: "job-ready",
@@ -76,12 +78,12 @@ const defaultCourses = [
       { module: "Module 4: Security Operations Center (SOC) Simulation", weeks: "Weeks 19-24" }
     ],
     prerequisites: "Basic understanding of operating systems, computing hardware, or networking.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-4",
-    title: "Cloud Computing (AWS & Azure)",
-    slug: "cloud-computing-aws-azure",
+    id: "course-cloud",
+    title: "Cloud Computing",
+    slug: "cloud-computing",
     category: "job-ready",
     categoryLabel: "Job-Ready (24 Weeks)",
     duration: "24 Weeks",
@@ -101,16 +103,16 @@ const defaultCourses = [
       { module: "Module 4: DevOps Automation, Kubernetes & Live Migration", weeks: "Weeks 18-24" }
     ],
     prerequisites: "Familiarity with IT systems, computer networking, or web development.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-5",
-    title: "Machine Learning Engineering",
-    slug: "machine-learning-engineering",
+    id: "course-machine-learning",
+    title: "Machine Learning",
+    slug: "machine-learning",
     category: "job-ready",
     categoryLabel: "Job-Ready (24 Weeks)",
     duration: "24 Weeks",
-    level: "Accredited Diploma",
+    level: "Accredited Certificate / Diploma",
     isFeatured: false,
     description: "Bridge research algorithms with robust production pipelines using MLOps, automated training, model monitoring, and scalable inference.",
     highlights: [
@@ -126,12 +128,12 @@ const defaultCourses = [
       { module: "Module 4: Production Capstone with Live Monitoring", weeks: "Weeks 19-24" }
     ],
     prerequisites: "Prior programming experience in Python.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-6",
-    title: "Project Management Professional",
-    slug: "project-management-professional",
+    id: "course-project-management",
+    title: "Project Management",
+    slug: "project-management",
     category: "job-ready",
     categoryLabel: "Job-Ready (24 Weeks)",
     duration: "24 Weeks",
@@ -151,10 +153,10 @@ const defaultCourses = [
       { module: "Module 4: Complex Delivery Simulation & Capstone", weeks: "Weeks 19-24" }
     ],
     prerequisites: "Open to graduates and aspiring managers in all disciplines.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-7",
+    id: "course-product-management",
     title: "Product Management",
     slug: "product-management",
     category: "job-ready",
@@ -162,7 +164,7 @@ const defaultCourses = [
     duration: "24 Weeks",
     level: "Accredited Certificate",
     isFeatured: false,
-    description: "Guide products from user research and minimum viable product (MVP) to market launch, growth loops, and data-driven iteration.",
+    description: "Guide products from user research and MVP to market launch, growth loops, and data-driven iteration.",
     highlights: [
       "User Discovery, Wireframing & Prototyping",
       "Product Strategy, Roadmapping & Prioritization",
@@ -176,43 +178,145 @@ const defaultCourses = [
       { module: "Module 4: Complete Product Launch Simulation", weeks: "Weeks 19-24" }
     ],
     prerequisites: "Strong communication skills and passion for technology products.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-8",
-    title: "Business Analytics & Strategy",
-    slug: "business-analytics-strategy",
+    id: "course-business-leadership",
+    title: "Business and Leadership Skills",
+    slug: "business-and-leadership-skills",
     category: "job-ready",
     categoryLabel: "Job-Ready (24 Weeks)",
     duration: "24 Weeks",
-    level: "Accredited Diploma",
+    level: "Accredited Certificate / Diploma",
     isFeatured: false,
-    description: "Equip modern business leaders with quantitative decision-making, financial modeling, market entry analysis, and data storytelling.",
+    description: "Develop executive decision-making, strategic thinking, cross-cultural team management, financial fundamentals, and digital transformation leadership skills.",
     highlights: [
-      "Financial Modeling & Sensitivity Analysis",
-      "Market Sizing & Competitive Intelligence",
-      "Executive Storytelling with Visual Dashboards",
-      "Operations Research & Capital Allocation"
+      "Executive Decision Making & Strategic Planning",
+      "Cross-Cultural Team Management",
+      "Financial Fundamentals & Budget Management",
+      "Digital Transformation Strategy & Change Management"
     ],
     syllabus: [
-      { module: "Module 1: Quantitative Methods & Advanced Excel Modeling", weeks: "Weeks 1-6" },
-      { module: "Module 2: Market Analysis, Economics & Strategic Positioning", weeks: "Weeks 7-12" },
-      { module: "Module 3: PowerBI Executive Reporting & Data Pipelines", weeks: "Weeks 13-18" },
-      { module: "Module 4: Comprehensive Strategy Board Presentation", weeks: "Weeks 19-24" }
+      { module: "Module 1: Leadership Fundamentals & Organizational Behavior", weeks: "Weeks 1-6" },
+      { module: "Module 2: Strategic Management & Business Analytics", weeks: "Weeks 7-12" },
+      { module: "Module 3: Financial Acumen & Operations Management", weeks: "Weeks 13-18" },
+      { module: "Module 4: Digital Leadership & Executive Capstone", weeks: "Weeks 19-24" }
     ],
-    prerequisites: "Undergraduate degree or relevant business background.",
-    tuitionFee: "Subsidized Intake (1,500 ETB Application Fee)"
+    prerequisites: "Undergraduate degree or relevant professional experience.",
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
   },
   {
-    id: "course-9",
+    id: "course-communication-productivity",
+    title: "Communication and Productivity Skills",
+    slug: "communication-and-productivity-skills",
+    category: "job-ready",
+    categoryLabel: "Job-Ready (24 Weeks)",
+    duration: "24 Weeks",
+    level: "Accredited Certificate",
+    isFeatured: false,
+    description: "Master professional communication, workplace productivity tools, collaboration platforms, and the interpersonal skills demanded by modern employers.",
+    highlights: [
+      "Professional Writing & Presentation Skills",
+      "Microsoft 365, Google Workspace & Collaboration Tools",
+      "Critical Thinking & Problem Solving",
+      "Time Management & Personal Effectiveness"
+    ],
+    syllabus: [
+      { module: "Module 1: Professional Communication & Business Writing", weeks: "Weeks 1-6" },
+      { module: "Module 2: Productivity Tools & Digital Collaboration", weeks: "Weeks 7-12" },
+      { module: "Module 3: Critical Thinking, Negotiation & Influence", weeks: "Weeks 13-18" },
+      { module: "Module 4: Personal Effectiveness & Career Development", weeks: "Weeks 19-24" }
+    ],
+    prerequisites: "Open to all applicants; no prior technical knowledge required.",
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
+  },
+  {
+    id: "course-professional-certifications",
+    title: "Professional Certifications",
+    slug: "professional-certifications",
+    category: "job-ready",
+    categoryLabel: "Job-Ready (24 Weeks)",
+    duration: "24 Weeks",
+    level: "Accredited Certificate",
+    isFeatured: false,
+    description: "Prepare for globally recognized professional certification exams across IT, project management, and business domains with structured exam-ready curricula.",
+    highlights: [
+      "PMP, CompTIA, AWS & Microsoft Certification Prep",
+      "Practice Exams & Exam Strategy Coaching",
+      "Industry-Aligned Study Materials",
+      "Skillsoft Percipio Certification Pathways"
+    ],
+    syllabus: [
+      { module: "Module 1: Certification Landscape & Exam Preparation Foundations", weeks: "Weeks 1-6" },
+      { module: "Module 2: Domain-Specific Technical Deep Dives", weeks: "Weeks 7-14" },
+      { module: "Module 3: Practice Exams, Mock Tests & Gap Analysis", weeks: "Weeks 15-20" },
+      { module: "Module 4: Final Revision & Exam Simulation", weeks: "Weeks 21-24" }
+    ],
+    prerequisites: "Relevant experience in the chosen certification domain preferred.",
+    tuitionFee: "Subsidized Intake (Application Fee applies)"
+  },
+
+  // ── POSTGRADUATE DIPLOMAS (PGD) — COMING SOON ──────────────────
+  {
+    id: "course-pgd-management",
+    title: "Postgraduate Diploma in Management",
+    slug: "pgd-management",
+    category: "pgd",
+    categoryLabel: "Postgraduate Diploma (PGD)",
+    duration: "12 Months",
+    level: "Postgraduate Diploma (PGD)",
+    isFeatured: true,
+    description: "Advanced postgraduate qualification covering Project Management, Human Resource Management, Marketing, Digital Marketing, Business Analytics, Strategy & Innovation, Leadership, Entrepreneurship, Financial Management, and Digital Transformation. Includes 2 professional soft-skill courses and access to Business Simulation Game.",
+    highlights: [
+      "Six specialization courses from 14+ available areas",
+      "Two professional soft-skill courses",
+      "80+ hours of learning per specialization course",
+      "Business Simulation Game: My Business – My Strategies"
+    ],
+    syllabus: [
+      { module: "Term 1: Strategic Management & Executive Decision Frameworks", weeks: "Months 1-3" },
+      { module: "Term 2: Managerial Finance & Global Market Economics", weeks: "Months 4-6" },
+      { module: "Term 3: Operations, Technology Disruption & Agile Leadership", weeks: "Months 7-9" },
+      { module: "Term 4: Global Business Simulation & Applied Management Thesis", weeks: "Months 10-12" }
+    ],
+    prerequisites: "Bachelor's degree in any discipline with professional work experience.",
+    tuitionFee: "Special PGD Enrollment"
+  },
+  {
+    id: "course-pgd-it",
+    title: "Postgraduate Diploma in Information Technology",
+    slug: "pgd-information-technology",
+    category: "pgd",
+    categoryLabel: "Postgraduate Diploma (PGD)",
+    duration: "12 Months",
+    level: "Postgraduate Diploma (PGD)",
+    isFeatured: false,
+    description: "Advanced postgraduate IT qualification covering Cybersecurity, AI, Machine Learning, Data Science, Cloud Computing, Ethical Hacking, Python, Big Data, Blockchain, AWS, Azure, IoT, and Networking. Includes 2 professional soft-skill courses.",
+    highlights: [
+      "Six specialization courses from 14+ available areas",
+      "Two professional soft-skill courses",
+      "80+ hours of learning per specialization course",
+      "Business Simulation Game: My Business – My Strategies"
+    ],
+    syllabus: [
+      { module: "Term 1: Enterprise Information Systems & Database Architecture", weeks: "Months 1-3" },
+      { module: "Term 2: Advanced Network Engineering & Cloud Virtualization", weeks: "Months 4-6" },
+      { module: "Term 3: Enterprise IT Governance (ITIL, COBIT & ISO)", weeks: "Months 7-9" },
+      { module: "Term 4: Strategic Technology Leadership Capstone", weeks: "Months 10-12" }
+    ],
+    prerequisites: "Bachelor's degree in IT, Engineering, Sciences, or related field.",
+    tuitionFee: "Special PGD Enrollment"
+  },
+  {
+    id: "course-pgd-ai-gai",
     title: "Postgraduate Diploma in Artificial Intelligence & Generative AI (AI/GAI)",
     slug: "pgd-artificial-intelligence-generative-ai",
     category: "pgd",
     categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months (48 Weeks)",
+    duration: "12 Months",
     level: "Postgraduate Diploma (PGD)",
     isFeatured: true,
-    description: "An intensive 12-month advanced postgraduate qualification featuring 6 specialization courses, 2 soft-skill leadership modules, and real-time business simulations.",
+    description: "Intensive 12-month postgraduate qualification featuring 6 specialization courses in AI, Machine Learning, Generative AI, and enterprise AI strategy. Includes 2 soft-skill leadership modules and real-time business simulations.",
     highlights: [
       "Advanced Deep Learning & Transformer Architectures",
       "Custom Fine-Tuning & Retrieval-Augmented Generation (RAG)",
@@ -220,68 +324,17 @@ const defaultCourses = [
       "Executive Capstone with University in New York Mentors"
     ],
     syllabus: [
-      { module: "Term 1: Mathematical Foundations of AI & Machine Intelligence", weeks: "Weeks 1-12" },
-      { module: "Term 2: Computer Vision, Transformers & Foundation Models", weeks: "Weeks 13-24" },
-      { module: "Term 3: Enterprise RAG Pipelines & Autonomous Agents", weeks: "Weeks 25-36" },
-      { module: "Term 4: Executive Business Simulation & Thesis Project", weeks: "Weeks 37-48" }
+      { module: "Term 1: Mathematical Foundations of AI & Machine Intelligence", weeks: "Months 1-3" },
+      { module: "Term 2: Computer Vision, Transformers & Foundation Models", weeks: "Months 4-6" },
+      { module: "Term 3: Enterprise RAG Pipelines & Autonomous Agents", weeks: "Months 7-9" },
+      { module: "Term 4: Executive Business Simulation & Thesis Project", weeks: "Months 10-12" }
     ],
     prerequisites: "Bachelor's degree or higher in STEM, Business, or analytical field.",
-    tuitionFee: "Special PGD Enrollment"
-  },
-  {
-    id: "course-10",
-    title: "Postgraduate Diploma in Information Technology",
-    slug: "pgd-information-technology",
-    category: "pgd",
-    categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months (48 Weeks)",
-    level: "Postgraduate Diploma (PGD)",
-    isFeatured: false,
-    description: "Prepare for senior IT director, CTO, and systems architect roles with rigorous training in enterprise architecture, cloud infrastructure, and cybersecurity governance.",
-    highlights: [
-      "Enterprise Systems Architecture & Governance",
-      "Cloud Infrastructure Migration Strategies",
-      "IT Security Risk & Regulatory Compliance",
-      "Strategic Technology Leadership & Budgeting"
-    ],
-    syllabus: [
-      { module: "Term 1: Enterprise Information Systems & Database Architecture", weeks: "Weeks 1-12" },
-      { module: "Term 2: Advanced Network Engineering & Cloud Virtualization", weeks: "Weeks 13-24" },
-      { module: "Term 3: Enterprise IT Governance (ITIL, COBIT & ISO)", weeks: "Weeks 25-36" },
-      { module: "Term 4: Strategic Technology Leadership Capstone", weeks: "Weeks 37-48" }
-    ],
-    prerequisites: "Bachelor's degree in IT, Engineering, Sciences, or related field.",
-    tuitionFee: "Special PGD Enrollment"
-  },
-  {
-    id: "course-11",
-    title: "Postgraduate Diploma in Management",
-    slug: "pgd-management",
-    category: "pgd",
-    categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months (48 Weeks)",
-    level: "Postgraduate Diploma (PGD)",
-    isFeatured: false,
-    description: "Develop executive leadership mastery with modules covering financial strategy, global supply chains, international trade, and organizational psychology.",
-    highlights: [
-      "Corporate Finance & Value Creation",
-      "Cross-Border Supply Chain & Trade Logistics",
-      "Strategic Marketing in Digital Ecosystems",
-      "Organizational Change & High-Performance Teams"
-    ],
-    syllabus: [
-      { module: "Term 1: Strategic Management & Executive Decision Frameworks", weeks: "Weeks 1-12" },
-      { module: "Term 2: Managerial Finance & Global Market Economics", weeks: "Weeks 13-24" },
-      { module: "Term 3: Operations, Technology Disruption & Agile Leadership", weeks: "Weeks 25-36" },
-      { module: "Term 4: Global Business Simulation & Applied Management Thesis", weeks: "Weeks 37-48" }
-    ],
-    prerequisites: "Bachelor's degree in any discipline with professional work experience.",
     tuitionFee: "Special PGD Enrollment"
   }
 ];
 
 window.CoursesService = {
-  // Get all courses with local storage sync
   getAllCourses() {
     const stored = window.AcademicDB.getLocal(window.AcademicDB.keys.COURSES, null);
     if (!stored || !Array.isArray(stored) || stored.length === 0) {
@@ -291,7 +344,6 @@ window.CoursesService = {
     return stored;
   },
 
-  // Get single course by slug
   getCourseBySlug(slug) {
     if (!slug) return null;
     const courses = this.getAllCourses();
@@ -299,29 +351,95 @@ window.CoursesService = {
     return courses.find(c => (c.slug && c.slug.toLowerCase() === cleanSlug) || c.id === slug) || null;
   },
 
-  // Filter by category
   filterByCategory(category) {
     const courses = this.getAllCourses();
     if (!category || category === "all") return courses;
     return courses.filter(c => c.category === category);
   },
 
-  // Search by keyword
   search(query, category = "all") {
     let list = this.filterByCategory(category);
     if (!query || !query.trim()) return list;
     const q = query.toLowerCase().trim();
-    return list.filter(c => 
+    return list.filter(c =>
       c.title.toLowerCase().includes(q) ||
       (c.description && c.description.toLowerCase().includes(q)) ||
       (c.level && c.level.toLowerCase().includes(q))
     );
   },
 
-  // Get featured courses for homepage
   getFeatured() {
     const courses = this.getAllCourses();
-    const featured = courses.filter(c => c.isFeatured);
-    return featured.length > 0 ? featured : courses.slice(0, 4);
+    const featured = courses.filter(c => c.isFeatured && c.category === "job-ready");
+    return featured.length > 0 ? featured : courses.filter(c => c.category === "job-ready").slice(0, 4);
+  },
+
+  /**
+   * Seed all courses to the Supabase `courses` table if it is empty.
+   * Uses upsert so it is safe to run multiple times.
+   */
+  async seedCoursesToSupabase() {
+    const SUPA_URL = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
+    const SUPA_KEY = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+
+    try {
+      // Check if table already has rows
+      const checkRes = await fetch(`${SUPA_URL}/rest/v1/courses?select=id&limit=1`, {
+        headers: { "apikey": SUPA_KEY, "Authorization": `Bearer ${SUPA_KEY}` }
+      });
+      if (!checkRes.ok) {
+        console.info("Courses table not found in Supabase — skipping seed. Will use localStorage.");
+        return;
+      }
+      const existing = await checkRes.json();
+      if (Array.isArray(existing) && existing.length > 0) {
+        console.info("Courses already seeded in Supabase.");
+        return;
+      }
+
+      // Upsert all courses
+      const payload = defaultCourses.map(c => ({
+        id: c.id,
+        title: c.title,
+        slug: c.slug,
+        category: c.category,
+        category_label: c.categoryLabel,
+        duration: c.duration,
+        level: c.level,
+        is_featured: c.isFeatured,
+        description: c.description,
+        prerequisites: c.prerequisites || null,
+        tuition_fee: c.tuitionFee || null,
+        highlights: JSON.stringify(c.highlights || []),
+        syllabus: JSON.stringify(c.syllabus || [])
+      }));
+
+      const res = await fetch(`${SUPA_URL}/rest/v1/courses`, {
+        method: "POST",
+        headers: {
+          "apikey": SUPA_KEY,
+          "Authorization": `Bearer ${SUPA_KEY}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates,return=minimal"
+        },
+        body: JSON.stringify(payload)
+      });
+
+      if (res.ok || res.status === 201) {
+        console.log(`Seeded ${payload.length} courses to Supabase successfully.`);
+      } else {
+        const errText = await res.text();
+        console.warn("Course seed response:", res.status, errText);
+      }
+    } catch (e) {
+      console.info("Course seed skipped:", e.message);
+    }
   }
 };
+
+// Auto-seed on load (safe — checks for existing data first)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", () => window.CoursesService.seedCoursesToSupabase());
+} else {
+  window.CoursesService.seedCoursesToSupabase();
+}
