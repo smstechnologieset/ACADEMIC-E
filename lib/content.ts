@@ -28,7 +28,7 @@ export const bankDetails = {
   accountNumber: "1000 3948 29384",
   routingNumber: "CBEETAA",
   swiftCode: "CBETETAA",
-  applicationFee: "1,500 ETB / $35 USD",
+  applicationFee: "15,000 ETB",
   referenceNotePrompt: "Please enter your Application Reference Number in the deposit / transfer reason field.",
 };
 

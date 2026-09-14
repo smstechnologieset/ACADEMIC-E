@@ -34,8 +34,8 @@ const StorageKeys = {
 
 // Initial Seed Settings
 const defaultSettings = {
-  applicationFee: "1,500 ETB / $35 USD",
-  applicationFeeAmount: 1500,
+  applicationFee: "15,000 ETB",
+  applicationFeeAmount: 15000,
   telebirrNumber: "0911 55 2345",
   cbeAccount: "1000 3948 29384",
   awashAccount: "0132 0876 5432 10",
@@ -248,9 +248,21 @@ window.AcademicDB = {
     }
   },
 
+  /** Helper to sanitize stale legacy 1,500 ETB settings */
+  _sanitizeSettings(s) {
+    if (!s) return defaultSettings;
+    if (s.applicationFeeAmount === 1500 || s.applicationFee === "1,500 ETB / $35 USD" || s.applicationFee === "1,500 ETB") {
+      s.applicationFee = "15,000 ETB";
+      s.applicationFeeAmount = 15000;
+      setLocalData(StorageKeys.SETTINGS, s);
+    }
+    return s;
+  },
+
   /** Sync: read settings from localStorage only (instant, no network) */
   getSettingsSync() {
-    return getLocalData(StorageKeys.SETTINGS, defaultSettings);
+    const s = getLocalData(StorageKeys.SETTINGS, defaultSettings);
+    return this._sanitizeSettings(s);
   },
 
   /**
@@ -259,7 +271,10 @@ window.AcademicDB = {
    * All pages (course-detail, payment, apply) must use this.
    */
   async getSettings() {
-    const local = getLocalData(StorageKeys.SETTINGS, null);
+    let local = getLocalData(StorageKeys.SETTINGS, null);
+    if (local) {
+      local = this._sanitizeSettings(local);
+    }
     try {
       const res = await fetch(
         `${SUPABASE_URL}/rest/v1/site_settings?select=key,value&limit=100`,

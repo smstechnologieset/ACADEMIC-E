@@ -264,8 +264,8 @@ window.AdminService = {
   // 3. ANALYTICS & METRICS (CALCULATED ON REAL DATABASE APPS)
   getMetrics() {
     const apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, { applicationFeeAmount: 1500 });
-    const fee = settings.applicationFeeAmount || 1500;
+    const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, { applicationFeeAmount: 15000 });
+    const fee = settings.applicationFeeAmount || 15000;
 
     const total = apps.length;
     const pending = apps.filter(a => a.status === "pending").length;

@@ -111,8 +111,7 @@
         <!-- Right Sticky Sidebar: Admissions Information Card -->
         <aside class="course-sidebar-col">
           <div class="course-sidebar-card">
-            <span style="font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--accent-orange); letter-spacing: 1px;">Admissions Information</span>
-            <div class="sidebar-fee" id="courseFeeText">Subsidized Intake</div>
+            <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--accent-orange); letter-spacing: 1.2px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid #e2e8f0;">Admissions Information</div>
             
             <div class="sidebar-feature-list">
               <div class="sidebar-feature-item">
@@ -142,8 +141,8 @@
               <a href="contact.html" class="btn btn-black" style="width: 100%; text-align: center;">Inquire With Advisor</a>
             </div>
 
-            <div id="courseFeeNotice" style="margin-top: 20px; font-size: 0.8rem; color: #64748b; text-align: center;">
-              Loading fee information...
+            <div id="courseFeeNotice" style="margin-top: 20px; font-size: 0.85rem; font-weight: 600; color: var(--primary-navy); text-align: center; padding: 10px 14px; background: #f0f7fc; border: 1px solid #d0e4f2; border-radius: 6px;">
+              Application fee: 15,000 ETB — payable via Telebirr or Bank Transfer.
             </div>
           </div>
         </aside>
@@ -216,21 +215,20 @@
       document.getElementById("courseDescShort").textContent = course.description;
       document.getElementById("courseOverviewText").textContent = course.description;
       document.getElementById("courseDurationText").textContent = course.duration;
-      document.getElementById("courseFeeText").textContent = course.tuitionFee || "Subsidized Intake";
+      const feeEl = document.getElementById("courseFeeText");
+      if (feeEl) feeEl.textContent = course.tuitionFee || "Subsidized Intake";
       document.getElementById("coursePrereqText").textContent = course.prerequisites || "Bachelor's, Diploma, or secondary credential required.";
 
       // Load fee from admin settings (async — checks Supabase then localStorage)
       window.AcademicDB.getSettings().then(settings => {
         const feeNoticeEl = document.getElementById("courseFeeNotice");
         if (feeNoticeEl) {
-          const fee = settings.applicationFee || settings.applicationFeeAmount
-            ? (settings.applicationFee || `${Number(settings.applicationFeeAmount).toLocaleString()} ETB`)
-            : "Contact admissions for fee details";
+          const fee = settings.applicationFee || (settings.applicationFeeAmount ? `${Number(settings.applicationFeeAmount).toLocaleString()} ETB` : "15,000 ETB");
           feeNoticeEl.textContent = `Application fee: ${fee} — payable via Telebirr or Bank Transfer.`;
         }
       }).catch(() => {
         const el = document.getElementById("courseFeeNotice");
-        if (el) el.textContent = "Application fee: Contact admissions office.";
+        if (el) el.textContent = "Application fee: 15,000 ETB — payable via Telebirr or Bank Transfer.";
       });
 
       // Apply button pre-fill

@@ -336,10 +336,20 @@ const defaultCourses = [
 
 window.CoursesService = {
   getAllCourses() {
-    const stored = window.AcademicDB.getLocal(window.AcademicDB.keys.COURSES, null);
+    let stored = window.AcademicDB.getLocal(window.AcademicDB.keys.COURSES, null);
     if (!stored || !Array.isArray(stored) || stored.length === 0) {
       window.AcademicDB.setLocal(window.AcademicDB.keys.COURSES, defaultCourses);
       return defaultCourses;
+    }
+    let modified = false;
+    stored.forEach(c => {
+      if (c.tuitionFee && (c.tuitionFee.includes("1,500") || c.tuitionFee.includes("1500"))) {
+        c.tuitionFee = "Subsidized Intake (Application Fee applies)";
+        modified = true;
+      }
+    });
+    if (modified) {
+      window.AcademicDB.setLocal(window.AcademicDB.keys.COURSES, stored);
     }
     return stored;
   },

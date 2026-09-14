@@ -327,11 +327,11 @@
               <div class="form-grid-2">
                 <div class="form-group">
                   <label class="form-label">Application Fee Display</label>
-                  <input type="text" id="settingFeeDisplay" class="form-input" value="1,500 ETB / $35 USD" required />
+                  <input type="text" id="settingFeeDisplay" class="form-input" value="15,000 ETB" required />
                 </div>
                 <div class="form-group">
                   <label class="form-label">Application Fee Numeric (ETB)</label>
-                  <input type="number" id="settingFeeAmount" class="form-input" value="1500" required />
+                  <input type="number" id="settingFeeAmount" class="form-input" value="15000" required />
                 </div>
               </div>
               <div class="form-group">
@@ -681,7 +681,7 @@
     function loadOverview() {
       const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
       const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
-      const feeETB = parseInt(String(settings.applicationFeeAmount || settings.feeNumeric || "1500").replace(/[^0-9]/g, ""), 10) || 1500;
+      const feeETB = parseInt(String(settings.applicationFeeAmount || settings.feeNumeric || "15000").replace(/[^0-9]/g, ""), 10) || 15000;
       const total      = apps.length;
       const pending    = apps.filter(a => a.status === "pending").length;
       const underRev   = apps.filter(a => a.status === "under_review").length;
@@ -837,7 +837,7 @@
       document.querySelectorAll(".btn-sync-db").forEach(b => { b.disabled = true; b.innerHTML = "&#8635; Syncing..."; });
       try {
         await window.AdminService.fetchApplications();
-        if (syncBadge) { syncBadge.innerHTML = "<span class='status-dot-green'></span> Live DB Connected"; syncBadge.className = "db-sync-badge connected"; }
+        if (syncBadge) { syncBadge.innerHTML = "<span class='status-dot-green'></span> Live"; syncBadge.className = "db-sync-badge connected"; }
       } catch(e) {
         if (syncBadge) { syncBadge.innerHTML = "<span class='status-dot-orange'></span> Cached / Offline"; syncBadge.className = "db-sync-badge warning"; }
       } finally {
@@ -1245,7 +1245,7 @@
       e.preventDefault();
       const updated = {
         applicationFee:       document.getElementById("settingFeeDisplay").value.trim(),
-        applicationFeeAmount: parseInt(document.getElementById("settingFeeAmount").value,10)||1500,
+        applicationFeeAmount: parseInt(document.getElementById("settingFeeAmount").value,10)||15000,
         telebirrNumber:       document.getElementById("settingTelebirr").value.trim(),
         cbeAccount:           document.getElementById("settingCBE").value.trim(),
         awashAccount:         document.getElementById("settingAwash").value.trim()
