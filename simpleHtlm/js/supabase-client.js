@@ -236,7 +236,7 @@ window.AcademicDB = {
     return `${Number(amount).toLocaleString()} ETB`;
   },
   formatDate(iso) {
-    if (!iso) return "—";
+    if (!iso) return "\u2014";
     try {
       return new Date(iso).toLocaleDateString("en-US", {
         year: "numeric",
@@ -246,5 +246,36 @@ window.AcademicDB = {
     } catch {
       return iso;
     }
+  },
+
+  /** Sync: read settings from localStorage only (instant, no network) */
+  getSettingsSync() {
+    return getLocalData(StorageKeys.SETTINGS, defaultSettings);
+  },
+
+  /**
+   * getSettings() — async, single source of truth for admin settings.
+   * Checks Supabase site_settings table, falls back to localStorage/defaults.
+   * All pages (course-detail, payment, apply) must use this.
+   */
+  async getSettings() {
+    const local = getLocalData(StorageKeys.SETTINGS, null);
+    try {
+      const res = await fetch(
+        `${SUPABASE_URL}/rest/v1/site_settings?select=key,value&limit=100`,
+        { headers: { "apikey": SUPABASE_ANON_KEY, "Authorization": `Bearer ${SUPABASE_ANON_KEY}` } }
+      );
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0) {
+          const supaSettings = {};
+          rows.forEach(r => { supaSettings[r.key] = r.value; });
+          const merged = Object.assign({}, defaultSettings, local || {}, supaSettings);
+          setLocalData(StorageKeys.SETTINGS, merged);
+          return merged;
+        }
+      }
+    } catch (_) { /* network error — fall through */ }
+    return local || defaultSettings;
   }
 };

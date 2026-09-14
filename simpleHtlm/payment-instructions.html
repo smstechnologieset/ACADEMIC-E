@@ -93,7 +93,7 @@
               <div style="font-size: 1.05rem; color: #3b4b59; margin-top: 4px;">Covering Skillsoft Percipio platform licensing, FAYDA identity validation &amp; UNY credentialing.</div>
             </div>
             <div style="font-size: 2rem; font-family: var(--font-serif); font-weight: 700; color: var(--primary-navy);" id="feeAmountDisplay">
-              1,500 ETB / $35 USD
+              Loading...
             </div>
           </div>
 
@@ -308,12 +308,15 @@
   <script src="js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-      // 1. Dynamic Admin Settings (Fee Display & Bank Accounts)
+      // 1. Dynamic Admin Settings (Fee Display & Bank Accounts) — uses Supabase then localStorage
       try {
-        const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
+        const settings = await window.AcademicDB.getSettings();
         if (settings) {
-          if (settings.applicationFee) {
-            let displayFee = String(settings.applicationFee).trim();
+          // --- Application Fee ---
+          if (settings.applicationFee || settings.applicationFeeAmount) {
+            let displayFee = settings.applicationFee
+              ? String(settings.applicationFee).trim()
+              : `${Number(settings.applicationFeeAmount).toLocaleString()} ETB`;
             if (!displayFee.toUpperCase().includes("ETB") && !displayFee.includes("$")) {
               displayFee = `${displayFee} ETB`;
             }
@@ -321,6 +324,7 @@
             if (feeEl) feeEl.textContent = displayFee;
           }
 
+          // --- Telebirr ---
           if (settings.telebirrNumber) {
             const tel = String(settings.telebirrNumber).trim();
             const el = document.getElementById("telebirrNum");
@@ -334,6 +338,7 @@
             if (cbeBirrBtn) cbeBirrBtn.dataset.text = tel.replace(/\s+/g, "");
           }
 
+          // --- CBE ---
           if (settings.cbeAccount) {
             const cbe = String(settings.cbeAccount).trim();
             const el = document.getElementById("cbeNum");
@@ -342,6 +347,7 @@
             if (btn) btn.dataset.text = cbe.replace(/\s+/g, "");
           }
 
+          // --- Awash ---
           if (settings.awashAccount) {
             const aw = String(settings.awashAccount).trim();
             const el = document.getElementById("awashNum");

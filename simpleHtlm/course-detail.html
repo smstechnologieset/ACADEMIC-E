@@ -143,7 +143,7 @@
             </div>
 
             <div id="courseFeeNotice" style="margin-top: 20px; font-size: 0.8rem; color: #64748b; text-align: center;">
-              Application fee: 1,500 ETB / $35 USD payable via Telebirr or Bank Transfer.
+              Loading fee information...
             </div>
           </div>
         </aside>
@@ -219,16 +219,19 @@
       document.getElementById("courseFeeText").textContent = course.tuitionFee || "Subsidized Intake";
       document.getElementById("coursePrereqText").textContent = course.prerequisites || "Bachelor's, Diploma, or secondary credential required.";
 
-      // Dynamic settings fee notice
-      try {
-        const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
-        if (settings && settings.applicationFee) {
-          const feeNoticeEl = document.getElementById("courseFeeNotice");
-          if (feeNoticeEl) {
-            feeNoticeEl.textContent = `Application fee: ${settings.applicationFee} payable via Telebirr or Bank Transfer.`;
-          }
+      // Load fee from admin settings (async — checks Supabase then localStorage)
+      window.AcademicDB.getSettings().then(settings => {
+        const feeNoticeEl = document.getElementById("courseFeeNotice");
+        if (feeNoticeEl) {
+          const fee = settings.applicationFee || settings.applicationFeeAmount
+            ? (settings.applicationFee || `${Number(settings.applicationFeeAmount).toLocaleString()} ETB`)
+            : "Contact admissions for fee details";
+          feeNoticeEl.textContent = `Application fee: ${fee} — payable via Telebirr or Bank Transfer.`;
         }
-      } catch (e) {}
+      }).catch(() => {
+        const el = document.getElementById("courseFeeNotice");
+        if (el) el.textContent = "Application fee: Contact admissions office.";
+      });
 
       // Apply button pre-fill
       document.getElementById("applyNowBtn").href = `apply.html?course=${encodeURIComponent(course.title)}`;
