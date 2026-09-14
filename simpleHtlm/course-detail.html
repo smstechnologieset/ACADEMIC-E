@@ -142,7 +142,7 @@
               <a href="contact.html" class="btn btn-black" style="width: 100%; text-align: center;">Inquire With Advisor</a>
             </div>
 
-            <div style="margin-top: 20px; font-size: 0.8rem; color: #64748b; text-align: center;">
+            <div id="courseFeeNotice" style="margin-top: 20px; font-size: 0.8rem; color: #64748b; text-align: center;">
               Application fee: 1,500 ETB / $35 USD payable via Telebirr or Bank Transfer.
             </div>
           </div>
@@ -218,6 +218,17 @@
       document.getElementById("courseDurationText").textContent = course.duration;
       document.getElementById("courseFeeText").textContent = course.tuitionFee || "Subsidized Intake";
       document.getElementById("coursePrereqText").textContent = course.prerequisites || "Bachelor's, Diploma, or secondary credential required.";
+
+      // Dynamic settings fee notice
+      try {
+        const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
+        if (settings && settings.applicationFee) {
+          const feeNoticeEl = document.getElementById("courseFeeNotice");
+          if (feeNoticeEl) {
+            feeNoticeEl.textContent = `Application fee: ${settings.applicationFee} payable via Telebirr or Bank Transfer.`;
+          }
+        }
+      } catch (e) {}
 
       // Apply button pre-fill
       document.getElementById("applyNowBtn").href = `apply.html?course=${encodeURIComponent(course.title)}`;

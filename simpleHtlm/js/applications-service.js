@@ -64,28 +64,41 @@ window.ApplicationsService = {
 
   // 3. SUBMIT NEW APPLICATION
   async submitApplication(appData, faydaFile, educationDocFile) {
-    // Generate unique Application Reference
-    const randomSuffix = Math.floor(1000 + Math.random() * 9000);
-    const applicationId = `AE-2026-${randomSuffix}`;
+    // Generate standard unique Application Reference (e.g. AE-2K7X9B4M)
+    const chars = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+    let randomCode = "";
+    for (let i = 0; i < 8; i++) {
+      randomCode += chars[Math.floor(Math.random() * chars.length)];
+    }
+    const applicationId = `AE-${randomCode}`;
 
-    // Process uploaded files to data URLs for instant local viewing
-    let faydaFileData = null;
+    // Store data URLs in sessionStorage (to prevent exceeding localStorage 5MB quota)
+    let faydaFileData = "";
     if (faydaFile) {
       try {
         faydaFileData = await this.fileToBase64(faydaFile);
+        if (faydaFileData && faydaFileData.length < 2500000) {
+          sessionStorage.setItem("doc_fayda_" + applicationId, faydaFileData);
+        }
       } catch (e) {
         console.warn("Fayda file reading error:", e);
       }
     }
 
-    let educationDocData = null;
+    let educationDocData = "";
     if (educationDocFile) {
       try {
         educationDocData = await this.fileToBase64(educationDocFile);
+        if (educationDocData && educationDocData.length < 2500000) {
+          sessionStorage.setItem("doc_edu_" + applicationId, educationDocData);
+        }
       } catch (e) {
         console.warn("Education document file reading error:", e);
       }
     }
+
+    const todayDate = new Date().toISOString().split("T")[0];
+    const signatureText = (appData.signature || `${appData.firstName.trim()} ${appData.lastName.trim()}`).trim();
 
     const newApplication = {
       id: applicationId,
@@ -103,17 +116,18 @@ window.ApplicationsService = {
       fieldOfStudy: (appData.fieldOfStudy || "").trim(),
       courseApplied: appData.courseApplied,
       
-      // Verification Documents
+      // Verification Documents metadata (avoid huge base64 strings in localStorage)
       faydaIdNumber: (appData.faydaIdNumber || "FAYDA Document Attached").trim(),
       faydaFileName: faydaFile ? faydaFile.name : "",
-      faydaFileUrl: faydaFileData || "assets/students.jpg",
+      faydaFileUrl: faydaFileData && faydaFileData.length < 200000 ? faydaFileData : "assets/students.jpg",
       
       // Mandatory Education Documents / Transcripts
       educationDocName: educationDocFile ? educationDocFile.name : "",
-      educationDocUrl: educationDocData || "assets/campus.jpg",
+      educationDocUrl: educationDocData && educationDocData.length < 200000 ? educationDocData : "assets/campus.jpg",
       
-      signature: appData.signature || `${appData.firstName.trim()} ${appData.lastName.trim()}`,
+      signature: signatureText,
       status: "pending",
+      submission_date: todayDate,
       paymentMethod: "",
       paymentRef: "",
       paymentSlipName: "",
@@ -131,95 +145,240 @@ window.ApplicationsService = {
       ]
     };
 
-    // 1. Save to Local Storage
-    const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    apps.unshift(newApplication);
-    window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+    // 1. Save to Local & Session Storage
+    try {
+      const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+      const filtered = apps.filter(a => a.id !== applicationId);
+      filtered.unshift(newApplication);
+      window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, filtered);
+    } catch (e) {
+      console.warn("Local storage write error:", e);
+    }
 
-    // 2. Set pending payment reference
-    localStorage.setItem(window.AcademicDB.keys.PENDING_REF, applicationId);
+    try {
+      localStorage.setItem(window.AcademicDB.keys.PENDING_REF, applicationId);
+      sessionStorage.setItem("ae_current_app_" + applicationId, JSON.stringify(newApplication));
+    } catch (e) {}
+
     this.clearDraft();
 
-    // 3. Attempt Supabase live insert if client exists
-    if (window.AcademicDB.supabase) {
-      try {
-        await window.AcademicDB.supabase.from("applications").insert([{
-          id: applicationId,
-          first_name: newApplication.firstName,
-          middle_name: newApplication.middleName,
-          last_name: newApplication.lastName,
-          full_name: newApplication.fullName,
-          age: newApplication.age,
-          phone: newApplication.phone,
-          email: newApplication.email,
-          full_address: newApplication.fullAddress,
-          place: newApplication.place,
-          qualification: newApplication.qualification,
-          course_applied: newApplication.courseApplied,
-          signature: newApplication.signature,
-          status: "pending",
-          created_at: newApplication.created_at
-        }]);
-      } catch (err) {
-        console.warn("Supabase live write fallback:", err);
+    // 2. Direct Live Supabase Insert (REST API + SDK fallback)
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+
+      const dbPayload = {
+        id: applicationId,
+        first_name: newApplication.firstName,
+        middle_name: newApplication.middleName || "",
+        last_name: newApplication.lastName,
+        full_name: newApplication.fullName,
+        age: newApplication.age,
+        phone: newApplication.phone,
+        email: newApplication.email,
+        full_address: newApplication.fullAddress,
+        place: newApplication.place,
+        qualification: newApplication.qualification,
+        course_applied: newApplication.courseApplied,
+        signature: newApplication.signature,
+        status: "pending",
+        submission_date: todayDate
+      };
+
+      const res = await fetch(`${supabaseUrl}/rest/v1/applications`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=representation"
+        },
+        body: JSON.stringify(dbPayload)
+      });
+
+      if (!res.ok) {
+        console.warn("Supabase insert note:", await res.text());
       }
+    } catch (err) {
+      console.warn("Supabase network insert fallback:", err);
     }
 
     return { success: true, applicationId };
   },
 
-  // 4. GET APPLICATION FOR TRACKING OR PAYMENT
+  // 4. GET APPLICATION (SYNCHRONOUS CACHE)
   getApplication(idOrEmail) {
     if (!idOrEmail) return null;
-    const query = idOrEmail.trim().toLowerCase();
+    const clean = idOrEmail.trim();
+    const query = clean.toLowerCase();
+
+    // 1. Session Storage
+    try {
+      const sessionApp = sessionStorage.getItem("ae_current_app_" + clean);
+      if (sessionApp) return JSON.parse(sessionApp);
+    } catch (e) {}
+
+    // 2. Local Storage
     const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    
     return apps.find(a => 
       (a.id && a.id.toLowerCase() === query) ||
       (a.email && a.email.toLowerCase() === query)
     ) || null;
   },
 
+  // 4B. GET APPLICATION ASYNC (SUPABASE LIVE + LOCAL FALLBACK)
+  async getApplicationAsync(idOrEmail) {
+    if (!idOrEmail) return null;
+    const clean = idOrEmail.trim();
+    const query = clean.toLowerCase();
+
+    // 1. Try Local / Session cache first
+    const cached = this.getApplication(clean);
+    if (cached) return cached;
+
+    // 2. Live query Supabase database
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+
+      const headers = {
+        "apikey": supabaseKey,
+        "Authorization": `Bearer ${supabaseKey}`
+      };
+
+      let row = null;
+
+      // Try by ID first (exact match, case-insensitive)
+      const resId = await fetch(
+        `${supabaseUrl}/rest/v1/applications?id=ilike.${encodeURIComponent(clean)}&limit=1`,
+        { headers }
+      );
+      if (resId.ok) {
+        const rows = await resId.json();
+        if (Array.isArray(rows) && rows.length > 0) row = rows[0];
+      }
+
+      // If not found by ID, try by email
+      if (!row && clean.includes("@")) {
+        const resEmail = await fetch(
+          `${supabaseUrl}/rest/v1/applications?email=ilike.${encodeURIComponent(clean)}&limit=1`,
+          { headers }
+        );
+        if (resEmail.ok) {
+          const rows = await resEmail.json();
+          if (Array.isArray(rows) && rows.length > 0) row = rows[0];
+        }
+      }
+
+      if (row) {
+        const mapped = {
+          id: row.id,
+          firstName: row.first_name || "",
+          middleName: row.middle_name || "",
+          lastName: row.last_name || "",
+          fullName: row.full_name || `${row.first_name || ""} ${row.last_name || ""}`.trim(),
+          age: row.age || "—",
+          phone: row.phone || "",
+          email: row.email || "",
+          fullAddress: row.full_address || row.place || "Addis Ababa",
+          place: row.place || "Addis Ababa",
+          courseApplied: row.course_applied || "General Track",
+          qualification: row.qualification || "",
+          status: row.status || "pending",
+          paymentMethod: row.payment_method || "",
+          paymentRef: row.transaction_ref || "",
+          internalNotes: row.internal_notes || "",
+          created_at: row.created_at || new Date().toISOString()
+        };
+
+        // Cache in sessionStorage and localStorage for subsequent lookups
+        try {
+          sessionStorage.setItem("ae_current_app_" + mapped.id, JSON.stringify(mapped));
+        } catch (e) {}
+        const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+        const filtered = apps.filter(a => a.id !== mapped.id);
+        filtered.unshift(mapped);
+        window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, filtered);
+        return mapped;
+      }
+    } catch (e) {
+      console.warn("Supabase fetch application error:", e);
+    }
+
+    return null;
+  },
+
   // 5. SUBMIT PAYMENT PROOF
   async submitPaymentProof(applicationId, paymentMethod, transactionRef, slipFile) {
+    const cleanId = (applicationId || "").trim();
     const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    const idx = apps.findIndex(a => a.id.toLowerCase() === applicationId.toLowerCase().trim());
-    
-    if (idx === -1) {
-      return { success: false, error: "Application not found." };
-    }
+    const idx = apps.findIndex(a => a.id.toLowerCase() === cleanId.toLowerCase());
 
     let slipDataUrl = null;
     if (slipFile) {
       try {
         slipDataUrl = await this.fileToBase64(slipFile);
+        if (slipDataUrl && slipDataUrl.length < 2500000) {
+          sessionStorage.setItem("slip_" + cleanId, slipDataUrl);
+        }
       } catch (e) {
         console.warn("Slip file reading error:", e);
       }
     }
 
-    const app = apps[idx];
-    app.paymentMethod = paymentMethod;
-    app.paymentRef = transactionRef.trim();
-    app.paymentSlipName = slipFile ? slipFile.name : "";
-    app.paymentSlipUrl = slipDataUrl || app.paymentSlipUrl || "assets/campus.jpg";
-    app.status = "under_review";
-    app.updated_at = new Date().toISOString();
+    let targetApp = null;
+    if (idx !== -1) {
+      const app = apps[idx];
+      app.paymentMethod = paymentMethod;
+      app.paymentRef = transactionRef.trim();
+      app.paymentSlipName = slipFile ? slipFile.name : "";
+      app.paymentSlipUrl = slipDataUrl && slipDataUrl.length < 200000 ? slipDataUrl : "assets/campus.jpg";
+      app.status = "under_review";
+      app.updated_at = new Date().toISOString();
 
-    app.events.push({
-      type: "payment_uploaded",
-      title: "Payment Slip Uploaded",
-      time: new Date().toISOString(),
-      note: `Payment receipt submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}). Admissions team notified.`
-    });
+      if (!app.events) app.events = [];
+      app.events.push({
+        type: "payment_uploaded",
+        title: "Payment Slip Uploaded",
+        time: new Date().toISOString(),
+        note: `Payment receipt submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}). Admissions team notified.`
+      });
 
-    apps[idx] = app;
-    window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+      apps[idx] = app;
+      window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+      sessionStorage.setItem("ae_current_app_" + cleanId, JSON.stringify(app));
+      targetApp = app;
+    }
+
+    // Live update Supabase
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+
+      const patchPayload = {
+        payment_method: paymentMethod,
+        transaction_ref: transactionRef.trim(),
+        status: "under_review",
+        updated_at: new Date().toISOString()
+      };
+
+      await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${encodeURIComponent(cleanId)}`, {
+        method: "PATCH",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          "Prefer": "return=minimal"
+        },
+        body: JSON.stringify(patchPayload)
+      });
+    } catch (e) {
+      console.warn("Supabase patch payment proof error:", e);
+    }
 
     // Clear the pending lock once slip is submitted
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
-
-    return { success: true, application: app };
+    return { success: true, application: targetApp };
   },
 
   // 6. CANCEL APPLICATION & CLEAR LOCK

@@ -844,16 +844,31 @@
       if (currentSettings) {
         if (currentSettings.applicationFee) document.getElementById("settingFeeDisplay").value = currentSettings.applicationFee;
         if (currentSettings.applicationFeeAmount) document.getElementById("settingFeeAmount").value = currentSettings.applicationFeeAmount;
+        if (currentSettings.telebirrNumber) document.getElementById("settingTelebirr").value = currentSettings.telebirrNumber;
+        if (currentSettings.cbeAccount) document.getElementById("settingCBE").value = currentSettings.cbeAccount;
+        if (currentSettings.awashAccount) document.getElementById("settingAwash").value = currentSettings.awashAccount;
       }
 
       settingsForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        const appFee = document.getElementById("settingFeeDisplay").value;
-        const appFeeAmount = parseInt(document.getElementById("settingFeeAmount").value, 10);
-        window.AdminService.updateSettings({ applicationFee: appFee, applicationFeeAmount: appFeeAmount });
+        const appFee = document.getElementById("settingFeeDisplay").value.trim();
+        const appFeeAmount = parseInt(document.getElementById("settingFeeAmount").value, 10) || 1500;
+        const telebirr = document.getElementById("settingTelebirr").value.trim();
+        const cbe = document.getElementById("settingCBE").value.trim();
+        const awash = document.getElementById("settingAwash").value.trim();
+
+        window.AdminService.updateSettings({
+          applicationFee: appFee,
+          applicationFeeAmount: appFeeAmount,
+          telebirrNumber: telebirr,
+          cbeAccount: cbe,
+          awashAccount: awash
+        });
+
+        loadOverview();
         const alertBox = document.getElementById("settingsSuccessAlert");
         alertBox.style.display = "block";
-        setTimeout(() => alertBox.style.display = "none", 3000);
+        setTimeout(() => alertBox.style.display = "none", 3500);
       });
     });
   </script>

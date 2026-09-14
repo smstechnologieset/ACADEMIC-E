@@ -211,6 +211,7 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/applications-service.js"></script>
   <script src="js/main.js"></script>
@@ -234,9 +235,27 @@
         performSearch(queryInput.value.trim());
       });
 
-      function performSearch(query) {
+      async function performSearch(query) {
+        if (!query) return;
         errNotice.style.display = "none";
-        const app = window.ApplicationsService.getApplication(query);
+        const searchBtn = form.querySelector("button[type='submit']");
+        if (searchBtn) {
+          searchBtn.textContent = "Searching...";
+          searchBtn.disabled = true;
+        }
+
+        let app = null;
+        try {
+          app = await window.ApplicationsService.getApplicationAsync(query);
+        } catch (e) {
+          console.warn("Async lookup failed, using local cache:", e);
+          app = window.ApplicationsService.getApplication(query);
+        } finally {
+          if (searchBtn) {
+            searchBtn.textContent = "Track Status \u2192";
+            searchBtn.disabled = false;
+          }
+        }
 
         if (!app) {
           errNotice.textContent = "No application record found matching that Reference ID or Email. Please check your spelling.";

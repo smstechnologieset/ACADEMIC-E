@@ -36,6 +36,9 @@ const StorageKeys = {
 const defaultSettings = {
   applicationFee: "1,500 ETB / $35 USD",
   applicationFeeAmount: 1500,
+  telebirrNumber: "0911 55 2345",
+  cbeAccount: "1000 3948 29384",
+  awashAccount: "0132 0876 5432 10",
   currency: "ETB",
   contactEmail: "admissions@academice.edu.et",
   partnershipsEmail: "partnerships@academice.edu.et",

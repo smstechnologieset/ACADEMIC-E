@@ -110,7 +110,7 @@
               </div>
               <div class="account-number-box">
                 <span id="telebirrNum">0911 55 2345</span>
-                <button type="button" class="btn-sm copy-text-btn" data-text="0911552345" title="Copy Number">Copy</button>
+                <button type="button" class="btn-sm copy-text-btn" id="copyTelebirrBtn" data-text="0911552345" title="Copy Number">Copy</button>
               </div>
               <div style="font-size: 0.85rem; color: #475569;">
                 Account Name: <strong>Academic Excellence Ethiopia</strong><br />
@@ -126,7 +126,7 @@
               </div>
               <div class="account-number-box">
                 <span id="cbeNum">1000 3948 29384</span>
-                <button type="button" class="btn-sm copy-text-btn" data-text="1000394829384" title="Copy Account">Copy</button>
+                <button type="button" class="btn-sm copy-text-btn" id="copyCbeBtn" data-text="1000394829384" title="Copy Account">Copy</button>
               </div>
               <div style="font-size: 0.85rem; color: #475569;">
                 Account Name: <strong>Academic Excellence Education</strong><br />
@@ -141,8 +141,8 @@
                 <span class="hero-badge-pill" style="font-size: 0.65rem; background: #137333;">Wallet</span>
               </div>
               <div class="account-number-box">
-                <span>0911 55 2345</span>
-                <button type="button" class="btn-sm copy-text-btn" data-text="0911552345" title="Copy Number">Copy</button>
+                <span id="cbeBirrNum">0911 55 2345</span>
+                <button type="button" class="btn-sm copy-text-btn" id="copyCbeBirrBtn" data-text="0911552345" title="Copy Number">Copy</button>
               </div>
               <div style="font-size: 0.85rem; color: #475569;">
                 Pay via CBE Birr SuperApp or dial *847# using your Application Ref.
@@ -156,8 +156,8 @@
                 <span class="hero-badge-pill" style="font-size: 0.65rem; background: #0b1b3d;">Bank</span>
               </div>
               <div class="account-number-box">
-                <span>0132 0876 5432 10</span>
-                <button type="button" class="btn-sm copy-text-btn" data-text="01320876543210" title="Copy Account">Copy</button>
+                <span id="awashNum">0132 0876 5432 10</span>
+                <button type="button" class="btn-sm copy-text-btn" id="copyAwashBtn" data-text="01320876543210" title="Copy Account">Copy</button>
               </div>
               <div style="font-size: 0.85rem; color: #475569;">
                 Account Name: <strong>Academic Excellence Intake</strong><br />
@@ -302,30 +302,86 @@
   </footer>
 
   <!-- Scripts -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/applications-service.js"></script>
   <script src="js/main.js"></script>
   <script>
-    document.addEventListener("DOMContentLoaded", () => {
+    document.addEventListener("DOMContentLoaded", async () => {
+      // 1. Dynamic Admin Settings (Fee Display & Bank Accounts)
+      try {
+        const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
+        if (settings) {
+          if (settings.applicationFee) {
+            let displayFee = String(settings.applicationFee).trim();
+            if (!displayFee.toUpperCase().includes("ETB") && !displayFee.includes("$")) {
+              displayFee = `${displayFee} ETB`;
+            }
+            const feeEl = document.getElementById("feeAmountDisplay");
+            if (feeEl) feeEl.textContent = displayFee;
+          }
+
+          if (settings.telebirrNumber) {
+            const tel = String(settings.telebirrNumber).trim();
+            const el = document.getElementById("telebirrNum");
+            const btn = document.getElementById("copyTelebirrBtn");
+            if (el) el.textContent = tel;
+            if (btn) btn.dataset.text = tel.replace(/\s+/g, "");
+
+            const cbeBirrEl = document.getElementById("cbeBirrNum");
+            const cbeBirrBtn = document.getElementById("copyCbeBirrBtn");
+            if (cbeBirrEl) cbeBirrEl.textContent = tel;
+            if (cbeBirrBtn) cbeBirrBtn.dataset.text = tel.replace(/\s+/g, "");
+          }
+
+          if (settings.cbeAccount) {
+            const cbe = String(settings.cbeAccount).trim();
+            const el = document.getElementById("cbeNum");
+            const btn = document.getElementById("copyCbeBtn");
+            if (el) el.textContent = cbe;
+            if (btn) btn.dataset.text = cbe.replace(/\s+/g, "");
+          }
+
+          if (settings.awashAccount) {
+            const aw = String(settings.awashAccount).trim();
+            const el = document.getElementById("awashNum");
+            const btn = document.getElementById("copyAwashBtn");
+            if (el) el.textContent = aw;
+            if (btn) btn.dataset.text = aw.replace(/\s+/g, "");
+          }
+        }
+      } catch (err) {
+        console.warn("Could not load dynamic settings:", err);
+      }
+
+      // 2. Fetch and display the specific Applicant
       const urlParams = new URLSearchParams(window.location.search);
       let refId = urlParams.get("ref") || localStorage.getItem(window.AcademicDB.keys.PENDING_REF);
 
       let app = null;
       if (refId) {
-        app = window.ApplicationsService.getApplication(refId);
-      }
-
-      if (!app) {
-        // Fallback to first available demo app if testing directly
-        const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-        app = apps[0];
+        try {
+          app = await window.ApplicationsService.getApplicationAsync(refId);
+        } catch (e) {
+          console.warn("Async lookup failed, checking local sync:", e);
+          app = window.ApplicationsService.getApplication(refId);
+        }
       }
 
       if (app) {
         document.getElementById("appRefDisplay").textContent = app.id;
-        document.getElementById("appNameDisplay").textContent = app.fullName || `${app.firstName} ${app.lastName}`;
-        document.getElementById("appProgramDisplay").textContent = app.courseApplied;
+        document.getElementById("appNameDisplay").textContent = app.fullName || `${app.firstName || ""} ${app.lastName || ""}`.trim();
+        document.getElementById("appProgramDisplay").textContent = app.courseApplied || "Selected Intake Program";
         refId = app.id;
+      } else if (refId) {
+        // Application ID exists, show pending state instead of someone else's record
+        document.getElementById("appRefDisplay").textContent = refId;
+        document.getElementById("appNameDisplay").textContent = "Applicant Verification in Progress";
+        document.getElementById("appProgramDisplay").textContent = "Selected Intake Program";
+      } else {
+        document.getElementById("appRefDisplay").textContent = "No Application Found";
+        document.getElementById("appNameDisplay").textContent = "Please Complete Application Form";
+        document.getElementById("appProgramDisplay").textContent = "—";
       }
 
       // Copy reference button
