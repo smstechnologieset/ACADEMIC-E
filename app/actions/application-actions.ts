@@ -6,6 +6,7 @@ import { generateShortId } from "@/lib/id-generator";
 import { validateFileType, validateFileSize, sanitizeFileName, checkDangerousExtension } from "@/lib/file-validation";
 import { rateLimit, getClientIp, RATE_LIMITS } from "@/lib/rate-limiter";
 import { recordContactMessage } from "@/lib/cms-repo";
+import { sendApplicationReceivedEmail, sendPaymentReceivedEmail } from "@/lib/email";
 
 export async function submitApplicationAction(formData: FormData) {
   try {
@@ -119,6 +120,13 @@ export async function submitApplicationAction(formData: FormData) {
       actor: "applicant",
     });
 
+    // 5. Send confirmation email to applicant via Resend
+    try {
+      await sendApplicationReceivedEmail(email, fullName, newAppId, courseApplied);
+    } catch (emailErr) {
+      console.warn("Failed to send application received email:", emailErr);
+    }
+
     return { success: true, applicationId: newAppId };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : "Failed to submit application.";
@@ -205,6 +213,20 @@ export async function submitPaymentProofAction(formData: FormData) {
         actor: "system",
       },
     ]);
+
+    // Send payment received confirmation email via Resend
+    try {
+      const { data: applicant } = await supabase
+        .from("applications")
+        .select("email, full_name")
+        .eq("id", applicationId)
+        .single();
+      if (applicant?.email) {
+        await sendPaymentReceivedEmail(applicant.email, applicant.full_name || "Applicant", applicationId);
+      }
+    } catch (emailErr) {
+      console.warn("Failed to send payment received email:", emailErr);
+    }
 
     return { success: true };
   } catch (err: unknown) {

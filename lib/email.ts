@@ -3,7 +3,8 @@
  * Uses Resend API when RESEND_API_KEY is set, otherwise logs to console.
  */
 
-const FROM_ADDRESS = "Academic Excellence <admissions@academice.org>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <info@academicexcellences.com>";
+const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "solhm1@yahoo.com";
 
 async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
@@ -24,6 +25,7 @@ async function sendEmail(to: string, subject: string, htmlBody: string): Promise
       body: JSON.stringify({
         from: FROM_ADDRESS,
         to: [to],
+        reply_to: [REPLY_TO_ADDRESS],
         subject,
         html: htmlBody,
       }),
@@ -83,7 +85,7 @@ export async function sendApplicationReceivedEmail(
     <ol style="font-size: 13px; padding-left: 20px;">
       <li>Complete your payment following the instructions on our website</li>
       <li>Upload your payment receipt/screenshot</li>
-      <li>Track your status at <strong>academice.org/track</strong></li>
+      <li>Track your status at <strong>academicexcellences.com/track</strong></li>
     </ol>
     <p style="font-size: 13px; color: #64748b;">If you have questions, reply to this email or contact our admissions desk.</p>
   `);
@@ -104,7 +106,7 @@ export async function sendPaymentReceivedEmail(
       <p style="margin: 0; font-size: 13px;">⏳ <strong>Status:</strong> Under Review</p>
       <p style="margin: 8px 0 0 0; font-size: 13px;">Our team will verify your payment and review your academic credentials. This typically takes 2-5 business days.</p>
     </div>
-    <p style="font-size: 13px;">You can track your application status anytime at <strong>academice.org/track</strong> using your Reference ID.</p>
+    <p style="font-size: 13px;">You can track your application status anytime at <strong>academicexcellences.com/track</strong> using your Reference ID.</p>
   `);
 
   return sendEmail(to, subject, html);

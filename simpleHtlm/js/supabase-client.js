@@ -40,8 +40,8 @@ const defaultSettings = {
   cbeAccount: "1000 3948 29384",
   awashAccount: "0132 0876 5432 10",
   currency: "ETB",
-  contactEmail: "admissions@academice.edu.et",
-  partnershipsEmail: "partnerships@academice.edu.et",
+  contactEmail: "info@academicexcellences.com",
+  partnershipsEmail: "info@academicexcellences.com",
   phone: "+251 11 555 2345",
   address: "Bole Sub-City, Education Hub, Addis Ababa, Ethiopia",
   paymentMethods: [

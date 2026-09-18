@@ -383,6 +383,24 @@ window.AdminService = {
       console.warn("Supabase live update error:", e);
     }
 
+    // Trigger email notification via /api/send-email if applicant has an email
+    if (targetApp && targetApp.email) {
+      const emailType = newStatus === "approved" ? "status_approved" : (newStatus === "rejected" ? "status_rejected" : null);
+      if (emailType) {
+        fetch("/api/send-email", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            type: emailType,
+            to: targetApp.email,
+            name: targetApp.fullName || targetApp.firstName || "Applicant",
+            refId: targetApp.id,
+            course: targetApp.courseApplied || "Academic Program"
+          })
+        }).catch(err => console.info("Email notification queued/handled:", err));
+      }
+    }
+
     return { success: true, application: targetApp };
   },
 

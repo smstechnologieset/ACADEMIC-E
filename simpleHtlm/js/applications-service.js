@@ -203,6 +203,21 @@ window.ApplicationsService = {
       console.warn("Supabase network insert fallback:", err);
     }
 
+    // Send application received email via server API
+    if (newApplication.email) {
+      fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "application_received",
+          to: newApplication.email,
+          name: newApplication.fullName || newApplication.firstName || "Applicant",
+          refId: applicationId,
+          course: newApplication.courseApplied || "Academic Program"
+        })
+      }).catch(err => console.info("Email notification handled/queued:", err));
+    }
+
     return { success: true, applicationId };
   },
 
@@ -378,6 +393,21 @@ window.ApplicationsService = {
 
     // Clear the pending lock once slip is submitted
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+
+    // Send payment proof received email via server API
+    if (targetApp && targetApp.email) {
+      fetch("/api/send-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "payment_received",
+          to: targetApp.email,
+          name: targetApp.fullName || targetApp.firstName || "Applicant",
+          refId: cleanId
+        })
+      }).catch(err => console.info("Email notification handled/queued:", err));
+    }
+
     return { success: true, application: targetApp };
   },
 
