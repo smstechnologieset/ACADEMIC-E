@@ -3,7 +3,7 @@
  * Uses Resend API when RESEND_API_KEY is set, otherwise logs to console.
  */
 
-const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <info@academicexcellences.com>";
+const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <admin@academicexcellences.com>";
 const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "solhm1@yahoo.com";
 
 async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {

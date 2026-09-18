@@ -334,8 +334,8 @@ insert into site_settings (key, value) values
   ('cbeAccount', '1000 3948 29384'),
   ('awashAccount', '0132 0876 5432 10'),
   ('currency', 'ETB'),
-  ('contactEmail', 'info@academicexcellences.com'),
-  ('partnershipsEmail', 'info@academicexcellences.com'),
+  ('contactEmail', 'admin@academicexcellences.com'),
+  ('partnershipsEmail', 'admin@academicexcellences.com'),
   ('phone', '+251 11 555 2345'),
   ('address', 'Bole Sub-City, Education Hub, Addis Ababa, Ethiopia')
 on conflict (key) do update set value = excluded.value;
@@ -349,8 +349,8 @@ insert into cms_site_settings (id, data) values
     "cbeAccount": "1000 3948 29384",
     "awashAccount": "0132 0876 5432 10",
     "currency": "ETB",
-    "contactEmail": "info@academicexcellences.com",
-    "partnershipsEmail": "info@academicexcellences.com",
+    "contactEmail": "admin@academicexcellences.com",
+    "partnershipsEmail": "admin@academicexcellences.com",
     "phone": "+251 11 555 2345",
     "address": "Bole Sub-City, Education Hub, Addis Ababa, Ethiopia"
   }'::jsonb)
