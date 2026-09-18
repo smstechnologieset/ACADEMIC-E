@@ -62,6 +62,80 @@ window.ApplicationsService = {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + " " + sizes[i];
   },
 
+  // Helper to upload files to Supabase Storage
+  async uploadFileToSupabase(file, bucket, fileName) {
+    if (!file) return null;
+    try {
+      const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      if (client && client.storage) {
+        const { data, error } = await client.storage.from(bucket).upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true
+        });
+        if (!error && data) {
+          const { data: publicUrlData } = client.storage.from(bucket).getPublicUrl(fileName);
+          return publicUrlData?.publicUrl || null;
+        }
+      }
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+      const res = await fetch(`${supabaseUrl}/storage/v1/object/${bucket}/${encodeURIComponent(fileName)}`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "x-upsert": "true"
+        },
+        body: file
+      });
+      if (res.ok) {
+        return `${supabaseUrl}/storage/v1/object/public/${bucket}/${encodeURIComponent(fileName)}`;
+      }
+    } catch (e) {
+      console.warn("Storage upload note:", e);
+    }
+    return null;
+  },
+
+  // Helper to record uploaded file in application_files table
+  async recordApplicationFile(applicationId, category, filePath, fileName, fileSize, mimeType) {
+    if (!filePath) return;
+    try {
+      const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      if (client && client.from) {
+        await client.from("application_files").insert({
+          application_id: applicationId,
+          file_category: category,
+          file_path: filePath,
+          file_name: fileName || "document",
+          file_size: fileSize || 0,
+          mime_type: mimeType || "application/octet-stream"
+        });
+        return;
+      }
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+      await fetch(`${supabaseUrl}/rest/v1/application_files`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          application_id: applicationId,
+          file_category: category,
+          file_path: filePath,
+          file_name: fileName || "document",
+          file_size: fileSize || 0,
+          mime_type: mimeType || "application/octet-stream"
+        })
+      });
+    } catch (e) {
+      console.warn("Record file note:", e);
+    }
+  },
+
   // 3. SUBMIT NEW APPLICATION
   async submitApplication(appData, faydaFile, educationDocFile) {
     // Generate standard unique Application Reference (e.g. AE-2K7X9B4M)
@@ -162,7 +236,7 @@ window.ApplicationsService = {
 
     this.clearDraft();
 
-    // 2. Direct Live Supabase Insert (REST API + SDK fallback)
+    // 2. Direct Live Supabase Insert / Upsert (resilient fallback)
     try {
       const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
       const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
@@ -173,7 +247,7 @@ window.ApplicationsService = {
         middle_name: newApplication.middleName || "",
         last_name: newApplication.lastName,
         full_name: newApplication.fullName,
-        age: newApplication.age,
+        age: isNaN(newApplication.age) ? null : newApplication.age,
         phone: newApplication.phone,
         email: newApplication.email,
         full_address: newApplication.fullAddress,
@@ -185,22 +259,45 @@ window.ApplicationsService = {
         submission_date: todayDate
       };
 
-      const res = await fetch(`${supabaseUrl}/rest/v1/applications`, {
-        method: "POST",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=representation"
-        },
-        body: JSON.stringify(dbPayload)
-      });
+      const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      let inserted = false;
+      if (client && client.from) {
+        const { error: insErr } = await client.from("applications").upsert(dbPayload);
+        if (!insErr) inserted = true;
+      }
 
-      if (!res.ok) {
-        console.warn("Supabase insert note:", await res.text());
+      if (!inserted) {
+        const res = await fetch(`${supabaseUrl}/rest/v1/applications`, {
+          method: "POST",
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            "Prefer": "resolution=merge-duplicates,return=representation"
+          },
+          body: JSON.stringify(dbPayload)
+        });
+
+        if (!res.ok) {
+          console.warn("Supabase insert note:", await res.text());
+        }
+      }
+
+      // Upload documents to Supabase Storage asynchronously and record file metadata
+      if (faydaFile) {
+        this.uploadFileToSupabase(faydaFile, "documents", `${applicationId}_fayda_${faydaFile.name.replace(/\s+/g, "_")}`)
+          .then(url => {
+            if (url) this.recordApplicationFile(applicationId, "fayda_id", url, faydaFile.name, faydaFile.size, faydaFile.type);
+          }).catch(() => {});
+      }
+      if (educationDocFile) {
+        this.uploadFileToSupabase(educationDocFile, "documents", `${applicationId}_edu_${educationDocFile.name.replace(/\s+/g, "_")}`)
+          .then(url => {
+            if (url) this.recordApplicationFile(applicationId, "document", url, educationDocFile.name, educationDocFile.size, educationDocFile.type);
+          }).catch(() => {});
       }
     } catch (err) {
-      console.warn("Supabase network insert fallback:", err);
+      console.warn("Supabase network insert error:", err);
     }
 
     // Send application received email via server API
@@ -215,7 +312,7 @@ window.ApplicationsService = {
           refId: applicationId,
           course: newApplication.courseApplied || "Academic Program"
         })
-      }).catch(err => console.info("Email notification handled/queued:", err));
+      }).catch(err => console.info("Email notification queued:", err));
     }
 
     return { success: true, applicationId };
@@ -363,13 +460,26 @@ window.ApplicationsService = {
       window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
       sessionStorage.setItem("ae_current_app_" + cleanId, JSON.stringify(app));
       targetApp = app;
+    } else {
+      // If not in local array, retrieve from cache or async storage
+      targetApp = this.getApplication(cleanId);
     }
 
-    // Live update Supabase
+    // Live update / upsert in Supabase
     try {
       const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
       const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
+      // Upload payment slip to Supabase Storage if file is provided
+      let slipUrl = null;
+      if (slipFile) {
+        slipUrl = await this.uploadFileToSupabase(slipFile, "payment-proofs", `${cleanId}_slip_${slipFile.name.replace(/\s+/g, "_")}`);
+        if (slipUrl) {
+          await this.recordApplicationFile(cleanId, "payment_proof", slipUrl, slipFile.name, slipFile.size, slipFile.type);
+        }
+      }
+
+      const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
       const patchPayload = {
         payment_method: paymentMethod,
         transaction_ref: transactionRef.trim(),
@@ -377,16 +487,68 @@ window.ApplicationsService = {
         updated_at: new Date().toISOString()
       };
 
-      await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${encodeURIComponent(cleanId)}`, {
-        method: "PATCH",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json",
-          "Prefer": "return=minimal"
-        },
-        body: JSON.stringify(patchPayload)
-      });
+      let patched = false;
+      if (client && client.from) {
+        const { data, error } = await client.from("applications").update(patchPayload).eq("id", cleanId).select();
+        if (!error && data && data.length > 0) patched = true;
+      }
+
+      if (!patched) {
+        const res = await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${encodeURIComponent(cleanId)}`, {
+          method: "PATCH",
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=representation"
+          },
+          body: JSON.stringify(patchPayload)
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (Array.isArray(rows) && rows.length > 0) patched = true;
+        }
+      }
+
+      // CRITICAL RESILIENCE FALLBACK: If application row did not exist in Supabase yet, UPSERT the full record
+      if (!patched && targetApp) {
+        const fullPayload = {
+          id: cleanId,
+          first_name: targetApp.firstName || "Applicant",
+          middle_name: targetApp.middleName || "",
+          last_name: targetApp.lastName || "Candidate",
+          full_name: targetApp.fullName || `${targetApp.firstName || ""} ${targetApp.lastName || ""}`.trim(),
+          age: isNaN(targetApp.age) ? null : targetApp.age,
+          phone: targetApp.phone || "",
+          email: targetApp.email || "",
+          full_address: targetApp.fullAddress || targetApp.place || "Addis Ababa",
+          place: targetApp.place || "Addis Ababa",
+          qualification: targetApp.qualification || "Completed Degree",
+          course_applied: targetApp.courseApplied || "Selected Intake Track",
+          signature: targetApp.signature || targetApp.fullName || "Applicant",
+          status: "under_review",
+          payment_method: paymentMethod,
+          transaction_ref: transactionRef.trim(),
+          submission_date: targetApp.submission_date || new Date().toISOString().split("T")[0],
+          created_at: targetApp.created_at || new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        if (client && client.from) {
+          await client.from("applications").upsert(fullPayload);
+        } else {
+          await fetch(`${supabaseUrl}/rest/v1/applications`, {
+            method: "POST",
+            headers: {
+              "apikey": supabaseKey,
+              "Authorization": `Bearer ${supabaseKey}`,
+              "Content-Type": "application/json",
+              "Prefer": "resolution=merge-duplicates"
+            },
+            body: JSON.stringify(fullPayload)
+          });
+        }
+      }
     } catch (e) {
       console.warn("Supabase patch payment proof error:", e);
     }
@@ -405,7 +567,7 @@ window.ApplicationsService = {
           name: targetApp.fullName || targetApp.firstName || "Applicant",
           refId: cleanId
         })
-      }).catch(err => console.info("Email notification handled/queued:", err));
+      }).catch(err => console.info("Email notification queued:", err));
     }
 
     return { success: true, application: targetApp };

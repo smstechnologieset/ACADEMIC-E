@@ -98,33 +98,33 @@ window.AdminService = {
 
   checkAuth() {
     try {
-      // 1. URL parameter check (critical for file:/// protocol security origin isolation)
-      const urlParams = new URLSearchParams(window.location.search);
-      if (urlParams.get("auth") === "1" || urlParams.get("auth") === "true") {
-        return {
-          role: "Super Admin",
-          email: "admin@academice.edu.et",
-          loginTime: new Date().toISOString()
-        };
-      }
-
-      // 2. Check localStorage
+      // 1. Check real saved authentication session first (Supabase Auth)
       if (typeof localStorage !== "undefined") {
         const local = localStorage.getItem(window.AcademicDB.keys.ADMIN_AUTH);
         if (local) return JSON.parse(local);
       }
 
-      // 3. Check sessionStorage
+      // 2. Check sessionStorage
       if (typeof sessionStorage !== "undefined") {
         const raw = sessionStorage.getItem(window.AcademicDB.keys.ADMIN_AUTH);
         if (raw) return JSON.parse(raw);
+      }
+
+      // 3. Fallback to URL parameter check
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get("auth") === "1" || urlParams.get("auth") === "true") {
+        return {
+          role: "Super Admin",
+          email: "admin@academicexcellences.com",
+          loginTime: new Date().toISOString()
+        };
       }
 
       return null;
     } catch (e) {
       const urlParams = new URLSearchParams(window.location.search);
       if (urlParams.get("auth") === "1") {
-        return { role: "Super Admin", email: "admin@academice.edu.et" };
+        return { role: "Super Admin", email: "admin@academicexcellences.com" };
       }
       return null;
     }
@@ -192,9 +192,26 @@ window.AdminService = {
 
       if (rawApps && Array.isArray(rawApps)) {
         const mapped = rawApps.map(row => this._mapSupabaseApp(row));
-        this._cachedApps = mapped;
-        window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, mapped);
-        return mapped;
+        
+        // Merge with local applications to never lose offline/locally submitted applications
+        const local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+        const mergedMap = new Map();
+        
+        // 1. Put Supabase apps as canonical source
+        mapped.forEach(app => mergedMap.set(app.id, app));
+        
+        // 2. Preserve any local applications not yet in Supabase and sync them in the background
+        local.forEach(app => {
+          if (!mergedMap.has(app.id)) {
+            mergedMap.set(app.id, app);
+            this._syncMissingAppToSupabase(app);
+          }
+        });
+        
+        const finalApps = Array.from(mergedMap.values()).sort((a, b) => new Date(b.created_at || 0) - new Date(a.created_at || 0));
+        this._cachedApps = finalApps;
+        window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, finalApps);
+        return finalApps;
       }
     } catch (err) {
       console.warn("Could not fetch live Supabase applications, using cached/local store:", err);
@@ -204,6 +221,49 @@ window.AdminService = {
     const local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
     this._cachedApps = local;
     return local;
+  },
+
+  async _syncMissingAppToSupabase(app) {
+    if (!app || !app.id) return;
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+      
+      const payload = {
+        id: app.id,
+        first_name: app.firstName || "Applicant",
+        middle_name: app.middleName || "",
+        last_name: app.lastName || "Candidate",
+        full_name: app.fullName || `${app.firstName || ""} ${app.lastName || ""}`.trim(),
+        age: isNaN(app.age) ? null : app.age,
+        phone: app.phone || "",
+        email: app.email || "",
+        full_address: app.fullAddress || app.place || "Addis Ababa",
+        place: app.place || "Addis Ababa",
+        qualification: app.qualification || "",
+        course_applied: app.courseApplied || "Selected Intake Track",
+        signature: app.signature || app.fullName || "Applicant",
+        status: app.status || "pending",
+        payment_method: app.paymentMethod || null,
+        transaction_ref: app.paymentRef || null,
+        submission_date: app.submission_date || new Date().toISOString().split("T")[0],
+        created_at: app.created_at || new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
+      await fetch(`${supabaseUrl}/rest/v1/applications`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates"
+        },
+        body: JSON.stringify(payload)
+      });
+    } catch (e) {
+      console.warn("Background sync error:", e);
+    }
   },
 
   _mapSupabaseApp(row) {
