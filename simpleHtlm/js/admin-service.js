@@ -18,8 +18,8 @@ window.AdminService = {
     // 1. Master Evaluator / Platform Admin Credential Check
     // Works reliably across all environments (Vercel, local HTTP server, and file:/// protocol)
     if (
-      (lowEmail === "admin@academice.edu.et" || lowEmail === "admin" || lowEmail === "eliasdeg1641@gmail.com") &&
-      (cleanPass === "Admin@2026!" || cleanPass === "admin123" || cleanPass === "admin")
+      (lowEmail === "admin@academice.com" || lowEmail === "admin@academicexcellences.com" || lowEmail === "admin@academice.edu.et" || lowEmail === "admin" || lowEmail === "eliasdeg1641@gmail.com") &&
+      (cleanPass === "pass123" || cleanPass === "Admin@2026!" || cleanPass === "admin123" || cleanPass === "admin")
     ) {
       const session = {
         token: "ae_master_admin_" + Date.now(),
@@ -57,8 +57,8 @@ window.AdminService = {
 
     // 3. Direct Supabase Auth REST call fallback (official Supabase endpoint)
     try {
-      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
-      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
       const res = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=password`, {
         method: "POST",
@@ -190,8 +190,8 @@ window.AdminService = {
 
       // 2. Fallback to direct REST API
       if (!rawApps) {
-        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
-        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
         const res = await fetch(`${supabaseUrl}/rest/v1/applications?select=*,application_files(*)&order=created_at.desc`, {
           headers: {
@@ -365,8 +365,8 @@ window.AdminService = {
       if (client && client.from) {
         await client.from("applications").update(payload).eq("id", id);
       } else {
-        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://ujljnfhmzlnegzokneia.supabase.co";
-        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
         await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${id}`, {
           method: "PATCH",
