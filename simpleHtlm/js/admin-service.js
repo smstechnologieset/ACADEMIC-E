@@ -13,25 +13,7 @@ window.AdminService = {
       return { success: false, error: "Please enter both your email and password." };
     }
 
-    const lowEmail = cleanEmail.toLowerCase();
-
-    // 1. Master Evaluator / Platform Admin Credential Check
-    // Works reliably across all environments (Vercel, local HTTP server, and file:/// protocol)
-    if (
-      (lowEmail === "admin@academice.com" || lowEmail === "admin@academicexcellences.com" || lowEmail === "admin@academice.edu.et" || lowEmail === "admin" || lowEmail === "eliasdeg1641@gmail.com") &&
-      (cleanPass === "pass123" || cleanPass === "Admin@2026!" || cleanPass === "admin123" || cleanPass === "admin")
-    ) {
-      const session = {
-        token: "ae_master_admin_" + Date.now(),
-        email: lowEmail.includes("@") ? lowEmail : "admin@academice.edu.et",
-        role: "Super Admin",
-        loginTime: new Date().toISOString()
-      };
-      this._saveSession(session);
-      return { success: true };
-    }
-
-    // 2. Authenticate via Supabase Client SDK if initialized
+    // 1. Authenticate via Supabase Client SDK if initialized
     const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
     if (client && client.auth) {
       try {
@@ -55,7 +37,7 @@ window.AdminService = {
       }
     }
 
-    // 3. Direct Supabase Auth REST call fallback (official Supabase endpoint)
+    // 2. Direct Supabase Auth REST call fallback (official Supabase endpoint)
     try {
       const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
       const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
