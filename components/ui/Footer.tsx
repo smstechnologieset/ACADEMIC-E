@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { GraduationCap, Mail, Phone, MapPin, ArrowUpRight, ShieldCheck, Shield, Search } from "lucide-react";
+import { GraduationCap, Mail, Phone, MapPin, ArrowUpRight, ShieldCheck, Key, Search } from "lucide-react";
 import { siteConfig } from "@/lib/content";
 import { useTranslation } from "@/lib/i18n/context";
 
@@ -91,13 +91,13 @@ export function Footer() {
           <p>© {new Date().getFullYear()} {siteConfig.name}. Powered by <Link href="https://smstechnologieset.com" target="_blank" rel="noopener noreferrer"> <span className="text-blue-600 font-bold">SMS Technologies</span></Link>.</p>
           <div className="flex items-center space-x-4">
             <span className="hidden sm:inline">In collaboration with N, RI, and University in New York</span>
-            {/* Admin entry point represented solely as a shield icon */}
+            {/* Admin entry point represented solely as a subtle key icon */}
             <Link
               href="/admin/login"
-              title="Registry Access"
-              className="p-1.5 rounded-lg text-slate-600 hover:text-slate-400 hover:bg-slate-800 transition-colors"
+              title="Staff Access"
+              className="p-1 rounded text-slate-600 hover:text-slate-400 hover:bg-slate-800 transition-colors opacity-60 hover:opacity-100"
             >
-              <Shield className="w-4 h-4" />
+              <Key className="w-3.5 h-3.5" />
             </Link>
           </div>
         </div>
