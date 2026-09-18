@@ -3,8 +3,8 @@
  * Connects directly to Supabase with resilient LocalStorage fallback
  */
 
-const SUPABASE_URL = "https://ujljnfhmzlnegzokneia.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InVqbGpuZmhtemxuZWd6b2tuZWlhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODgxNjgyMjQsImV4cCI6MjEwMzc0NDIyNH0.B51eHxdWIjoOaF8Lmxpf0St0IWo4b2ZIK2HmxP-76yU";
+const SUPABASE_URL = "https://tfmbmmtlppkzcxpndiym.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
 // Dynamic Supabase Client Initializer
 function getSupabaseInstance() {
