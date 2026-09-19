@@ -586,6 +586,7 @@ window.ApplicationsService = {
 
     // Clear the pending lock once slip is submitted
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+    localStorage.removeItem("ae_pending_payment_ref");
 
     // Send payment proof received email via server API
     if (targetApp && targetApp.email) {
@@ -605,33 +606,62 @@ window.ApplicationsService = {
   },
 
   // 6. CANCEL APPLICATION & CLEAR LOCK
-  cancelApplication(applicationId, emailConfirm) {
+  async cancelApplication(applicationId, emailConfirm) {
+    const cleanId = (applicationId || "").toLowerCase().trim();
+    const emailNormalized = (emailConfirm || "").toLowerCase().trim();
+
+    // 1. Check local storage applications
     const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    const idx = apps.findIndex(a => a.id.toLowerCase() === applicationId.toLowerCase().trim());
-    
-    if (idx === -1) {
-      return { success: false, error: "Application not found." };
+    const idx = apps.findIndex(a => a.id && a.id.toLowerCase() === cleanId);
+    let appFound = null;
+
+    if (idx !== -1) {
+      appFound = apps[idx];
+      if (emailNormalized && appFound.email && appFound.email.toLowerCase().trim() !== emailNormalized) {
+        return { success: false, error: "The provided confirmation email does not match the application record." };
+      }
+      appFound.status = "cancelled";
+      appFound.updated_at = new Date().toISOString();
+      if (!appFound.events) appFound.events = [];
+      appFound.events.push({
+        type: "cancelled",
+        title: "Application Cancelled",
+        time: new Date().toISOString(),
+        note: "Application was cancelled by the applicant. Pending lock cleared."
+      });
+      apps[idx] = appFound;
+      window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
     }
 
-    const app = apps[idx];
-    if (emailConfirm && app.email.toLowerCase() !== emailConfirm.toLowerCase().trim()) {
-      return { success: false, error: "The provided confirmation email does not match the application record." };
+    // 2. Sync cancellation to Supabase if connected
+    if (window.supabaseClient) {
+      try {
+        const { data: supaApp } = await window.supabaseClient
+          .from("applications")
+          .select("id, email")
+          .ilike("id", cleanId)
+          .maybeSingle();
+
+        if (supaApp) {
+          if (emailNormalized && supaApp.email && supaApp.email.toLowerCase().trim() !== emailNormalized) {
+            return { success: false, error: "The provided confirmation email does not match the application record." };
+          }
+          await window.supabaseClient
+            .from("applications")
+            .update({
+              status: "cancelled",
+              notes: "Cancelled by applicant from payment page."
+            })
+            .eq("id", supaApp.id);
+        }
+      } catch (err) {
+        console.warn("Supabase cancel sync warning:", err);
+      }
     }
 
-    app.status = "cancelled";
-    app.updated_at = new Date().toISOString();
-    app.events.push({
-      type: "cancelled",
-      title: "Application Cancelled",
-      time: new Date().toISOString(),
-      note: "Application was cancelled by the applicant. Pending lock cleared."
-    });
-
-    apps[idx] = app;
-    window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
-
-    // Clear pending lock
+    // 3. Clear pending lock
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+    localStorage.removeItem("ae_pending_payment_ref");
 
     return { success: true };
   }

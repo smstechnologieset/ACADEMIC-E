@@ -79,4 +79,27 @@ document.addEventListener('DOMContentLoaded', () => {
       }, 900);
     });
   }
+
+  // 4. Active Pending Payment Session Support for Apply Links
+  try {
+    const pendingRef = localStorage.getItem('ae_pending_payment_ref');
+    if (pendingRef && pendingRef.trim()) {
+      const targetPaymentUrl = `payment-instructions.html?ref=${encodeURIComponent(pendingRef.trim())}`;
+      
+      // Update all navigation and action links pointing to apply.html
+      const applyLinks = document.querySelectorAll('a[href^="apply.html"]');
+      applyLinks.forEach(link => {
+        const href = link.getAttribute('href') || '';
+        // Skip links that intentionally request a fresh start
+        if (href.includes('fresh=1') || href.includes('new=1')) return;
+
+        link.setAttribute('href', targetPaymentUrl);
+        if (link.classList.contains('nav-link')) {
+          link.title = `Resume Pending Payment (${pendingRef.trim()})`;
+        }
+      });
+    }
+  } catch (err) {
+    console.warn('Pending payment link check error:', err);
+  }
 });

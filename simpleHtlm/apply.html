@@ -12,6 +12,42 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="style.css" />
+
+  <!-- Active Pending Payment Session Detection -->
+  <script>
+    (function() {
+      try {
+        var params = new URLSearchParams(window.location.search);
+        // If applicant intentionally requested a fresh application, clear pending lock
+        if (params.get("fresh") === "1" || params.get("new") === "1") {
+          localStorage.removeItem("ae_pending_payment_ref");
+          return;
+        }
+        var pendingRef = localStorage.getItem("ae_pending_payment_ref");
+        if (pendingRef && pendingRef.trim()) {
+          var cleanRef = pendingRef.trim();
+          // Quick check: if local cache records this app as already submitted/finalized, clear the lock
+          var rawApps = localStorage.getItem("academic_applications");
+          if (rawApps) {
+            try {
+              var appsList = JSON.parse(rawApps);
+              var existing = appsList.find(function(a) {
+                return a.id && a.id.toLowerCase() === cleanRef.toLowerCase();
+              });
+              if (existing && existing.status && existing.status !== "pending") {
+                localStorage.removeItem("ae_pending_payment_ref");
+                return;
+              }
+            } catch (err) {}
+          }
+          // Redirect immediately to payment instructions session
+          window.location.replace("payment-instructions.html?ref=" + encodeURIComponent(cleanRef));
+        }
+      } catch (e) {
+        console.warn("Session check error:", e);
+      }
+    })();
+  </script>
 </head>
 <body>
 
@@ -324,6 +360,24 @@
   <script src="js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
+      // 0. Fallback check for active pending payment session
+      const pendingRef = localStorage.getItem("ae_pending_payment_ref") || 
+        (window.AcademicDB && window.AcademicDB.keys && localStorage.getItem(window.AcademicDB.keys.PENDING_REF));
+      const urlParams = new URLSearchParams(window.location.search);
+      const isFresh = urlParams.get("fresh") === "1" || urlParams.get("new") === "1";
+      if (pendingRef && !isFresh) {
+        const cachedApp = window.ApplicationsService ? window.ApplicationsService.getApplication(pendingRef) : null;
+        if (!cachedApp || cachedApp.status === "pending" || !cachedApp.paymentSlipUrl) {
+          window.location.replace(`payment-instructions.html?ref=${encodeURIComponent(pendingRef.trim())}`);
+          return;
+        } else {
+          localStorage.removeItem("ae_pending_payment_ref");
+          if (window.AcademicDB && window.AcademicDB.keys) {
+            localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+          }
+        }
+      }
+
       // 1. Populate courses dropdown
       const courseSelect = document.getElementById("courseApplied");
       const courses = window.CoursesService.getAllCourses();

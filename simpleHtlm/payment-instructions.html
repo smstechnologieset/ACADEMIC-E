@@ -166,11 +166,16 @@
           <!-- Bottom Utility: Cancel Application / Start Fresh -->
           <div style="border-top: 1px solid var(--border-light); padding-top: 25px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
             <div style="font-size: 0.88rem; color: #64748b;">
-              Made a mistake in your application?
+              Need to change details or start over?
             </div>
-            <button type="button" id="openCancelModalBtn" style="background: none; border: 1px solid #e2e8f0; padding: 8px 18px; color: #d93025; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
-              Cancel This Application &amp; Start Fresh
-            </button>
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+              <a href="apply.html?fresh=1" style="background: none; border: 1px solid #cbd5e1; padding: 8px 16px; color: #475569; font-size: 0.85rem; font-weight: 600; text-decoration: none;">
+                &larr; Start Fresh Application
+              </a>
+              <button type="button" id="openCancelModalBtn" style="background: none; border: 1px solid #fee2e2; padding: 8px 18px; color: #d93025; font-size: 0.85rem; font-weight: 700; cursor: pointer;">
+                Cancel This Application &amp; Start Fresh
+              </button>
+            </div>
           </div>
 
         </div>
@@ -365,11 +370,40 @@
         document.getElementById("appNameDisplay").textContent = app.fullName || `${app.firstName || ""} ${app.lastName || ""}`.trim();
         document.getElementById("appProgramDisplay").textContent = app.courseApplied || "Selected Intake Program";
         refId = app.id;
+
+        // Check if payment proof has already been submitted or application is under review/approved
+        const isAlreadyPaid = Boolean(
+          app.paymentSlipUrl || 
+          app.payment_slip_url || 
+          (app.status && app.status !== "pending" && app.status !== "cancelled")
+        );
+
+        if (isAlreadyPaid) {
+          // Clear active pending payment session lock since applicant already paid
+          localStorage.removeItem("ae_pending_payment_ref");
+          if (window.AcademicDB && window.AcademicDB.keys) {
+            localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+          }
+          const submitBtn = document.getElementById("btnSubmitSlip");
+          if (submitBtn) submitBtn.style.display = "none";
+          const formCard = document.getElementById("paymentProofForm");
+          if (formCard) formCard.style.display = "none";
+          const successAlert = document.getElementById("slipSuccessAlert");
+          if (successAlert) {
+            successAlert.style.display = "block";
+            const trackBtn = document.getElementById("trackSubmittedAppBtn");
+            if (trackBtn) trackBtn.href = `track.html?ref=${encodeURIComponent(app.id)}`;
+          }
+        } else {
+          // Active pending payment session: keep in localStorage
+          localStorage.setItem("ae_pending_payment_ref", app.id);
+        }
       } else if (refId) {
-        // Application ID exists, show pending state instead of someone else's record
+        // Application ID exists, show pending state
         document.getElementById("appRefDisplay").textContent = refId;
         document.getElementById("appNameDisplay").textContent = "Applicant Verification in Progress";
         document.getElementById("appProgramDisplay").textContent = "Selected Intake Program";
+        localStorage.setItem("ae_pending_payment_ref", refId);
       } else {
         document.getElementById("appRefDisplay").textContent = "No Application Found";
         document.getElementById("appNameDisplay").textContent = "Please Complete Application Form";
@@ -484,7 +518,7 @@
       closeModalBtn.addEventListener("click", closeModal);
       abortBtn.addEventListener("click", closeModal);
 
-      confirmBtn.addEventListener("click", () => {
+      confirmBtn.addEventListener("click", async () => {
         const confirmEmail = document.getElementById("cancelConfirmEmail").value.trim();
         if (!confirmEmail) {
           modalErr.textContent = "Please enter your confirmation email address.";
@@ -492,13 +526,27 @@
           return;
         }
 
-        const res = window.ApplicationsService.cancelApplication(refId, confirmEmail);
-        if (res.success) {
-          alert("Your application has been cancelled and pending locks have been cleared. You can now start a fresh application.");
-          window.location.href = "apply.html";
-        } else {
-          modalErr.textContent = res.error || "Cancellation failed. Check your email.";
+        confirmBtn.disabled = true;
+        confirmBtn.textContent = "Cancelling...";
+
+        try {
+          const res = await window.ApplicationsService.cancelApplication(refId, confirmEmail);
+          if (res.success) {
+            localStorage.removeItem("ae_pending_payment_ref");
+            alert("Your application has been cancelled and pending locks have been cleared. You can now start a fresh application.");
+            window.location.href = "apply.html?fresh=1";
+          } else {
+            modalErr.textContent = res.error || "Cancellation failed. Check your email.";
+            modalErr.style.display = "block";
+            confirmBtn.disabled = false;
+            confirmBtn.textContent = "Confirm Cancellation";
+          }
+        } catch (err) {
+          console.error(err);
+          modalErr.textContent = "An error occurred during cancellation. Please retry.";
           modalErr.style.display = "block";
+          confirmBtn.disabled = false;
+          confirmBtn.textContent = "Confirm Cancellation";
         }
       });
     });
