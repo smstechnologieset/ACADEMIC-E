@@ -519,15 +519,109 @@ window.AdminService = {
     return { success: true };
   },
 
-  // 5. SETTINGS
+  // 5. SETTINGS & PAYMENT METHODS
   getSettings() {
-    return window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
+    return (window.AcademicDB && window.AcademicDB.getSettingsSync) ? window.AcademicDB.getSettingsSync() : window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
   },
 
-  updateSettings(newSettings) {
+  async getSettingsAsync() {
+    if (window.AcademicDB && window.AcademicDB.getSettings) {
+      return await window.AcademicDB.getSettings();
+    }
+    return this.getSettings();
+  },
+
+  async updateSettings(newSettings) {
     const current = this.getSettings();
     const updated = { ...current, ...newSettings };
     window.AcademicDB.setLocal(window.AcademicDB.keys.SETTINGS, updated);
+
+    // Sync to Supabase site_settings table asynchronously
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+      // Prepare key-value entries to upsert into site_settings
+      const entries = Object.entries(updated).map(([key, val]) => ({
+        key,
+        value: typeof val === "object" ? JSON.stringify(val) : String(val),
+        updated_at: new Date().toISOString()
+      }));
+
+      const session = this.checkAuth();
+      const authToken = (session && session.token) ? session.token : supabaseKey;
+
+      await fetch(`${supabaseUrl}/rest/v1/site_settings`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${authToken}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates"
+        },
+        body: JSON.stringify(entries)
+      });
+    } catch (e) {
+      console.warn("Could not sync settings to Supabase site_settings:", e);
+    }
+
     return { success: true, settings: updated };
+  },
+
+  getPaymentMethods() {
+    const s = this.getSettings();
+    return Array.isArray(s.paymentMethods) ? s.paymentMethods : [];
+  },
+
+  async savePaymentMethod(methodData) {
+    const s = this.getSettings();
+    const methods = Array.isArray(s.paymentMethods) ? [...s.paymentMethods] : [];
+
+    if (methodData.id) {
+      const idx = methods.findIndex(m => m.id === methodData.id);
+      if (idx !== -1) {
+        methods[idx] = { ...methods[idx], ...methodData };
+      } else {
+        methods.push(methodData);
+      }
+    } else {
+      const newMethod = {
+        ...methodData,
+        id: "pm-" + Date.now().toString(36) + Math.random().toString(36).substr(2, 4)
+      };
+      methods.push(newMethod);
+    }
+
+    // Keep primary legacy accounts updated if matching
+    const tele = methods.find(m => m.name.toLowerCase().includes("telebirr") && m.is_active !== false);
+    const cbe = methods.find(m => m.name.toLowerCase().includes("cbe") && !m.name.toLowerCase().includes("birr") && m.is_active !== false);
+    const awash = methods.find(m => m.name.toLowerCase().includes("awash") && m.is_active !== false);
+
+    const extraUpdates = { paymentMethods: methods };
+    if (tele && tele.accountNumber) extraUpdates.telebirrNumber = tele.accountNumber;
+    if (cbe && cbe.accountNumber) extraUpdates.cbeAccount = cbe.accountNumber;
+    if (awash && awash.accountNumber) extraUpdates.awashAccount = awash.accountNumber;
+
+    await this.updateSettings(extraUpdates);
+    return { success: true, paymentMethods: methods };
+  },
+
+  async deletePaymentMethod(id) {
+    const s = this.getSettings();
+    const methods = (Array.isArray(s.paymentMethods) ? s.paymentMethods : []).filter(m => m.id !== id);
+    await this.updateSettings({ paymentMethods: methods });
+    return { success: true, paymentMethods: methods };
+  },
+
+  async togglePaymentMethod(id, isActive) {
+    const s = this.getSettings();
+    const methods = (Array.isArray(s.paymentMethods) ? [...s.paymentMethods] : []).map(m => {
+      if (m.id === id) {
+        return { ...m, is_active: isActive };
+      }
+      return m;
+    });
+    await this.updateSettings({ paymentMethods: methods });
+    return { success: true, paymentMethods: methods };
   }
 };

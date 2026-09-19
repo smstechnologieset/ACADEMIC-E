@@ -100,70 +100,10 @@
           <h3 style="font-size: 1.45rem; color: #0b1b3d; margin-bottom: 20px;">1. Choose Your Preferred Payment Channel</h3>
 
           <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 35px;" id="paymentMethodsGrid">
-            
-            <!-- Telebirr -->
-            <div class="payment-method-card selected" data-method="Telebirr SuperApp / USSD">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: #0b1b3d; font-size: 1.1rem;">Telebirr</strong>
-                <span class="hero-badge-pill" style="font-size: 0.65rem; background: #df6b26;">Instant</span>
-              </div>
-              <div class="account-number-box">
-                <span id="telebirrNum">0911 55 2345</span>
-                <button type="button" class="btn-sm copy-text-btn" id="copyTelebirrBtn" data-text="0911552345" title="Copy Number">Copy</button>
-              </div>
-              <div style="font-size: 0.85rem; color: #475569;">
-                Account Name: <strong>Academic Excellence Ethiopia</strong><br />
-                Transfer via Telebirr App or dial *127#.
-              </div>
+            <!-- Dynamically populated from settings.paymentMethods -->
+            <div style="grid-column: 1 / -1; padding: 30px; text-align: center; color: #64748b; background: #fff; border: 1px solid var(--border-light);">
+              Loading available payment channels...
             </div>
-
-            <!-- CBE -->
-            <div class="payment-method-card" data-method="Commercial Bank of Ethiopia (CBE)">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: #0b1b3d; font-size: 1.1rem;">CBE Bank</strong>
-                <span class="hero-badge-pill" style="font-size: 0.65rem; background: #1854a1;">Direct</span>
-              </div>
-              <div class="account-number-box">
-                <span id="cbeNum">1000 3948 29384</span>
-                <button type="button" class="btn-sm copy-text-btn" id="copyCbeBtn" data-text="1000394829384" title="Copy Account">Copy</button>
-              </div>
-              <div style="font-size: 0.85rem; color: #475569;">
-                Account Name: <strong>Academic Excellence Education</strong><br />
-                Transfer via CBE Mobile Banking or branch counter.
-              </div>
-            </div>
-
-            <!-- CBE Birr -->
-            <div class="payment-method-card" data-method="CBE Birr Wallet">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: #0b1b3d; font-size: 1.1rem;">CBE Birr</strong>
-                <span class="hero-badge-pill" style="font-size: 0.65rem; background: #137333;">Wallet</span>
-              </div>
-              <div class="account-number-box">
-                <span id="cbeBirrNum">0911 55 2345</span>
-                <button type="button" class="btn-sm copy-text-btn" id="copyCbeBirrBtn" data-text="0911552345" title="Copy Number">Copy</button>
-              </div>
-              <div style="font-size: 0.85rem; color: #475569;">
-                Pay via CBE Birr SuperApp or dial *847# using your Application Ref.
-              </div>
-            </div>
-
-            <!-- Awash Bank -->
-            <div class="payment-method-card" data-method="Awash Bank">
-              <div style="display: flex; justify-content: space-between; align-items: center;">
-                <strong style="color: #0b1b3d; font-size: 1.1rem;">Awash Bank</strong>
-                <span class="hero-badge-pill" style="font-size: 0.65rem; background: #0b1b3d;">Bank</span>
-              </div>
-              <div class="account-number-box">
-                <span id="awashNum">0132 0876 5432 10</span>
-                <button type="button" class="btn-sm copy-text-btn" id="copyAwashBtn" data-text="01320876543210" title="Copy Account">Copy</button>
-              </div>
-              <div style="font-size: 0.85rem; color: #475569;">
-                Account Name: <strong>Academic Excellence Intake</strong><br />
-                Transfer via Awash Birr Pro or local branch.
-              </div>
-            </div>
-
           </div>
 
           <!-- 2. UPLOAD PAYMENT SLIP FORM -->
@@ -178,10 +118,7 @@
                 <div class="form-group">
                   <label class="form-label">Payment Channel Used *</label>
                   <select id="selectedPaymentChannel" class="form-select" required>
-                    <option value="Telebirr SuperApp / USSD">Telebirr SuperApp / USSD (*127#)</option>
-                    <option value="Commercial Bank of Ethiopia (CBE)">Commercial Bank of Ethiopia (CBE)</option>
-                    <option value="CBE Birr Wallet">CBE Birr Wallet (*847#)</option>
-                    <option value="Awash Bank">Awash Bank</option>
+                    <option value="">Loading payment channels...</option>
                   </select>
                 </div>
 
@@ -311,7 +248,10 @@
   <script src="js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
-      // 1. Dynamic Admin Settings (Fee Display & Bank Accounts) — uses Supabase then localStorage
+      const gridEl = document.getElementById("paymentMethodsGrid");
+      const selectEl = document.getElementById("selectedPaymentChannel");
+
+      // 1. Dynamic Admin Settings & Payment Methods — uses Supabase then localStorage
       try {
         const settings = await window.AcademicDB.getSettings();
         if (settings) {
@@ -327,40 +267,83 @@
             if (feeEl) feeEl.textContent = displayFee;
           }
 
-          // --- Telebirr ---
-          if (settings.telebirrNumber) {
-            const tel = String(settings.telebirrNumber).trim();
-            const el = document.getElementById("telebirrNum");
-            const btn = document.getElementById("copyTelebirrBtn");
-            if (el) el.textContent = tel;
-            if (btn) btn.dataset.text = tel.replace(/\s+/g, "");
+          // --- Dynamic Payment Methods ---
+          const rawMethods = Array.isArray(settings.paymentMethods) ? settings.paymentMethods : [];
+          const activeMethods = rawMethods.filter(m => m.is_active !== false);
 
-            const cbeBirrEl = document.getElementById("cbeBirrNum");
-            const cbeBirrBtn = document.getElementById("copyCbeBirrBtn");
-            if (cbeBirrEl) cbeBirrEl.textContent = tel;
-            if (cbeBirrBtn) cbeBirrBtn.dataset.text = tel.replace(/\s+/g, "");
-          }
+          if (gridEl && activeMethods.length > 0) {
+            gridEl.innerHTML = activeMethods.map((m, idx) => {
+              const cleanNumber = (m.accountNumber || "").replace(/\s+/g, "");
+              const isSelected = idx === 0 ? " selected" : "";
 
-          // --- CBE ---
-          if (settings.cbeAccount) {
-            const cbe = String(settings.cbeAccount).trim();
-            const el = document.getElementById("cbeNum");
-            const btn = document.getElementById("copyCbeBtn");
-            if (el) el.textContent = cbe;
-            if (btn) btn.dataset.text = cbe.replace(/\s+/g, "");
-          }
+              let badgeBg = "#1854a1";
+              const lower = (m.name || "").toLowerCase();
+              if (lower.includes("telebirr")) badgeBg = "#df6b26";
+              else if (lower.includes("cbe birr") || lower.includes("wallet")) badgeBg = "#137333";
+              else if (lower.includes("awash")) badgeBg = "#0b1b3d";
 
-          // --- Awash ---
-          if (settings.awashAccount) {
-            const aw = String(settings.awashAccount).trim();
-            const el = document.getElementById("awashNum");
-            const btn = document.getElementById("copyAwashBtn");
-            if (el) el.textContent = aw;
-            if (btn) btn.dataset.text = aw.replace(/\s+/g, "");
+              return `
+                <div class="payment-method-card${isSelected}" data-method="${m.name}" style="cursor:pointer;">
+                  <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <strong style="color: #0b1b3d; font-size: 1.1rem;">${m.name}</strong>
+                    ${m.badge ? `<span class="hero-badge-pill" style="font-size: 0.65rem; background: ${badgeBg};">${m.badge}</span>` : ""}
+                  </div>
+                  <div class="account-number-box">
+                    <span>${m.accountNumber}</span>
+                    <button type="button" class="btn-sm copy-text-btn" data-text="${cleanNumber}" title="Copy Number">Copy</button>
+                  </div>
+                  <div style="font-size: 0.85rem; color: #475569; line-height: 1.45;">
+                    ${m.accountName ? `Account Name: <strong>${m.accountName}</strong><br />` : ""}
+                    ${m.instructions ? `<span>${m.instructions}</span>` : ""}
+                  </div>
+                </div>
+              `;
+            }).join("");
+
+            // Populate channel dropdown
+            if (selectEl) {
+              selectEl.innerHTML = activeMethods.map((m, idx) =>
+                `<option value="${m.name}"${idx === 0 ? " selected" : ""}>${m.name}</option>`
+              ).join("");
+            }
+
+            // Bind card selection
+            gridEl.querySelectorAll(".payment-method-card").forEach(card => {
+              card.addEventListener("click", () => {
+                gridEl.querySelectorAll(".payment-method-card").forEach(c => c.classList.remove("selected"));
+                card.classList.add("selected");
+                const method = card.dataset.method;
+                if (selectEl) selectEl.value = method;
+              });
+            });
+
+            // Bind copy button on each card
+            gridEl.querySelectorAll(".copy-text-btn").forEach(btn => {
+              btn.addEventListener("click", (e) => {
+                e.stopPropagation();
+                const text = btn.dataset.text;
+                navigator.clipboard.writeText(text);
+                btn.textContent = "Copied!";
+                setTimeout(() => btn.textContent = "Copy", 2000);
+              });
+            });
+          } else if (gridEl) {
+            gridEl.innerHTML = "<div style='grid-column:1/-1;padding:24px;text-align:center;color:#64748b;background:#fff;border:1px solid var(--border-light);'>No payment channels currently available. Please contact admissions.</div>";
           }
         }
       } catch (err) {
         console.warn("Could not load dynamic settings:", err);
+      }
+
+      // Sync dropdown change back to card selection
+      if (selectEl) {
+        selectEl.addEventListener("change", () => {
+          const val = selectEl.value;
+          document.querySelectorAll(".payment-method-card").forEach(c => {
+            if (c.dataset.method === val) c.classList.add("selected");
+            else c.classList.remove("selected");
+          });
+        });
       }
 
       // 2. Fetch and display the specific Applicant
@@ -396,33 +379,15 @@
       // Copy reference button
       const copyRefBtn = document.getElementById("copyRefBtn");
       const copyToast = document.getElementById("copyToast");
-      copyRefBtn.addEventListener("click", () => {
-        navigator.clipboard.writeText(refId);
-        copyToast.style.display = "block";
-        setTimeout(() => copyToast.style.display = "none", 4000);
-      });
-
-      // Quick copy account buttons
-      document.querySelectorAll(".copy-text-btn").forEach(btn => {
-        btn.addEventListener("click", (e) => {
-          e.stopPropagation();
-          const text = btn.dataset.text;
-          navigator.clipboard.writeText(text);
-          btn.textContent = "Copied!";
-          setTimeout(() => btn.textContent = "Copy", 2000);
+      if (copyRefBtn) {
+        copyRefBtn.addEventListener("click", () => {
+          navigator.clipboard.writeText(refId);
+          if (copyToast) {
+            copyToast.style.display = "block";
+            setTimeout(() => copyToast.style.display = "none", 4000);
+          }
         });
-      });
-
-      // Select payment method card
-      document.querySelectorAll(".payment-method-card").forEach(card => {
-        card.addEventListener("click", () => {
-          document.querySelectorAll(".payment-method-card").forEach(c => c.classList.remove("selected"));
-          card.classList.add("selected");
-          const method = card.dataset.method;
-          const select = document.getElementById("selectedPaymentChannel");
-          if (select) select.value = method;
-        });
-      });
+      }
 
       // File Upload for Slip
       let selectedSlipFile = null;

@@ -248,14 +248,17 @@ window.AcademicDB = {
     }
   },
 
-  /** Helper to sanitize stale legacy 1,500 ETB settings */
+  /** Helper to sanitize stale settings and ensure valid payment methods */
   _sanitizeSettings(s) {
     if (!s) return defaultSettings;
     if (s.applicationFeeAmount === 1500 || s.applicationFee === "1,500 ETB / $35 USD" || s.applicationFee === "1,500 ETB") {
       s.applicationFee = "15,000 ETB";
       s.applicationFeeAmount = 15000;
-      setLocalData(StorageKeys.SETTINGS, s);
     }
+    if (!s.paymentMethods || !Array.isArray(s.paymentMethods) || s.paymentMethods.length === 0) {
+      s.paymentMethods = JSON.parse(JSON.stringify(defaultSettings.paymentMethods));
+    }
+    setLocalData(StorageKeys.SETTINGS, s);
     return s;
   },
 
@@ -284,13 +287,27 @@ window.AcademicDB = {
         const rows = await res.json();
         if (Array.isArray(rows) && rows.length > 0) {
           const supaSettings = {};
-          rows.forEach(r => { supaSettings[r.key] = r.value; });
+          rows.forEach(r => {
+            if (r.key === "paymentMethods") {
+              try {
+                supaSettings.paymentMethods = typeof r.value === "string" ? JSON.parse(r.value) : r.value;
+              } catch (_) {
+                supaSettings.paymentMethods = defaultSettings.paymentMethods;
+              }
+            } else {
+              supaSettings[r.key] = r.value;
+            }
+          });
           const merged = Object.assign({}, defaultSettings, local || {}, supaSettings);
+          if (supaSettings.paymentMethods && Array.isArray(supaSettings.paymentMethods)) {
+            merged.paymentMethods = supaSettings.paymentMethods;
+          }
+          this._sanitizeSettings(merged);
           setLocalData(StorageKeys.SETTINGS, merged);
           return merged;
         }
       }
     } catch (_) { /* network error — fall through */ }
-    return local || defaultSettings;
+    return local ? this._sanitizeSettings(local) : defaultSettings;
   }
 };

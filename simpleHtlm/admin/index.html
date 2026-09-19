@@ -230,7 +230,7 @@
           <div class="data-table-card">
             <div class="table-toolbar">
               <h3 style="font-size:1.15rem;color:#0b1b3d;">Academic Programs &amp; Diplomas CMS</h3>
-              <button type="button" class="btn btn-orange btn-sm" id="btnAddNewCourse">+ Add New Program</button>
+              <button type="button" id="btnAddNewCourse" style="background:#0b1b3d;color:#ffffff;border:1px solid #0b1b3d;padding:8px 18px;font-weight:700;font-size:0.88rem;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s;" onmouseover="this.style.background='#1854a1'" onmouseout="this.style.background='#0b1b3d'">+ Add New Program</button>
             </div>
             <div class="table-responsive">
               <table class="admin-table">
@@ -321,38 +321,59 @@
 
         <!-- TAB: SETTINGS -->
         <section id="tabSettings" class="admin-tab-pane" style="display:none;">
-          <div style="background:#fff;border:1px solid #e2e8f0;padding:35px;max-width:780px;border-radius:10px;">
-            <h3 style="font-size:1.35rem;color:#0b1b3d;margin-bottom:20px;">Intake &amp; Payment Settings</h3>
-            <form id="settingsForm">
-              <div class="form-grid-2">
-                <div class="form-group">
-                  <label class="form-label">Application Fee Display</label>
-                  <input type="text" id="settingFeeDisplay" class="form-input" value="15,000 ETB" required />
+          <div style="max-width:960px;display:flex;flex-direction:column;gap:30px;">
+            <!-- Intake & General Fee Settings -->
+            <div style="background:#fff;border:1px solid #e2e8f0;padding:32px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+              <h3 style="font-size:1.3rem;color:#0b1b3d;margin-bottom:8px;">Application Fee Configuration</h3>
+              <p style="color:#64748b;font-size:0.88rem;margin-bottom:20px;">Configure the official applicant registration fee displayed on the student portal.</p>
+              <form id="settingsFeeForm">
+                <div class="form-grid-2">
+                  <div class="form-group">
+                    <label class="form-label">Application Fee Display Text *</label>
+                    <input type="text" id="settingFeeDisplay" class="form-input" value="15,000 ETB" required />
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label">Application Fee Numeric (ETB) *</label>
+                    <input type="number" id="settingFeeAmount" class="form-input" value="15000" required />
+                  </div>
                 </div>
-                <div class="form-group">
-                  <label class="form-label">Application Fee Numeric (ETB)</label>
-                  <input type="number" id="settingFeeAmount" class="form-input" value="15000" required />
+                <div style="margin-top:15px;">
+                  <button type="submit" style="background:#0b1b3d;color:#fff;border:none;padding:9px 20px;border-radius:6px;font-weight:700;font-size:0.88rem;cursor:pointer;transition:background 0.2s;" onmouseover="this.style.background='#1854a1'" onmouseout="this.style.background='#0b1b3d'">Save Fee Settings</button>
                 </div>
+              </form>
+            </div>
+
+            <!-- Payment Accounts & Banking Channels Manager -->
+            <div style="background:#fff;border:1px solid #e2e8f0;padding:32px;border-radius:10px;box-shadow:0 2px 8px rgba(0,0,0,0.02);">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:15px;margin-bottom:22px;">
+                <div>
+                  <h3 style="font-size:1.3rem;color:#0b1b3d;margin-bottom:6px;">Payment Accounts &amp; Banking Channels</h3>
+                  <p style="color:#64748b;font-size:0.88rem;margin:0;">Manage the banks, merchant numbers, and mobile wallets displayed dynamically on the student payment instructions page.</p>
+                </div>
+                <button type="button" id="btnAddNewPaymentMethod" style="background:#0b1b3d;color:#ffffff;border:1px solid #0b1b3d;padding:9px 20px;font-weight:700;font-size:0.88rem;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:6px;transition:background 0.2s;" onmouseover="this.style.background='#1854a1'" onmouseout="this.style.background='#0b1b3d'">
+                  + Add Payment Method / Bank
+                </button>
               </div>
-              <div class="form-group">
-                <label class="form-label">Telebirr Merchant / Phone Number</label>
-                <input type="text" id="settingTelebirr" class="form-input" value="0911 55 2345" required />
+
+              <!-- Payment Methods List / Table -->
+              <div class="table-responsive" style="border:1px solid #e2e8f0;border-radius:8px;overflow:hidden;">
+                <table class="admin-table" style="margin:0;">
+                  <thead>
+                    <tr>
+                      <th style="width:28%;">Bank / Channel</th>
+                      <th style="width:22%;">Account / Number</th>
+                      <th style="width:24%;">Account Holder</th>
+                      <th style="width:10%;">Badge</th>
+                      <th style="width:8%;">Status</th>
+                      <th style="width:8%;text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="paymentMethodsTableBody">
+                    <tr><td colspan="6" style="text-align:center;padding:24px;color:#64748b;">Loading payment channels...</td></tr>
+                  </tbody>
+                </table>
               </div>
-              <div class="form-group">
-                <label class="form-label">Commercial Bank of Ethiopia (CBE) Account</label>
-                <input type="text" id="settingCBE" class="form-input" value="1000 3948 29384" required />
-              </div>
-              <div class="form-group">
-                <label class="form-label">Awash Bank Account</label>
-                <input type="text" id="settingAwash" class="form-input" value="0132 0876 5432 10" required />
-              </div>
-              <div style="margin-top:25px;">
-                <button type="submit" class="btn btn-orange">Save Settings Changes</button>
-              </div>
-              <div id="settingsSuccessAlert" style="display:none;background:#d1fae5;border:1px solid #6ee7b7;color:#065f46;padding:12px;margin-top:15px;border-radius:6px;">
-                &#10003; Settings updated successfully!
-              </div>
-            </form>
+            </div>
           </div>
         </section>
 
@@ -496,6 +517,48 @@
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelCourseBtn">Cancel</button>
             <button type="submit" class="btn btn-orange btn-sm">Save Program</button>
+          </div>
+        </form>
+      </div>
+  <!-- PAYMENT METHOD MODAL -->
+  <div class="admin-modal" id="paymentMethodModal">
+    <div class="modal-card" style="max-width:580px;">
+      <div class="modal-header">
+        <h3 style="font-size:1.25rem;color:#0b1b3d;" id="pmModalTitle">Add Payment Channel / Bank</h3>
+        <button type="button" class="btn-remove-file" id="closePmModalBtn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <form id="pmForm">
+          <input type="hidden" id="pmEditId" />
+          <div class="form-group">
+            <label class="form-label">Provider / Bank Name *</label>
+            <input type="text" id="pmInputName" class="form-input" placeholder="e.g. Commercial Bank of Ethiopia (CBE), Telebirr, Dashen Bank" required />
+          </div>
+          <div class="form-grid-2">
+            <div class="form-group">
+              <label class="form-label">Account or Phone Number *</label>
+              <input type="text" id="pmInputAccountNumber" class="form-input" placeholder="e.g. 1000 3948 29384 or 0911 55 2345" required />
+            </div>
+            <div class="form-group">
+              <label class="form-label">Badge Tag</label>
+              <input type="text" id="pmInputBadge" class="form-input" placeholder="e.g. Instant, Direct, Bank, Wallet" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Account / Beneficiary Name *</label>
+            <input type="text" id="pmInputAccountName" class="form-input" placeholder="e.g. Academic Excellence Ethiopia" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Transfer Instructions / USSD Prompt</label>
+            <textarea id="pmInputInstructions" class="form-textarea" style="min-height:75px;" placeholder="e.g. Transfer via Mobile App or dial *127# using Reference ID."></textarea>
+          </div>
+          <div class="form-group" style="display:flex;align-items:center;gap:10px;margin-top:10px;">
+            <input type="checkbox" id="pmInputActive" checked style="width:18px;height:18px;cursor:pointer;" />
+            <label for="pmInputActive" style="font-weight:600;color:#0b1b3d;cursor:pointer;margin:0;">Active &amp; Visible to Students on Payment Instructions Page</label>
+          </div>
+          <div class="step-actions" style="margin-top:25px;display:flex;justify-content:flex-end;gap:10px;">
+            <button type="button" class="btn btn-sm" id="cancelPmBtn">Cancel</button>
+            <button type="submit" class="btn-sm" style="background:#0b1b3d;color:#fff;border:none;padding:8px 20px;border-radius:6px;font-weight:700;cursor:pointer;">Save Payment Channel</button>
           </div>
         </form>
       </div>
@@ -659,7 +722,9 @@
       const { method = "GET", filter = "", body = null, upsert = false } = opts;
       let url = SUPA_URL + "/rest/v1/" + table;
       if (filter) url += "?" + filter;
-      const headers = Object.assign({}, BASE_HEADERS);
+      const auth = (window.AdminService && window.AdminService.checkAuth) ? window.AdminService.checkAuth() : null;
+      const token = (auth && auth.token) ? auth.token : SUPA_KEY;
+      const headers = Object.assign({}, BASE_HEADERS, { "Authorization": "Bearer " + token });
       if (upsert) headers["Prefer"] = "resolution=merge-duplicates,return=representation";
       else if (method !== "GET") headers["Prefer"] = "return=representation";
       const init = { method, headers };
@@ -869,41 +934,72 @@
     }
 
     function openAppModal(id) {
-      const app = window.AdminService.getApplicationById(id);
-      if (!app) return;
-      currentViewingApp = app;
-      document.getElementById("modalAppRef").textContent = app.id;
-      document.getElementById("modalAppDate").textContent = "Submitted: " + window.AcademicDB.formatDate(app.created_at);
-      document.getElementById("modalFullName").textContent = app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim();
-      document.getElementById("modalAge").textContent = app.age || "—";
-      document.getElementById("modalEmail").textContent = app.email || "—";
-      document.getElementById("modalPhone").textContent = app.phone || "—";
-      document.getElementById("modalPlace").textContent = app.place || app.fullAddress || "—";
-      document.getElementById("modalProgram").textContent = app.courseApplied || "—";
-      document.getElementById("modalQualification").textContent = app.qualification || "—";
-      document.getElementById("modalMajorInst").textContent = app.previousInstitution || "—";
-      document.getElementById("modalStatusSelect").value = app.status || "pending";
-      document.getElementById("modalInternalNotes").value = app.internalNotes || "";
-      document.getElementById("timelineContent").innerHTML = buildTimeline(app);
+      try {
+        const app = window.AdminService.getApplicationById(id);
+        if (!app) {
+          showToast("Application record not found: " + id, "error");
+          return;
+        }
+        currentViewingApp = app;
+        document.getElementById("modalAppRef").textContent = app.id || "AE-REF";
+        document.getElementById("modalAppDate").textContent = "Submitted: " + window.AcademicDB.formatDate(app.created_at);
+        document.getElementById("modalFullName").textContent = app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim() || "—";
+        document.getElementById("modalAge").textContent = app.age || "—";
+        document.getElementById("modalEmail").textContent = app.email || "—";
+        document.getElementById("modalPhone").textContent = app.phone || "—";
+        document.getElementById("modalPlace").textContent = app.place || app.fullAddress || "—";
+        document.getElementById("modalProgram").textContent = app.courseApplied || "—";
+        document.getElementById("modalQualification").textContent = app.qualification || "—";
+        document.getElementById("modalMajorInst").textContent = app.previousInstitution || "—";
+        document.getElementById("modalStatusSelect").value = app.status || "pending";
+        document.getElementById("modalInternalNotes").value = app.internalNotes || "";
+        document.getElementById("timelineContent").innerHTML = buildTimeline(app);
 
-      function setDoc(thumbId, nameId, linkId, fileUrl, fileName, emColor) {
-        document.getElementById(nameId).textContent = fileName || "Not Uploaded";
-        const t = document.getElementById(thumbId);
-        const l = document.getElementById(linkId);
-        if (fileUrl && fileUrl.startsWith("data:image")) t.innerHTML = "<img src='" + fileUrl + "' style='max-height:100%;max-width:100%;object-fit:contain;' />";
-        else if (fileUrl) t.innerHTML = "<span style='font-size:2rem;color:" + emColor + ";'>&#128196;</span>";
-        else t.innerHTML = "<span style='font-size:0.8rem;color:#94a3b8;'>No file uploaded</span>";
-        l.href = fileUrl || "#";
+        function isImg(url) {
+          if (!url) return false;
+          return url.startsWith("data:image") || url.includes("payment-proofs") || url.includes("documents") || /\.(png|jpe?g|webp|gif)$/i.test(url.split("?")[0]);
+        }
+
+        function setDoc(thumbId, nameId, linkId, fileUrl, fileName, emColor) {
+          if (nameId && document.getElementById(nameId)) {
+            document.getElementById(nameId).textContent = fileName || (fileUrl ? "Uploaded File" : "Not Uploaded");
+          }
+          const t = document.getElementById(thumbId);
+          const l = document.getElementById(linkId);
+          if (t) {
+            if (isImg(fileUrl)) {
+              t.innerHTML = "<img src='" + fileUrl + "' alt='Document Preview' style='max-height:100%;max-width:100%;object-fit:contain;' />";
+            } else if (fileUrl) {
+              t.innerHTML = "<span style='font-size:2rem;color:" + emColor + ";'>&#128196;</span>";
+            } else {
+              t.innerHTML = "<span style='font-size:0.8rem;color:#94a3b8;'>No file uploaded</span>";
+            }
+          }
+          if (l) {
+            l.href = fileUrl || "#";
+            if (!fileUrl) {
+              l.removeAttribute("target");
+              l.style.opacity = "0.5";
+              l.style.pointerEvents = "none";
+            } else {
+              l.setAttribute("target", "_blank");
+              l.style.opacity = "1";
+              l.style.pointerEvents = "auto";
+            }
+          }
+        }
+
+        setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", app.faydaFileUrl, app.faydaFileName, "#1854a1");
+        setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", app.educationDocUrl, app.educationDocName, "#10b981");
+        document.getElementById("modalPaymentChannel").textContent = "Channel: " + (app.paymentMethod || "Pending");
+        document.getElementById("modalPaymentRef").textContent = "Ref: " + (app.paymentRef || "Pending");
+        setDoc("modalSlipThumb", null, "modalSlipLink", app.paymentSlipUrl, app.paymentSlipName, "#df6b26");
+
+        appModal.classList.add("open");
+      } catch (err) {
+        console.error("Error opening application modal:", err);
+        showToast("Error displaying application modal: " + (err.message || err), "error");
       }
-      setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", app.faydaFileUrl, app.faydaFileName, "#1854a1");
-      setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", app.educationDocUrl, app.educationDocName, "#10b981");
-      document.getElementById("modalPaymentChannel").textContent = "Channel: " + (app.paymentMethod || "Pending");
-      document.getElementById("modalPaymentRef").textContent = "Ref: " + (app.paymentRef || "Pending");
-      setDoc("modalSlipThumb", null, "modalSlipLink", app.paymentSlipUrl, null, "#df6b26");
-      // Slip name — no dedicated span needed but set link href
-      document.getElementById("modalSlipLink").href = app.paymentSlipUrl || "#";
-
-      appModal.classList.add("open");
     }
     const closeAppModal = () => appModal.classList.remove("open");
     document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
@@ -1231,31 +1327,150 @@
     });
     document.getElementById("refreshActivityBtn").addEventListener("click", loadActivityLog);
 
-    // SETTINGS
-    const settingsForm = document.getElementById("settingsForm");
-    const cs = window.AdminService.getSettings();
-    if (cs) {
-      if (cs.applicationFee)       document.getElementById("settingFeeDisplay").value = cs.applicationFee;
-      if (cs.applicationFeeAmount) document.getElementById("settingFeeAmount").value   = cs.applicationFeeAmount;
-      if (cs.telebirrNumber)        document.getElementById("settingTelebirr").value   = cs.telebirrNumber;
-      if (cs.cbeAccount)            document.getElementById("settingCBE").value         = cs.cbeAccount;
-      if (cs.awashAccount)          document.getElementById("settingAwash").value       = cs.awashAccount;
+    // SETTINGS & DYNAMIC PAYMENT METHODS
+    const settingsFeeForm = document.getElementById("settingsFeeForm");
+    const pmTableBody = document.getElementById("paymentMethodsTableBody");
+    const pmModal = document.getElementById("paymentMethodModal");
+    const pmForm = document.getElementById("pmForm");
+
+    async function loadSettingsUI() {
+      const cs = await window.AdminService.getSettingsAsync();
+      if (cs) {
+        if (cs.applicationFee && document.getElementById("settingFeeDisplay")) {
+          document.getElementById("settingFeeDisplay").value = cs.applicationFee;
+        }
+        if (cs.applicationFeeAmount && document.getElementById("settingFeeAmount")) {
+          document.getElementById("settingFeeAmount").value = cs.applicationFeeAmount;
+        }
+      }
+      renderPaymentMethods();
     }
-    settingsForm.addEventListener("submit", e => {
-      e.preventDefault();
-      const updated = {
-        applicationFee:       document.getElementById("settingFeeDisplay").value.trim(),
-        applicationFeeAmount: parseInt(document.getElementById("settingFeeAmount").value,10)||15000,
-        telebirrNumber:       document.getElementById("settingTelebirr").value.trim(),
-        cbeAccount:           document.getElementById("settingCBE").value.trim(),
-        awashAccount:         document.getElementById("settingAwash").value.trim()
-      };
-      window.AdminService.updateSettings(updated);
-      logActivity("updated_settings", "settings");
-      loadOverview();
-      const ab = document.getElementById("settingsSuccessAlert"); ab.style.display="block"; setTimeout(() => ab.style.display="none", 3500);
-      showToast("Settings saved!", "success");
+
+    function renderPaymentMethods() {
+      const methods = window.AdminService.getPaymentMethods();
+      if (!methods || !methods.length) {
+        pmTableBody.innerHTML = "<tr><td colspan='6' style='text-align:center;padding:24px;color:#64748b;'>No payment channels configured yet. Click '+ Add Payment Method / Bank' to add one.</td></tr>";
+        return;
+      }
+
+      pmTableBody.innerHTML = methods.map(m => {
+        const isActive = m.is_active !== false;
+        const statusBadge = isActive
+          ? "<span style='display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;background:#d1fae5;color:#065f46;'>Active</span>"
+          : "<span style='display:inline-block;padding:3px 10px;border-radius:12px;font-size:0.75rem;font-weight:700;background:#f1f5f9;color:#64748b;'>Disabled</span>";
+
+        const badgeHtml = m.badge
+          ? "<span style='display:inline-block;padding:2px 8px;border-radius:4px;font-size:0.72rem;background:#eff6ff;color:#1854a1;font-weight:600;border:1px solid #bfdbfe;'>" + m.badge + "</span>"
+          : "—";
+
+        return "<tr>" +
+          "<td><strong style='color:#0b1b3d;font-size:0.95rem;'>" + m.name + "</strong>" +
+            (m.instructions ? "<div style='font-size:0.78rem;color:#64748b;margin-top:3px;line-height:1.3;'>" + m.instructions + "</div>" : "") +
+          "</td>" +
+          "<td><code style='font-family:monospace;font-size:0.92rem;background:#f8fafc;padding:3px 6px;border-radius:4px;border:1px solid #e2e8f0;font-weight:700;color:#0b1b3d;'>" + m.accountNumber + "</code></td>" +
+          "<td>" + (m.accountName || "—") + "</td>" +
+          "<td>" + badgeHtml + "</td>" +
+          "<td>" + statusBadge + "</td>" +
+          "<td style='text-align:right;white-space:nowrap;'>" +
+            "<button type='button' class='btn-sm btn-edit-pm' data-id='" + m.id + "' style='margin-right:6px;'>Edit</button>" +
+            "<button type='button' class='btn-sm btn-toggle-pm' data-id='" + m.id + "' data-active='" + (isActive ? "false" : "true") + "' style='margin-right:6px;'>" + (isActive ? "Disable" : "Enable") + "</button>" +
+            "<button type='button' class='btn-sm btn-delete-pm' data-id='" + m.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button>" +
+          "</td>" +
+        "</tr>";
+      }).join("");
+
+      // Bind edit buttons
+      document.querySelectorAll(".btn-edit-pm").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const m = methods.find(x => x.id === btn.dataset.id);
+          if (!m) return;
+          document.getElementById("pmEditId").value = m.id;
+          document.getElementById("pmModalTitle").textContent = "Edit: " + m.name;
+          document.getElementById("pmInputName").value = m.name;
+          document.getElementById("pmInputAccountNumber").value = m.accountNumber;
+          document.getElementById("pmInputAccountName").value = m.accountName || "";
+          document.getElementById("pmInputBadge").value = m.badge || "";
+          document.getElementById("pmInputInstructions").value = m.instructions || "";
+          document.getElementById("pmInputActive").checked = m.is_active !== false;
+          pmModal.classList.add("open");
+        });
+      });
+
+      // Bind toggle active status
+      document.querySelectorAll(".btn-toggle-pm").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const newActive = btn.dataset.active === "true";
+          btn.disabled = true;
+          await window.AdminService.togglePaymentMethod(id, newActive);
+          logActivity(newActive ? "enabled_payment_method" : "disabled_payment_method", "settings", id);
+          renderPaymentMethods();
+          showToast(`Payment channel ${newActive ? "enabled" : "disabled"}.`, "success");
+        });
+      });
+
+      // Bind delete payment channel
+      document.querySelectorAll(".btn-delete-pm").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const id = btn.dataset.id;
+          const m = methods.find(x => x.id === id);
+          if (!confirm(`Are you sure you want to delete payment method "${m ? m.name : id}"?`)) return;
+          btn.disabled = true;
+          await window.AdminService.deletePaymentMethod(id);
+          logActivity("deleted_payment_method", "settings", id);
+          renderPaymentMethods();
+          showToast("Payment method removed.", "success");
+        });
+      });
+    }
+
+    if (settingsFeeForm) {
+      settingsFeeForm.addEventListener("submit", async e => {
+        e.preventDefault();
+        const updated = {
+          applicationFee: document.getElementById("settingFeeDisplay").value.trim(),
+          applicationFeeAmount: parseInt(document.getElementById("settingFeeAmount").value, 10) || 15000
+        };
+        await window.AdminService.updateSettings(updated);
+        logActivity("updated_fee_settings", "settings");
+        loadOverview();
+        showToast("Application fee settings updated successfully!", "success");
+      });
+    }
+
+    document.getElementById("btnAddNewPaymentMethod").addEventListener("click", () => {
+      pmForm.reset();
+      document.getElementById("pmEditId").value = "";
+      document.getElementById("pmModalTitle").textContent = "Add Payment Channel / Bank";
+      document.getElementById("pmInputActive").checked = true;
+      pmModal.classList.add("open");
     });
+
+    const closePmModal = () => pmModal.classList.remove("open");
+    document.getElementById("closePmModalBtn").addEventListener("click", closePmModal);
+    document.getElementById("cancelPmBtn").addEventListener("click", closePmModal);
+
+    pmForm.addEventListener("submit", async e => {
+      e.preventDefault();
+      const id = document.getElementById("pmEditId").value;
+      const payload = {
+        name: document.getElementById("pmInputName").value.trim(),
+        accountNumber: document.getElementById("pmInputAccountNumber").value.trim(),
+        accountName: document.getElementById("pmInputAccountName").value.trim(),
+        badge: document.getElementById("pmInputBadge").value.trim() || "Bank Transfer",
+        instructions: document.getElementById("pmInputInstructions").value.trim(),
+        is_active: document.getElementById("pmInputActive").checked
+      };
+      if (id) payload.id = id;
+
+      await window.AdminService.savePaymentMethod(payload);
+      logActivity(id ? "updated_payment_method" : "created_payment_method", "settings", payload.name);
+      closePmModal();
+      renderPaymentMethods();
+      showToast(id ? "Payment method updated!" : "New payment method added!", "success");
+    });
+
+    loadSettingsUI();
 
     // RESPONSIVE CHARTS
     const chartsRow = document.getElementById("chartsRow");
