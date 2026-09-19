@@ -197,8 +197,25 @@ window.AdminService = {
         const local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
         const mergedMap = new Map();
         
-        // 1. Put Supabase apps as canonical source
-        mapped.forEach(app => mergedMap.set(app.id, app));
+        // 1. Put Supabase apps as canonical source with local document fallback
+        mapped.forEach(app => {
+          const localMatch = local.find(l => l.id === app.id);
+          if (localMatch) {
+            if (!app.faydaFileUrl && localMatch.faydaFileUrl) {
+              app.faydaFileUrl = localMatch.faydaFileUrl;
+              app.faydaFileName = localMatch.faydaFileName;
+            }
+            if (!app.educationDocUrl && localMatch.educationDocUrl) {
+              app.educationDocUrl = localMatch.educationDocUrl;
+              app.educationDocName = localMatch.educationDocName;
+            }
+            if (!app.paymentSlipUrl && localMatch.paymentSlipUrl) {
+              app.paymentSlipUrl = localMatch.paymentSlipUrl;
+              app.paymentSlipName = localMatch.paymentSlipName;
+            }
+          }
+          mergedMap.set(app.id, app);
+        });
         
         // 2. Preserve any local applications not yet in Supabase and sync them in the background
         local.forEach(app => {
@@ -268,9 +285,9 @@ window.AdminService = {
 
   _mapSupabaseApp(row) {
     const files = row.application_files || [];
-    const faydaFile = files.find(f => f.file_category === "fayda_id");
-    const eduFile = files.find(f => f.file_category === "document");
-    const slipFile = files.find(f => f.file_category === "payment_proof");
+    const faydaFile = files.find(f => f.file_category === "fayda_id" || f.file_category === "fayda" || (f.file_name && f.file_name.toLowerCase().includes("fayda")));
+    const eduFile = files.find(f => f.file_category === "document" || f.file_category === "education_doc" || f.file_category === "transcript" || (f.file_name && (f.file_name.toLowerCase().includes("transcript") || f.file_name.toLowerCase().includes("degree") || f.file_name.toLowerCase().includes("edu"))));
+    const slipFile = files.find(f => f.file_category === "payment_proof" || f.file_category === "slip" || (f.file_name && (f.file_name.toLowerCase().includes("slip") || f.file_name.toLowerCase().includes("receipt"))));
 
     return {
       id: row.id,

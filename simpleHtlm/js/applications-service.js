@@ -283,19 +283,50 @@ window.ApplicationsService = {
         }
       }
 
-      // Upload documents to Supabase Storage asynchronously and record file metadata
+      // Upload documents to Supabase Storage and record file metadata before returning
+      const uploadTasks = [];
       if (faydaFile) {
-        this.uploadFileToSupabase(faydaFile, "documents", `${applicationId}_fayda_${faydaFile.name.replace(/\s+/g, "_")}`)
-          .then(url => {
-            if (url) this.recordApplicationFile(applicationId, "fayda_id", url, faydaFile.name, faydaFile.size, faydaFile.type);
-          }).catch(() => {});
+        uploadTasks.push((async () => {
+          try {
+            const url = await this.uploadFileToSupabase(faydaFile, "documents", `${applicationId}_fayda_${faydaFile.name.replace(/\s+/g, "_")}`);
+            if (url) {
+              newApplication.faydaFileUrl = url;
+              newApplication.faydaFileName = faydaFile.name;
+              await this.recordApplicationFile(applicationId, "fayda_id", url, faydaFile.name, faydaFile.size, faydaFile.type);
+            }
+          } catch (e) {
+            console.warn("Fayda upload error:", e);
+          }
+        })());
       }
       if (educationDocFile) {
-        this.uploadFileToSupabase(educationDocFile, "documents", `${applicationId}_edu_${educationDocFile.name.replace(/\s+/g, "_")}`)
-          .then(url => {
-            if (url) this.recordApplicationFile(applicationId, "document", url, educationDocFile.name, educationDocFile.size, educationDocFile.type);
-          }).catch(() => {});
+        uploadTasks.push((async () => {
+          try {
+            const url = await this.uploadFileToSupabase(educationDocFile, "documents", `${applicationId}_edu_${educationDocFile.name.replace(/\s+/g, "_")}`);
+            if (url) {
+              newApplication.educationDocUrl = url;
+              newApplication.educationDocName = educationDocFile.name;
+              await this.recordApplicationFile(applicationId, "document", url, educationDocFile.name, educationDocFile.size, educationDocFile.type);
+            }
+          } catch (e) {
+            console.warn("Education doc upload error:", e);
+          }
+        })());
       }
+
+      if (uploadTasks.length > 0) {
+        await Promise.all(uploadTasks);
+      }
+
+      // Update local and session storage with final document URLs
+      try {
+        const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+        const idx = apps.findIndex(a => a.id === applicationId);
+        if (idx !== -1) apps[idx] = newApplication;
+        else apps.unshift(newApplication);
+        window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+        sessionStorage.setItem("ae_current_app_" + applicationId, JSON.stringify(newApplication));
+      } catch (e) {}
     } catch (err) {
       console.warn("Supabase network insert error:", err);
     }

@@ -520,6 +520,9 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
   <!-- PAYMENT METHOD MODAL -->
   <div class="admin-modal" id="paymentMethodModal">
     <div class="modal-card" style="max-width:580px;">
@@ -989,11 +992,15 @@
           }
         }
 
-        setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", app.faydaFileUrl, app.faydaFileName, "#1854a1");
-        setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", app.educationDocUrl, app.educationDocName, "#10b981");
+        const faydaUrl = app.faydaFileUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_fayda_" + app.id) : "");
+        const eduUrl = app.educationDocUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_edu_" + app.id) : "");
+        const slipUrl = app.paymentSlipUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_slip_" + app.id) : "");
+
+        setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", faydaUrl, app.faydaFileName || (faydaUrl ? "FAYDA_National_ID.png" : ""), "#1854a1");
+        setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", eduUrl, app.educationDocName || (eduUrl ? "Academic_Transcript.pdf" : ""), "#10b981");
         document.getElementById("modalPaymentChannel").textContent = "Channel: " + (app.paymentMethod || "Pending");
         document.getElementById("modalPaymentRef").textContent = "Ref: " + (app.paymentRef || "Pending");
-        setDoc("modalSlipThumb", null, "modalSlipLink", app.paymentSlipUrl, app.paymentSlipName, "#df6b26");
+        setDoc("modalSlipThumb", null, "modalSlipLink", slipUrl, app.paymentSlipName || (slipUrl ? "Payment_Receipt.jpg" : ""), "#df6b26");
 
         appModal.classList.add("open");
       } catch (err) {
