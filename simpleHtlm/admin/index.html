@@ -79,6 +79,128 @@
       transform: translateY(-1px);
       box-shadow: 0 4px 10px rgba(11, 27, 61, 0.25);
     }
+
+    /* INQUIRIES READ/UNREAD STYLES */
+    @keyframes unreadGlowPulse {
+      0% {
+        box-shadow: 0 0 0 rgba(37, 99, 235, 0.4), 0 4px 14px rgba(11, 27, 61, 0.08);
+      }
+      50% {
+        box-shadow: 0 0 20px rgba(37, 99, 235, 0.65), 0 0 35px rgba(59, 130, 246, 0.3), 0 6px 20px rgba(11, 27, 61, 0.12);
+      }
+      100% {
+        box-shadow: 0 0 0 rgba(37, 99, 235, 0.4), 0 4px 14px rgba(11, 27, 61, 0.08);
+      }
+    }
+    .inquiry-card {
+      border-radius: 10px;
+      padding: 20px 22px;
+      margin-bottom: 16px;
+      position: relative;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    /* UNREAD: GLOWING */
+    .inquiry-card.is-unread {
+      background: #ffffff !important;
+      border: 1.5px solid #3b82f6 !important;
+      border-left: 6px solid #2563eb !important;
+      animation: unreadGlowPulse 2.6s infinite ease-in-out;
+    }
+    .inquiry-card.is-unread:hover {
+      border-color: #1d4ed8 !important;
+      transform: translateY(-2px);
+      box-shadow: 0 0 26px rgba(37, 99, 235, 0.75), 0 8px 25px rgba(11, 27, 61, 0.16) !important;
+    }
+    /* READ: GREY */
+    .inquiry-card.is-read {
+      background: #f1f5f9 !important;
+      border: 1px solid #e2e8f0 !important;
+      border-left: 6px solid #94a3b8 !important;
+      box-shadow: none !important;
+      animation: none !important;
+      opacity: 0.82;
+    }
+    .inquiry-card.is-read:hover {
+      opacity: 1;
+      background: #f8fafc !important;
+      border-color: #cbd5e1 !important;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06) !important;
+    }
+    .iq-badge-unread {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #eff6ff;
+      color: #1d4ed8;
+      border: 1px solid #bfdbfe;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .iq-badge-unread-dot {
+      width: 7px;
+      height: 7px;
+      background: #2563eb;
+      border-radius: 50%;
+      display: inline-block;
+      box-shadow: 0 0 8px #2563eb;
+    }
+    .iq-badge-read {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #e2e8f0;
+      color: #64748b;
+      border: 1px solid #cbd5e1;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+    }
+    .btn-toggle-read {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      transition: all 0.15s ease;
+    }
+    .btn-toggle-read:hover {
+      background: #f8fafc;
+      border-color: #94a3b8;
+      color: #0b1b3d;
+    }
+    .btn-reply-email {
+      background: #0b1b3d;
+      color: #ffffff !important;
+      border: 1px solid #0b1b3d;
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 6px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-reply-email:hover {
+      background: #1854a1;
+      border-color: #1854a1;
+      color: #ffffff !important;
+    }
   </style>
 </head>
 <body>
@@ -310,13 +432,24 @@
 
         <!-- TAB: INQUIRIES -->
         <section id="tabInquiries" class="admin-tab-pane" style="display:none;">
-          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
             <div>
               <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">Contact Inquiries</h3>
               <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Messages submitted via the public contact form.</p>
             </div>
-            <button type="button" class="btn-sm btn-sync-db" id="refreshInquiriesBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;">&#8635; Refresh</button>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="btn-sm" id="markAllReadBtn" style="background:#ffffff;color:#1e40af;border:1px solid #bfdbfe;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer;">&#10003; Mark All as Read</button>
+              <button type="button" class="btn-sm btn-sync-db" id="refreshInquiriesBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;padding:8px 14px;border-radius:6px;cursor:pointer;">&#8635; Refresh</button>
+            </div>
           </div>
+
+          <!-- Filter Toolbar for Inquiries -->
+          <div style="display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap;" id="inquiryFilters">
+            <button type="button" class="btn-sm iq-filter-btn" data-filter="all" style="background:#0b1b3d;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">All (<span id="countAllInquiries">0</span>)</button>
+            <button type="button" class="btn-sm iq-filter-btn" data-filter="unread" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Unread (<span id="countUnreadInquiries">0</span>)</button>
+            <button type="button" class="btn-sm iq-filter-btn" data-filter="read" style="background:#f8fafc;color:#64748b;border:1px solid #cbd5e1;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Read (<span id="countReadInquiries">0</span>)</button>
+          </div>
+
           <div id="inquiryList"><p style="color:#64748b;">Loading inquiries...</p></div>
         </section>
 
@@ -1443,8 +1576,168 @@
       closeTestimonialModal(); renderTestimonials(); showToast("Testimonial saved!", "success");
     });
 
-    // CONTACT INQUIRIES
+    // CONTACT INQUIRIES & READ/UNREAD MANAGEMENT
     const inquiryListEl = document.getElementById("inquiryList");
+    let allInquiries = [];
+    let currentInquiryFilter = "all";
+
+    function getReadInquiryIds() {
+      try {
+        const raw = localStorage.getItem("ae_read_contact_inquiries");
+        return raw ? new Set(JSON.parse(raw)) : new Set();
+      } catch (e) {
+        return new Set();
+      }
+    }
+
+    function saveReadInquiryIds(set) {
+      const arr = Array.from(set);
+      try {
+        localStorage.setItem("ae_read_contact_inquiries", JSON.stringify(arr));
+      } catch (e) {}
+
+      // Asynchronously sync to Supabase site_settings table (best-effort)
+      try {
+        supaFetch("site_settings", {
+          method: "POST",
+          body: { key: "read_contact_inquiries", value: JSON.stringify(arr) },
+          upsert: true
+        }).catch(() => {});
+      } catch (e) {}
+    }
+
+    async function syncRemoteReadIds() {
+      try {
+        const rows = await supaFetch("site_settings", { filter: "key=eq.read_contact_inquiries" });
+        if (rows && rows.length && rows[0].value) {
+          const remoteArr = JSON.parse(rows[0].value);
+          if (Array.isArray(remoteArr)) {
+            const localSet = getReadInquiryIds();
+            remoteArr.forEach(id => localSet.add(id));
+            localStorage.setItem("ae_read_contact_inquiries", JSON.stringify(Array.from(localSet)));
+          }
+        }
+      } catch (e) {}
+    }
+
+    function toggleInquiryRead(id) {
+      const readSet = getReadInquiryIds();
+      const isNowRead = !readSet.has(id);
+      if (isNowRead) {
+        readSet.add(id);
+      } else {
+        readSet.delete(id);
+      }
+      saveReadInquiryIds(readSet);
+      renderInquiries();
+      showToast(isNowRead ? "Marked inquiry as read" : "Marked inquiry as unread", "success");
+    }
+
+    function markAllInquiriesRead() {
+      if (!allInquiries || !allInquiries.length) return;
+      const readSet = getReadInquiryIds();
+      allInquiries.forEach(r => { if (r.id) readSet.add(r.id); });
+      saveReadInquiryIds(readSet);
+      renderInquiries();
+      showToast("All inquiries marked as read", "success");
+    }
+
+    function renderInquiries() {
+      if (!allInquiries || !allInquiries.length) {
+        inquiryListEl.innerHTML = "<p style='color:#64748b;'>No contact inquiries yet.</p>";
+        updateInquiryCounts(0, 0, 0);
+        return;
+      }
+
+      const readSet = getReadInquiryIds();
+      const totalCount = allInquiries.length;
+      let readCount = 0;
+      let unreadCount = 0;
+
+      allInquiries.forEach(r => {
+        if (readSet.has(r.id)) readCount++;
+        else unreadCount++;
+      });
+
+      updateInquiryCounts(totalCount, unreadCount, readCount);
+
+      // Filter inquiries according to current filter
+      let filtered = allInquiries;
+      if (currentInquiryFilter === "unread") {
+        filtered = allInquiries.filter(r => !readSet.has(r.id));
+      } else if (currentInquiryFilter === "read") {
+        filtered = allInquiries.filter(r => readSet.has(r.id));
+      }
+
+      if (!filtered.length) {
+        inquiryListEl.innerHTML = `<div style="background:#fff;padding:32px;border:1px solid #e2e8f0;border-radius:10px;text-align:center;color:#64748b;">
+          No ${currentInquiryFilter === "unread" ? "unread" : currentInquiryFilter === "read" ? "read" : ""} inquiries found.
+        </div>`;
+        return;
+      }
+
+      inquiryListEl.innerHTML = filtered.map(r => {
+        const isRead = readSet.has(r.id);
+        const cardClass = isRead ? "inquiry-card is-read" : "inquiry-card is-unread";
+        const badgeHtml = isRead 
+          ? `<span class="iq-badge-read">&#10003; Read</span>` 
+          : `<span class="iq-badge-unread"><span class="iq-badge-unread-dot"></span> New / Unread</span>`;
+        const toggleBtnLabel = isRead 
+          ? `✉ Mark as Unread` 
+          : `✓ Mark as Read`;
+        const ts = r.created_at ? new Date(r.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
+        const replySubject = encodeURIComponent("Re: " + (r.subject || "Academic Excellence Inquiry"));
+        const safeName = r.name || "Anonymous";
+        const safeEmail = r.email || "—";
+        const safePhone = r.phone || "";
+
+        return `
+          <div class="${cardClass}" id="inquiryCard_${r.id}">
+            <div class="iq-meta" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+              <strong style="color:${isRead ? '#475569' : '#0b1b3d'};font-size:1.05rem;">${safeName}</strong>
+              ${badgeHtml}
+              <span style="color:#64748b;">✉ <a href="mailto:${safeEmail}" style="color:${isRead ? '#64748b' : '#1d4ed8'};text-decoration:none;font-weight:600;">${safeEmail}</a></span>
+              ${safePhone ? `<span style="color:#64748b;">📞 ${safePhone}</span>` : ""}
+              <span style="margin-left:auto;color:#94a3b8;font-size:0.8rem;">${ts}</span>
+            </div>
+
+            ${r.subject ? `<div style="font-weight:700;color:${isRead ? '#475569' : '#0b1b3d'};margin-bottom:8px;font-size:0.95rem;">Subject: ${r.subject}</div>` : ""}
+
+            <div style="color:${isRead ? '#64748b' : '#1e293b'};font-size:0.92rem;line-height:1.65;white-space:pre-wrap;margin-bottom:14px;background:${isRead ? '#e2e8f033' : '#f8fafc'};padding:12px 14px;border-radius:6px;border:1px solid ${isRead ? '#cbd5e1' : '#e2e8f0'};">${r.message || "—"}</div>
+
+            <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;border-top:1px solid ${isRead ? '#cbd5e1' : '#e2e8f0'};padding-top:12px;margin-top:8px;">
+              <button type="button" class="btn-toggle-read" onclick="window.toggleInquiryRead('${r.id}')">
+                ${toggleBtnLabel}
+              </button>
+              <a href="mailto:${safeEmail}?subject=${replySubject}" class="btn-reply-email">
+                ↩ Reply via Email
+              </a>
+              <button type="button" class="btn-toggle-read" onclick="navigator.clipboard.writeText('${safeEmail}'); showToast('Email copied to clipboard', 'success');">
+                📋 Copy Email
+              </button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    function updateInquiryCounts(total, unread, read) {
+      const allEl = document.getElementById("countAllInquiries");
+      const unreadEl = document.getElementById("countUnreadInquiries");
+      const readEl = document.getElementById("countReadInquiries");
+      if (allEl) allEl.textContent = total;
+      if (unreadEl) unreadEl.textContent = unread;
+      if (readEl) readEl.textContent = read;
+
+      const badge = document.getElementById("navBadgeInquiries");
+      if (badge) {
+        badge.textContent = unread;
+        badge.style.display = unread > 0 ? "inline-block" : "none";
+        badge.style.background = unread > 0 ? "#2563eb" : "#94a3b8";
+        badge.style.boxShadow = unread > 0 ? "0 0 10px rgba(37,99,235,0.6)" : "none";
+      }
+    }
+
     async function loadInquiries() {
       inquiryListEl.innerHTML = "<p style='color:#64748b;'>Loading inquiries...</p>";
       try {
@@ -1469,16 +1762,34 @@
           } catch(e) {}
         }
 
-        if (!rows || !rows.length) { inquiryListEl.innerHTML = "<p style='color:#64748b;'>No contact inquiries yet.</p>"; return; }
-        const badge = document.getElementById("navBadgeInquiries");
-        if (badge) { badge.textContent = rows.length; badge.style.display = "inline-block"; }
-        inquiryListEl.innerHTML = rows.map(r => {
-          const ts = r.created_at ? new Date(r.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
-          return "<div class='inquiry-card'><div class='iq-meta'><strong style='color:#0b1b3d;'>" + (r.name||"Anonymous") + "</strong><span>" + (r.email||"—") + "</span>" + (r.phone ? "<span>" + r.phone + "</span>" : "") + "<span style='margin-left:auto;'>" + ts + "</span></div>" + (r.subject ? "<div style='font-weight:600;color:#0b1b3d;margin-bottom:6px;'>Subject: " + r.subject + "</div>" : "") + "<div style='color:#475569;font-size:0.9rem;line-height:1.6;'>" + (r.message||"—") + "</div></div>";
-        }).join("");
-      } catch(e) { inquiryListEl.innerHTML = "<p style='color:#d93025;'>Could not load inquiries. (" + e.message + ")</p>"; }
+        allInquiries = Array.isArray(rows) ? rows : [];
+        await syncRemoteReadIds();
+        renderInquiries();
+      } catch(e) {
+        inquiryListEl.innerHTML = "<p style='color:#d93025;'>Could not load inquiries. (" + e.message + ")</p>";
+      }
     }
+
+    window.toggleInquiryRead = toggleInquiryRead;
+    window.markAllInquiriesRead = markAllInquiriesRead;
+
     document.getElementById("refreshInquiriesBtn").addEventListener("click", loadInquiries);
+    document.getElementById("markAllReadBtn")?.addEventListener("click", markAllInquiriesRead);
+
+    document.getElementById("inquiryFilters")?.querySelectorAll(".iq-filter-btn")?.forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".iq-filter-btn").forEach(b => {
+          b.style.background = "#f8fafc";
+          b.style.color = "#475569";
+          b.style.border = "1px solid #cbd5e1";
+        });
+        btn.style.background = "#0b1b3d";
+        btn.style.color = "#ffffff";
+        btn.style.border = "none";
+        currentInquiryFilter = btn.dataset.filter;
+        renderInquiries();
+      });
+    });
 
     // ACTIVITY LOG
     const activityContainer = document.getElementById("activityLogContainer");
