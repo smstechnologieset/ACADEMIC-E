@@ -70,7 +70,7 @@ export function AdminLoginForm() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@academice.edu.et"
+                  placeholder="solhm1@yahoo.com"
                   className="w-full pl-10 pr-4 py-3 rounded-xl bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:outline-none focus:border-blue-600 text-sm shadow-sm"
                   required
                 />

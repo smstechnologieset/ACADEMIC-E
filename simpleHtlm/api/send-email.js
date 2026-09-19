@@ -5,7 +5,7 @@
 
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <admin@academicexcellences.com>";
-const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "imkingya69@gmail.com";
+const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "solhm1@yahoo.com";
 
 const baseWrapper = (content) => `
 <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
@@ -279,7 +279,7 @@ module.exports = async function handler(req, res) {
         `);
 
         // Send to official administrative inbox and backup notification address
-        await sendEmail(["admin@academicexcellences.com", "imkingya69@gmail.com"], adminSubject, adminHtml, safeEmail);
+        await sendEmail(["admin@academicexcellences.com", "solhm1@yahoo.com"], adminSubject, adminHtml, safeEmail);
 
         // 3. Send Auto-Confirmation Receipt to Visitor
         if (safeEmail) {
