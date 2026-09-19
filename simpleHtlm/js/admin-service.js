@@ -25,6 +25,8 @@ window.AdminService = {
         if (!authError && data && data.session) {
           const session = {
             token: data.session.access_token || ("ae_token_" + Date.now()),
+            refreshToken: data.session.refresh_token || "",
+            expiresAt: Date.now() + ((data.session.expires_in || 3600) * 1000),
             email: data.user?.email || cleanEmail,
             role: "Super Admin",
             loginTime: new Date().toISOString()
@@ -60,6 +62,8 @@ window.AdminService = {
       if (res.ok && data.access_token) {
         const session = {
           token: data.access_token,
+          refreshToken: data.refresh_token || "",
+          expiresAt: Date.now() + ((data.expires_in || 3600) * 1000),
           email: data.user?.email || cleanEmail,
           role: "Super Admin",
           loginTime: new Date().toISOString()
@@ -94,6 +98,79 @@ window.AdminService = {
     } catch (e) {
       console.warn("sessionStorage save error:", e);
     }
+  },
+
+  isTokenExpired(token) {
+    if (!token || typeof token !== "string") return true;
+    if (!token.includes(".")) return false; // Non-JWT local mock
+    try {
+      const parts = token.split(".");
+      if (parts.length !== 3) return false;
+      const base64 = parts[1].replace(/-/g, "+").replace(/_/g, "/");
+      const jsonPayload = decodeURIComponent(
+        atob(base64)
+          .split("")
+          .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+          .join("")
+      );
+      const parsed = JSON.parse(jsonPayload);
+      if (!parsed.exp) return false;
+      // Mark expired if current time is within 60 seconds of exp
+      return (Date.now() / 1000) >= (parsed.exp - 60);
+    } catch (e) {
+      return false;
+    }
+  },
+
+  async refreshToken() {
+    const session = this.checkAuth();
+    if (!session || !session.refreshToken) return null;
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+      const res = await fetch(`${supabaseUrl}/auth/v1/token?grant_type=refresh_token`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${supabaseKey}`,
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ refresh_token: session.refreshToken })
+      });
+
+      const data = await res.json();
+      if (res.ok && data.access_token) {
+        session.token = data.access_token;
+        if (data.refresh_token) session.refreshToken = data.refresh_token;
+        session.expiresAt = Date.now() + ((data.expires_in || 3600) * 1000);
+        this._saveSession(session);
+        return session.token;
+      }
+    } catch (err) {
+      console.warn("Token refresh failure:", err);
+    }
+    return null;
+  },
+
+  async getValidToken() {
+    const session = this.checkAuth();
+    const fallbackAnon = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+    if (!session || !session.token) {
+      return fallbackAnon;
+    }
+
+    if (this.isTokenExpired(session.token)) {
+      if (session.refreshToken) {
+        const refreshed = await this.refreshToken();
+        if (refreshed) return refreshed;
+      }
+      // Return anon key instead of an expired token that causes 401 PGRST303
+      return fallbackAnon;
+    }
+
+    return session.token;
   },
 
   checkAuth() {

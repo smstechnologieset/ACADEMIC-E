@@ -56,6 +56,29 @@
     .kpi-grid-new { display:grid; grid-template-columns:repeat(auto-fit,minmax(210px,1fr)); gap:18px; margin-bottom:28px; }
     .kpi-card-new { background:#fff; border:1px solid #e2e8f0; padding:24px; border-radius:10px; }
     .kpi-card-blue { background:linear-gradient(135deg,#0b1b3d,#1854a1); color:#fff; }
+    .btn-dark-admin {
+      background: #0b1b3d !important;
+      color: #ffffff !important;
+      border: 1px solid #0b1b3d !important;
+      padding: 8px 18px;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-radius: 6px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      box-shadow: 0 2px 4px rgba(11, 27, 61, 0.15);
+      text-decoration: none;
+    }
+    .btn-dark-admin:hover {
+      background: #1854a1 !important;
+      border-color: #1854a1 !important;
+      color: #ffffff !important;
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(11, 27, 61, 0.25);
+    }
   </style>
 </head>
 <body>
@@ -248,7 +271,7 @@
           <div class="data-table-card">
             <div class="table-toolbar">
               <h3 style="font-size:1.15rem;color:#0b1b3d;">Homepage Statistics Editor</h3>
-              <button type="button" class="btn btn-orange btn-sm" id="btnAddStat">+ Add Stat Block</button>
+              <button type="button" class="btn-dark-admin" id="btnAddStat">+ Add Stat Block</button>
             </div>
             <div class="table-responsive">
               <table class="admin-table">
@@ -266,7 +289,7 @@
               <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">FAQ Editor</h3>
               <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Manage frequently asked questions on the public site.</p>
             </div>
-            <button type="button" class="btn btn-orange btn-sm" id="btnAddFaq">+ Add Question</button>
+            <button type="button" class="btn-dark-admin" id="btnAddFaq">+ Add Question</button>
           </div>
           <div id="faqList"><p style="color:#64748b;">Loading FAQs...</p></div>
         </section>
@@ -278,7 +301,7 @@
               <h3 style="font-size:1.25rem;color:#0b1b3d;margin:0;">Testimonials Manager</h3>
               <p style="color:#64748b;font-size:0.85rem;margin:4px 0 0;">Manage student testimonials shown on the homepage.</p>
             </div>
-            <button type="button" class="btn btn-orange btn-sm" id="btnAddTestimonial">+ Add Testimonial</button>
+            <button type="button" class="btn-dark-admin" id="btnAddTestimonial">+ Add Testimonial</button>
           </div>
           <div id="testimonialGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:18px;">
             <p style="color:#64748b;">Loading testimonials...</p>
@@ -450,7 +473,7 @@
             </div>
             <div class="form-group">
               <label class="form-label">Save Action</label>
-              <button type="button" class="btn btn-orange" id="modalSaveStatusBtn" style="width:100%;">Update Status &amp; Save</button>
+              <button type="button" class="btn-dark-admin" id="modalSaveStatusBtn" style="width:100%;justify-content:center;height:42px;">Update Status &amp; Save</button>
             </div>
           </div>
 
@@ -538,7 +561,7 @@
           </div>
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelCourseBtn">Cancel</button>
-            <button type="submit" class="btn btn-orange btn-sm">Save Program</button>
+            <button type="submit" class="btn-dark-admin">Save Program</button>
           </div>
         </form>
       </div>
@@ -606,7 +629,7 @@
           <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="statInputSort" class="form-input" value="1" min="1" /></div>
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelStatBtn">Cancel</button>
-            <button type="submit" class="btn btn-orange btn-sm">Save Stat</button>
+            <button type="submit" class="btn-dark-admin">Save Stat</button>
           </div>
         </form>
       </div>
@@ -628,7 +651,7 @@
           <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="faqInputSort" class="form-input" value="1" min="1" /></div>
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelFaqBtn">Cancel</button>
-            <button type="submit" class="btn btn-orange btn-sm">Save FAQ</button>
+            <button type="submit" class="btn-dark-admin">Save FAQ</button>
           </div>
         </form>
       </div>
@@ -665,7 +688,7 @@
           </div>
           <div class="step-actions">
             <button type="button" class="btn btn-sm" id="cancelTestimonialBtn">Cancel</button>
-            <button type="submit" class="btn btn-orange btn-sm">Save Testimonial</button>
+            <button type="submit" class="btn-dark-admin">Save Testimonial</button>
           </div>
         </form>
       </div>
@@ -747,14 +770,55 @@
       const { method = "GET", filter = "", body = null, upsert = false } = opts;
       let url = SUPA_URL + "/rest/v1/" + table;
       if (filter) url += "?" + filter;
-      const auth = (window.AdminService && window.AdminService.checkAuth) ? window.AdminService.checkAuth() : null;
-      const token = (auth && auth.token) ? auth.token : SUPA_KEY;
+
+      let token = SUPA_KEY;
+      if (window.AdminService && window.AdminService.getValidToken) {
+        try {
+          token = await window.AdminService.getValidToken();
+        } catch (e) {
+          token = SUPA_KEY;
+        }
+      } else {
+        const auth = (window.AdminService && window.AdminService.checkAuth) ? window.AdminService.checkAuth() : null;
+        if (auth && auth.token && !auth.token.includes(".")) token = auth.token;
+      }
+
       const headers = Object.assign({}, BASE_HEADERS, { "Authorization": "Bearer " + token });
       if (upsert) headers["Prefer"] = "resolution=merge-duplicates,return=representation";
       else if (method !== "GET") headers["Prefer"] = "return=representation";
       const init = { method, headers };
       if (body) init.body = JSON.stringify(body);
-      const res = await fetch(url, init);
+
+      let res = await fetch(url, init);
+
+      // Auto-recover from 401 JWT expired / PGRST303 error
+      if (res.status === 401) {
+        let errTxt = "";
+        try {
+          const clone = res.clone();
+          errTxt = await clone.text();
+        } catch(e) {}
+
+        if (errTxt.includes("JWT expired") || errTxt.includes("PGRST303")) {
+          console.warn("Caught 401 JWT expired in supaFetch. Attempting auto-refresh or fallback...");
+          let refreshed = false;
+          if (window.AdminService && window.AdminService.refreshToken) {
+            try {
+              const freshToken = await window.AdminService.refreshToken();
+              if (freshToken) {
+                headers["Authorization"] = "Bearer " + freshToken;
+                res = await fetch(url, init);
+                refreshed = true;
+              }
+            } catch(e) {}
+          }
+          if (!refreshed || !res.ok) {
+            headers["Authorization"] = "Bearer " + SUPA_KEY;
+            res = await fetch(url, init);
+          }
+        }
+      }
+
       if (!res.ok) { const t = await res.text(); throw new Error(table + " " + method + ": " + res.status + " " + t); }
       if (method === "DELETE") return null;
       return res.json();
@@ -1384,7 +1448,27 @@
     async function loadInquiries() {
       inquiryListEl.innerHTML = "<p style='color:#64748b;'>Loading inquiries...</p>";
       try {
-        const rows = await supaFetch("contact_messages", { filter:"order=created_at.desc&limit=100" });
+        let rows = null;
+        try {
+          rows = await supaFetch("contact_messages", { filter:"order=created_at.desc&limit=100" });
+        } catch (fetchErr) {
+          console.warn("Direct contact_messages fetch error, trying API fallback:", fetchErr);
+          const fallbackRes = await fetch("/api/send-email?action=get_inquiries");
+          if (fallbackRes.ok) rows = await fallbackRes.json();
+          else throw fetchErr;
+        }
+
+        // If direct fetch returned empty array, verify with API fallback
+        if (!rows || !rows.length) {
+          try {
+            const fallbackRes = await fetch("/api/send-email?action=get_inquiries");
+            if (fallbackRes.ok) {
+              const fallbackRows = await fallbackRes.json();
+              if (fallbackRows && fallbackRows.length) rows = fallbackRows;
+            }
+          } catch(e) {}
+        }
+
         if (!rows || !rows.length) { inquiryListEl.innerHTML = "<p style='color:#64748b;'>No contact inquiries yet.</p>"; return; }
         const badge = document.getElementById("navBadgeInquiries");
         if (badge) { badge.textContent = rows.length; badge.style.display = "inline-block"; }
@@ -1392,7 +1476,7 @@
           const ts = r.created_at ? new Date(r.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}) : "—";
           return "<div class='inquiry-card'><div class='iq-meta'><strong style='color:#0b1b3d;'>" + (r.name||"Anonymous") + "</strong><span>" + (r.email||"—") + "</span>" + (r.phone ? "<span>" + r.phone + "</span>" : "") + "<span style='margin-left:auto;'>" + ts + "</span></div>" + (r.subject ? "<div style='font-weight:600;color:#0b1b3d;margin-bottom:6px;'>Subject: " + r.subject + "</div>" : "") + "<div style='color:#475569;font-size:0.9rem;line-height:1.6;'>" + (r.message||"—") + "</div></div>";
         }).join("");
-      } catch(e) { inquiryListEl.innerHTML = "<p style='color:#d93025;'>Could not load: " + e.message + "</p>"; }
+      } catch(e) { inquiryListEl.innerHTML = "<p style='color:#d93025;'>Could not load inquiries. (" + e.message + ")</p>"; }
     }
     document.getElementById("refreshInquiriesBtn").addEventListener("click", loadInquiries);
 
@@ -1412,7 +1496,34 @@
       try {
         let filter = "order=created_at.desc&limit=100";
         if (activityFilter !== "all") filter += "&target_type=eq." + activityFilter;
-        const rows = await supaFetch("admin_activity_log", { filter });
+        let rows = null;
+        try {
+          rows = await supaFetch("admin_activity_log", { filter });
+        } catch (fetchErr) {
+          console.warn("Direct admin_activity_log fetch error, trying API fallback:", fetchErr);
+          const fallbackRes = await fetch("/api/send-email?action=get_activity_log");
+          if (fallbackRes.ok) {
+            rows = await fallbackRes.json();
+            if (activityFilter !== "all" && Array.isArray(rows)) {
+              rows = rows.filter(r => r.target_type === activityFilter);
+            }
+          } else throw fetchErr;
+        }
+
+        // If direct fetch returned empty, verify with API fallback
+        if (!rows || !rows.length) {
+          try {
+            const fallbackRes = await fetch("/api/send-email?action=get_activity_log");
+            if (fallbackRes.ok) {
+              let fallbackRows = await fallbackRes.json();
+              if (activityFilter !== "all" && Array.isArray(fallbackRows)) {
+                fallbackRows = fallbackRows.filter(r => r.target_type === activityFilter);
+              }
+              if (fallbackRows && fallbackRows.length) rows = fallbackRows;
+            }
+          } catch(e) {}
+        }
+
         if (!rows || !rows.length) { activityContainer.innerHTML = "<p style='padding:24px;color:#64748b;'>No activity recorded yet.</p>"; return; }
         activityContainer.innerHTML = rows.map(entry => {
           const action = entry.action || "";
@@ -1422,7 +1533,7 @@
           const ts = entry.created_at ? new Date(entry.created_at).toLocaleString("en-GB", {day:"2-digit",month:"short",hour:"2-digit",minute:"2-digit"}) : "—";
           return "<div class='al-entry'><div class='al-icon " + cls + "'>" + icon + "</div><div style='flex:1;min-width:0;'><div style='font-size:0.9rem;font-weight:600;color:#0b1b3d;'>" + label + "</div><div style='font-size:0.78rem;color:#64748b;'>" + (entry.actor_email||"admin") + (entry.target_id ? " · <span style='font-family:monospace;'>" + entry.target_id.slice(0,20) + "</span>" : "") + "</div></div><div style='font-size:0.75rem;color:#94a3b8;white-space:nowrap;flex-shrink:0;'>" + ts + "</div></div>";
         }).join("");
-      } catch(e) { activityContainer.innerHTML = "<p style='padding:24px;color:#d93025;'>Could not load: " + e.message + "</p>"; }
+      } catch(e) { activityContainer.innerHTML = "<p style='padding:24px;color:#d93025;'>Could not load activity log. (" + e.message + ")</p>"; }
     }
     document.getElementById("activityFilters").querySelectorAll(".al-filter-btn").forEach(btn => {
       btn.addEventListener("click", () => {

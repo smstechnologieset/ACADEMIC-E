@@ -31,7 +31,7 @@ const baseWrapper = (content) => `
 </div>
 `;
 
-async function sendEmail(to, subject, htmlBody) {
+async function sendEmail(to, subject, htmlBody, customReplyTo = null) {
   if (!RESEND_API_KEY) {
     console.log(`[EMAIL SIMULATED] To: ${to} | Subject: ${subject}`);
     return true;
@@ -47,7 +47,7 @@ async function sendEmail(to, subject, htmlBody) {
       body: JSON.stringify({
         from: FROM_ADDRESS,
         to: Array.isArray(to) ? to : [to],
-        reply_to: [REPLY_TO_ADDRESS],
+        reply_to: customReplyTo ? [customReplyTo] : [REPLY_TO_ADDRESS],
         subject,
         html: htmlBody
       })
@@ -80,6 +80,40 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  const host = req.headers ? (req.headers.host || "localhost") : "localhost";
+  const urlObj = new URL(req.url, `http://${host}`);
+  const actionParam = urlObj.searchParams.get("action");
+
+  // Server-side fallback for reading inquiries and activity logs using service role key
+  if (req.method === "GET" || actionParam) {
+    const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+    const srvKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+    if (actionParam === "get_inquiries") {
+      try {
+        const r = await fetch(`${supabaseUrl}/rest/v1/contact_messages?order=created_at.desc&limit=100`, {
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        });
+        const rows = await r.json();
+        return res.status(200).json(Array.isArray(rows) ? rows : []);
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
+    if (actionParam === "get_activity_log") {
+      try {
+        const r = await fetch(`${supabaseUrl}/rest/v1/admin_activity_log?order=created_at.desc&limit=100`, {
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        });
+        const rows = await r.json();
+        return res.status(200).json(Array.isArray(rows) ? rows : []);
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+  }
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method not allowed. Use POST." });
   }
@@ -88,7 +122,7 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const { type, to, name, refId, course, reason, rejectionReason } = body;
 
-    if (!to) {
+    if (!to && type !== "contact_inquiry") {
       return res.status(400).json({ error: "Recipient email 'to' is required." });
     }
 
@@ -191,6 +225,79 @@ module.exports = async function handler(req, res) {
           <p style="font-size: 13px; color: #64748b; margin-top: 25px;">Thank you for your interest in Academic Excellence.</p>
         `);
         success = await sendEmail(to, subject, html);
+        break;
+      }
+
+      case "contact_inquiry": {
+        const safeEmail = (body.email || to || "").trim();
+        const safeSubject = (body.subject || "General Inquiry").trim();
+        const safePhone = (body.phone || "").trim();
+        const safeMessage = (body.message || "").trim();
+
+        // 1. Persist directly into Supabase contact_messages table via serverless service role key
+        const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const srvKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+        if (srvKey) {
+          try {
+            await fetch(`${supabaseUrl}/rest/v1/contact_messages`, {
+              method: "POST",
+              headers: {
+                "apikey": srvKey,
+                "Authorization": `Bearer ${srvKey}`,
+                "Content-Type": "application/json",
+                "Prefer": "return=minimal"
+              },
+              body: JSON.stringify({
+                name: safeName,
+                email: safeEmail,
+                phone: safePhone || null,
+                subject: safeSubject,
+                message: safeMessage
+              })
+            });
+          } catch (dbErr) {
+            console.warn("DB insert contact error:", dbErr);
+          }
+        }
+
+        // 2. Send Alert Notification to Admin Desk with custom reply-to set to visitor's email
+        const adminSubject = `📬 New Inquiry: ${safeSubject} — from ${safeName}`;
+        const escapedMessage = safeMessage.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+        const adminHtml = baseWrapper(`
+          <p style="font-size: 16px; margin-top: 0; color: #0b1b3d;"><strong>New Website Inquiry Received</strong></p>
+          <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+            <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>From:</strong> ${safeName}</p>
+            <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Email:</strong> <a href="mailto:${safeEmail}" style="color: #1d4ed8; font-weight: 600;">${safeEmail}</a></p>
+            ${safePhone ? `<p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Phone:</strong> ${safePhone}</p>` : ""}
+            <p style="margin: 0; font-size: 14px;"><strong>Subject / Track:</strong> ${safeSubject}</p>
+          </div>
+          <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px 20px; border-radius: 8px; margin-bottom: 20px;">
+            <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Message Content:</p>
+            <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #1e293b; white-space: pre-wrap;">${escapedMessage}</p>
+          </div>
+          <p style="font-size: 12px; color: #64748b;">💡 <em>You can reply directly to this email to respond directly to ${safeName} (${safeEmail}).</em></p>
+        `);
+
+        // Send to official administrative inbox and backup notification address
+        await sendEmail(["admin@academicexcellences.com", "solhm1@yahoo.com"], adminSubject, adminHtml, safeEmail);
+
+        // 3. Send Auto-Confirmation Receipt to Visitor
+        if (safeEmail) {
+          const userSubject = `Thank you for contacting Academic Excellence — We have received your message`;
+          const userHtml = baseWrapper(`
+            <p>Dear <strong>${safeName}</strong>,</p>
+            <p>Thank you for reaching out to Academic Excellence. We have received your inquiry regarding <strong>${safeSubject}</strong>.</p>
+            <p>A member of our admissions and academic counseling desk is reviewing your message and will reach out to you within 24 to 48 business hours.</p>
+            <div style="background: #f8fafc; border-left: 4px solid #0b1b3d; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+              <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #0b1b3d; text-transform: uppercase;">Your Message Summary:</p>
+              <p style="margin: 0; font-size: 13px; color: #475569; white-space: pre-wrap;">${safeMessage.slice(0, 300)}${safeMessage.length > 300 ? "..." : ""}</p>
+            </div>
+            <p style="font-size: 13px; color: #64748b; margin-top: 25px;">If you have any urgent inquiries, feel free to reply directly to this email or browse our academic programs at <a href="https://www.academicexcellences.com" style="color: #2563eb; font-weight: 600;">academicexcellences.com</a>.</p>
+          `);
+          await sendEmail(safeEmail, userSubject, userHtml);
+        }
+
+        success = true;
         break;
       }
 

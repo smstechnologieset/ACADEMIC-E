@@ -99,14 +99,34 @@
 
           <form id="academicInquiryForm">
             <div class="form-field-group">
-              <input type="email" id="emailAddress" class="form-input" placeholder="Email *" required />
+              <input type="text" id="fullName" class="form-input" placeholder="Full Name *" required />
             </div>
 
             <div class="form-field-group">
-              <textarea id="message" class="form-textarea" rows="6" placeholder="Write a Message..." required></textarea>
+              <input type="email" id="emailAddress" class="form-input" placeholder="Email Address *" required />
             </div>
 
-            <button type="submit" class="btn-form-submit">Submit</button>
+            <div class="form-field-group">
+              <input type="tel" id="phoneNumber" class="form-input" placeholder="Phone Number (e.g. +251 911 ...)" />
+            </div>
+
+            <div class="form-field-group">
+              <select id="natureOfInquiry" class="form-select">
+                <option value="" disabled selected>Nature of Inquiry</option>
+                <option value="Program Admissions">Program Admissions &amp; Enrollment</option>
+                <option value="Curriculum & Accreditation">Curriculum &amp; U.S. Accreditation Details</option>
+                <option value="Tuition & Bank Transfer">Tuition &amp; Bank Transfer Support</option>
+                <option value="Corporate Partnership">Corporate / Institutional Partnership</option>
+                <option value="General Inquiry">General Inquiries</option>
+                <option value="Other">Other Inquiry</option>
+              </select>
+            </div>
+
+            <div class="form-field-group">
+              <textarea id="message" class="form-textarea" rows="5" placeholder="Write your message or questions here..." required></textarea>
+            </div>
+
+            <button type="submit" class="btn-form-submit">Submit Inquiry</button>
             <div id="formStatus" class="form-status"></div>
           </form>
         </div>

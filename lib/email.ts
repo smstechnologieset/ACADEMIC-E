@@ -6,16 +6,24 @@
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <admin@academicexcellences.com>";
 const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "solhm1@yahoo.com";
 
-async function sendEmail(to: string, subject: string, htmlBody: string): Promise<boolean> {
+async function sendEmail(
+  to: string | string[],
+  subject: string,
+  htmlBody: string,
+  replyTo?: string | string[]
+): Promise<boolean> {
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!apiKey) {
-    console.log(`[EMAIL SIMULATED] To: ${to} | Subject: ${subject}`);
+    console.log(`[EMAIL SIMULATED] To: ${JSON.stringify(to)} | Subject: ${subject}`);
     console.log(`[EMAIL BODY]\n${htmlBody.replace(/<[^>]*>/g, "").substring(0, 200)}...`);
     return true;
   }
 
   try {
+    const toArray = Array.isArray(to) ? to : [to];
+    const replyToArray = replyTo ? (Array.isArray(replyTo) ? replyTo : [replyTo]) : [REPLY_TO_ADDRESS];
+
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -24,8 +32,8 @@ async function sendEmail(to: string, subject: string, htmlBody: string): Promise
       },
       body: JSON.stringify({
         from: FROM_ADDRESS,
-        to: [to],
-        reply_to: [REPLY_TO_ADDRESS],
+        to: toArray,
+        reply_to: replyToArray,
         subject,
         html: htmlBody,
       }),
@@ -192,3 +200,62 @@ export async function sendCancellationEmail(
 
   return sendEmail(to, subject, html);
 }
+
+export async function sendContactInquiryEmail(data: {
+  name: string;
+  email: string;
+  phone?: string;
+  subject?: string;
+  message: string;
+}): Promise<boolean> {
+  const safeName = (data.name || "Website Visitor").trim();
+  const safeEmail = (data.email || "").trim();
+  const safePhone = (data.phone || "").trim();
+  const safeSubject = (data.subject || "General Inquiry").trim();
+  const safeMessage = (data.message || "").trim();
+  const charMap: Record<string, string> = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+  const escapedMessage = safeMessage.replace(/[&<>"']/g, (c: string) => charMap[c] || "");
+
+  // 1. Send Notification to Admissions Desk
+  const adminSubject = `📬 New Inquiry: ${safeSubject} — from ${safeName}`;
+  const adminHtml = baseWrapper(`
+    <p style="font-size: 16px; margin-top: 0; color: #0b1b3d;"><strong>New Website Inquiry Received</strong></p>
+    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+      <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>From:</strong> ${safeName}</p>
+      <p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Email:</strong> <a href="mailto:${safeEmail}" style="color: #1d4ed8; font-weight: 600;">${safeEmail}</a></p>
+      ${safePhone ? `<p style="margin: 0 0 8px 0; font-size: 14px;"><strong>Phone:</strong> ${safePhone}</p>` : ""}
+      <p style="margin: 0; font-size: 14px;"><strong>Subject / Track:</strong> ${safeSubject}</p>
+    </div>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; padding: 18px 20px; border-radius: 8px; margin-bottom: 20px;">
+      <p style="margin: 0 0 8px 0; font-size: 12px; font-weight: 700; color: #64748b; text-transform: uppercase;">Message Content:</p>
+      <p style="margin: 0; font-size: 14px; line-height: 1.7; color: #1e293b; white-space: pre-wrap;">${escapedMessage}</p>
+    </div>
+    <p style="font-size: 12px; color: #64748b;">💡 <em>You can reply directly to this email to respond to ${safeName} (${safeEmail}).</em></p>
+  `);
+
+  await sendEmail(
+    ["admin@academicexcellences.com", "solhm1@yahoo.com"],
+    adminSubject,
+    adminHtml,
+    safeEmail
+  );
+
+  // 2. Send Auto-Confirmation Receipt to Visitor
+  if (safeEmail) {
+    const userSubject = `Thank you for contacting Academic Excellence — We have received your message`;
+    const userHtml = baseWrapper(`
+      <p>Dear <strong>${safeName}</strong>,</p>
+      <p>Thank you for reaching out to Academic Excellence. We have received your message regarding <strong>${safeSubject}</strong>.</p>
+      <p>A member of our admissions and academic counseling team is reviewing your message and will reach out to you within 24 to 48 business hours.</p>
+      <div style="background: #f8fafc; border-left: 4px solid #0b1b3d; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+        <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #0b1b3d; text-transform: uppercase;">Your Message Summary:</p>
+        <p style="margin: 0; font-size: 13px; color: #475569; white-space: pre-wrap;">${safeMessage.slice(0, 300)}${safeMessage.length > 300 ? "..." : ""}</p>
+      </div>
+      <p style="font-size: 13px; color: #64748b; margin-top: 25px;">If you have any urgent questions, feel free to reply directly to this email or visit our website at <a href="https://www.academicexcellences.com" style="color: #2563eb; font-weight: 600;">academicexcellences.com</a>.</p>
+    `);
+    await sendEmail(safeEmail, userSubject, userHtml);
+  }
+
+  return true;
+}
+
