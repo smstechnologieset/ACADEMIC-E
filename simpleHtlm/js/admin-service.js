@@ -390,26 +390,36 @@ window.AdminService = {
     return apps.find(a => a.id.toLowerCase() === id.toLowerCase().trim()) || null;
   },
 
-  async updateApplicationStatus(id, newStatus, internalNotes = "") {
+  async updateApplicationStatus(id, newStatus, internalNotes = "", rejectionReason = "") {
     let apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    const idx = apps.findIndex(a => a.id.toLowerCase() === id.toLowerCase().trim());
+    const idx = apps.findIndex(a => a.id && a.id.toLowerCase() === id.toLowerCase().trim());
     let targetApp = null;
+
+    let finalNotes = internalNotes;
+    if (newStatus === "rejected" && rejectionReason) {
+      finalNotes = `[Rejection Reason]: ${rejectionReason}${internalNotes ? '\n[Internal Notes]: ' + internalNotes : ''}`;
+    }
 
     if (idx !== -1) {
       const prevStatus = apps[idx].status;
       apps[idx].status = newStatus;
-      apps[idx].internalNotes = internalNotes;
+      apps[idx].internalNotes = finalNotes;
+      apps[idx].rejectionReason = rejectionReason;
       apps[idx].updated_at = new Date().toISOString();
       if (!apps[idx].events) apps[idx].events = [];
       apps[idx].events.push({
-        type: "status_changed",
+        type: newStatus === "rejected" ? "rejected" : "status_changed",
         title: `Status Changed: ${newStatus.toUpperCase().replace("_", " ")}`,
         time: new Date().toISOString(),
-        note: `Application transitioned from ${prevStatus} to ${newStatus}. ${internalNotes ? "Admin Note: " + internalNotes : ""}`
+        note: newStatus === "rejected" && rejectionReason
+          ? `Application rejected. Reason: ${rejectionReason}`
+          : `Application transitioned from ${prevStatus} to ${newStatus}. ${internalNotes ? "Admin Note: " + internalNotes : ""}`
       });
       targetApp = apps[idx];
       this._cachedApps = apps;
       window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+    } else {
+      targetApp = this.getApplicationById(id);
     }
 
     // Live update Supabase table
@@ -417,7 +427,7 @@ window.AdminService = {
       const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
       const payload = {
         status: newStatus,
-        internal_notes: internalNotes,
+        internal_notes: finalNotes,
         updated_at: new Date().toISOString()
       };
 
@@ -438,8 +448,54 @@ window.AdminService = {
           body: JSON.stringify(payload)
         });
       }
+
+      // Record in application_events table in Supabase
+      try {
+        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+        await fetch(`${supabaseUrl}/rest/v1/application_events`, {
+          method: "POST",
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json",
+            "Prefer": "return=minimal"
+          },
+          body: JSON.stringify({
+            application_id: id,
+            event_type: newStatus === "rejected" ? "rejected" : "status_changed",
+            new_value: newStatus,
+            actor: "admin"
+          })
+        });
+      } catch (evErr) {}
     } catch (e) {
       console.warn("Supabase live update error:", e);
+    }
+
+    // If targetApp missing from cache, fetch from Supabase
+    if (!targetApp) {
+      try {
+        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+        const res = await fetch(`${supabaseUrl}/rest/v1/applications?id=ilike.${encodeURIComponent(id)}&limit=1`, {
+          headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
+        });
+        if (res.ok) {
+          const rows = await res.json();
+          if (rows && rows[0]) {
+            targetApp = {
+              id: rows[0].id,
+              email: rows[0].email,
+              fullName: rows[0].full_name,
+              firstName: rows[0].first_name,
+              lastName: rows[0].last_name,
+              courseApplied: rows[0].course_applied,
+              status: newStatus
+            };
+          }
+        }
+      } catch (fetchErr) {}
     }
 
     // Trigger email notification via /api/send-email if applicant has an email
@@ -454,7 +510,8 @@ window.AdminService = {
             to: targetApp.email,
             name: targetApp.fullName || targetApp.firstName || "Applicant",
             refId: targetApp.id,
-            course: targetApp.courseApplied || "Academic Program"
+            course: targetApp.courseApplied || "Academic Program",
+            reason: rejectionReason
           })
         }).catch(err => console.info("Email notification queued/handled:", err));
       }

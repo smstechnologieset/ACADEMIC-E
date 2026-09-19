@@ -86,7 +86,7 @@ module.exports = async function handler(req, res) {
 
   try {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
-    const { type, to, name, refId, course } = body;
+    const { type, to, name, refId, course, reason, rejectionReason } = body;
 
     if (!to) {
       return res.status(400).json({ error: "Recipient email 'to' is required." });
@@ -128,25 +128,24 @@ module.exports = async function handler(req, res) {
           <p>Dear <strong>${safeName}</strong>,</p>
           <p>We have successfully received your payment proof submission for Application <strong>${safeRef}</strong>. Your dossier is now officially <strong>Under Review</strong> by the Admissions Committee.</p>
           <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
-            <p style="margin: 0; font-size: 13px; color: #854d0e;">⏳ <strong>ADMISSIONS STATUS:</strong></p>
-            <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: 700; color: #a16207;">Under Review</p>
-            <p style="margin: 8px 0 0 0; font-size: 13px; color: #475569;">Our admissions officers are verifying your payment and academic transcripts. Evaluation typically concludes within 24 to 48 business hours.</p>
+            <p style="margin: 0; font-size: 13px; color: #854d0e;"><strong>Application Reference:</strong> ${safeRef}</p>
+            <p style="margin: 6px 0 0 0; font-size: 13px; color: #854d0e;"><strong>Verification Status:</strong> Verification in progress</p>
           </div>
-          <p style="font-size: 14px;">You can monitor the real-time status of your verification at <a href="https://academicexcellences.com/track.html" style="color: #2563eb; font-weight: 600;">academicexcellences.com/track.html</a> using Reference ID: <strong>${safeRef}</strong>.</p>
-          <p style="font-size: 13px; color: #64748b; margin-top: 25px;">Thank you for your commitment to academic excellence.</p>
+          <p style="font-size: 14px;">Our admissions officers verify all bank and mobile transfer receipts directly against official institutional records. You will receive a final status notification once your credentials and payment verification are finalized.</p>
+          <p style="font-size: 14px;">You can monitor the live progress of your review at any time on our tracking page: <a href="https://academicexcellences.com/track.html?ref=${encodeURIComponent(safeRef)}" style="color: #2563eb; font-weight: 600;">Track Application</a>.</p>
+          <p style="font-size: 13px; color: #64748b; margin-top: 25px;">Thank you for your diligence!</p>
         `);
         success = await sendEmail(to, subject, html);
         break;
       }
 
       case "status_approved": {
-        const subject = `🎉 Congratulations! Application ${safeRef} Approved`;
+        const subject = `🎉 Congratulations! Your Application is Approved — ${safeRef}`;
         const html = baseWrapper(`
           <p>Dear <strong>${safeName}</strong>,</p>
-          <p>We are delighted to inform you that following comprehensive evaluation by the Admissions Committee, your application has been officially <strong style="color: #16a34a;">APPROVED</strong>.</p>
-          <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
-            <p style="margin: 0; font-size: 13px; color: #166534;">✅ <strong>ADMISSION DECISION:</strong></p>
-            <p style="margin: 4px 0 0 0; font-size: 18px; font-weight: 700; color: #15803d;">Officially Admitted / Enrolled</p>
+          <p>Congratulations! We are delighted to inform you that your application for admission has been officially <strong>Approved and Confirmed</strong>.</p>
+          <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+            <p style="margin: 0; font-size: 14px; font-weight: 700; color: #065f46;">ADMISSION ENROLLMENT CONFIRMED</p>
             <p style="margin: 8px 0 0 0; font-size: 13px; color: #334155;"><strong>Reference:</strong> ${safeRef} • <strong>Program:</strong> ${safeCourse}</p>
           </div>
           <p style="font-size: 14px;">Our student success team will contact you shortly with your official credentials for the Skillsoft Percipio learning platform, curriculum syllabus, and orientation timetable.</p>
@@ -157,15 +156,25 @@ module.exports = async function handler(req, res) {
       }
 
       case "status_rejected": {
+        const rawReason = (reason || rejectionReason || "").trim();
+        const safeReason = rawReason.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
         const subject = `Application Status Update — ${safeRef}`;
         const html = baseWrapper(`
           <p>Dear <strong>${safeName}</strong>,</p>
-          <p>Thank you for submitting your application (Ref: <strong>${safeRef}</strong>) for our academic programs.</p>
+          <p>Thank you for submitting your application (Ref: <strong>${safeRef}</strong>) for ${safeCourse ? `<strong>${safeCourse}</strong>` : "our academic programs"}.</p>
           <p>After thorough review by the Admissions Committee, we regret to inform you that we are unable to offer you placement for this specific intake cycle.</p>
+          ${safeReason ? `
+          <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+            <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">Admissions Feedback / Reason for Rejection:</p>
+            <p style="margin: 0; font-size: 14px; color: #7f1d1d; line-height: 1.6; font-weight: 500; white-space: pre-wrap;">${safeReason}</p>
+          </div>
+          ` : `
           <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
             <p style="margin: 0; font-size: 13px; color: #991b1b;">We encourage you to bolster your credentials and consider reapplying during our subsequent intake period.</p>
           </div>
-          <p style="font-size: 13px; color: #64748b; margin-top: 25px;">If you have questions or require further clarification, please contact our admissions office.</p>
+          `}
+          <p style="font-size: 13px; color: #64748b; margin-top: 25px;">You can review your application record and feedback anytime on our <a href="https://www.academicexcellences.com/track.html?ref=${encodeURIComponent(safeRef)}" style="color: #df6b26; font-weight: 600;">Tracking Portal</a>.</p>
+          <p style="font-size: 13px; color: #64748b;">If you have questions or require further clarification, please contact our admissions office.</p>
         `);
         success = await sendEmail(to, subject, html);
         break;

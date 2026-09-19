@@ -162,6 +162,29 @@
               <a href="#" id="completePaymentBtn" class="btn btn-orange">Upload Payment Slip Now &rarr;</a>
             </div>
 
+            <!-- Rejection Notice Banner (If rejected) -->
+            <div id="rejectedStatusBanner" style="display: none; background: #fff5f5; border: 1px solid #fed7d7; border-left: 5px solid #ef4444; padding: 22px; margin-bottom: 30px; border-radius: 4px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 40px; height: 40px; border-radius: 50%; background: #fee2e2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; flex-shrink: 0;">
+                  &#10005;
+                </div>
+                <div style="flex: 1;">
+                  <h4 style="color: #991b1b; font-size: 1.2rem; margin: 0 0 6px 0;">Application Decision: Not Accepted</h4>
+                  <p style="font-size: 0.95rem; color: #7f1d1d; margin: 0 0 10px 0; line-height: 1.6;">
+                    After review by the Admissions Committee, this application was not approved for the current intake cycle.
+                  </p>
+                  <div id="trackRejectionReasonWrap" style="display: none; background: #ffffff; border: 1px solid #fecaca; padding: 14px 18px; border-radius: 6px; margin: 12px 0;">
+                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #991b1b; letter-spacing: 0.5px;">Admissions Feedback / Reason:</div>
+                    <div id="trackRejectionReasonText" style="margin-top: 6px; font-size: 0.95rem; color: #1e293b; line-height: 1.5; font-weight: 600;"></div>
+                  </div>
+                  <div style="margin-top: 16px; display: flex; gap: 10px; flex-wrap: wrap;">
+                    <a href="apply.html?fresh=1" class="btn btn-sm" style="background: #991b1b; color: #ffffff; border-color: #991b1b; text-decoration: none;">Submit Fresh Application &rarr;</a>
+                    <a href="contact.html" class="btn btn-sm" style="background: #ffffff; border-color: #cbd5e1; color: #475569; text-decoration: none;">Contact Admissions Office</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <!-- Audit / Event Timeline -->
             <div>
               <h4 style="font-size: 1.2rem; color: #0b1b3d; margin-bottom: 18px;">Application Event History</h4>
@@ -289,12 +312,21 @@
         const node3 = document.getElementById("stepNode3");
         const node4 = document.getElementById("stepNode4");
 
-        // Reset
+        // Reset stepper nodes
         [node1, node2, node3, node4].forEach(n => {
           n.className = "status-node";
         });
+        node1.querySelector(".status-icon").innerHTML = "&check;";
+        node2.querySelector(".status-icon").innerHTML = "2";
+        node3.querySelector(".status-icon").innerHTML = "3";
+        node4.querySelector(".status-icon").innerHTML = "4";
+        const step3Label = node3.querySelector("div[style*='font-weight: 700']");
+        if (step3Label) step3Label.textContent = "Admissions Review";
 
         const pendingBanner = document.getElementById("pendingPaymentBanner");
+        const rejectedBanner = document.getElementById("rejectedStatusBanner");
+        if (rejectedBanner) rejectedBanner.style.display = "none";
+
         if (app.status === "pending") {
           node1.className = "status-node completed";
           node2.className = "status-node active";
@@ -306,16 +338,38 @@
           node2.className = "status-node completed";
           node3.className = "status-node active";
           pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = `Slip Uploaded (${app.paymentMethod || "Bank"})`;
+          document.getElementById("trackPaymentSummary").textContent = `Slip Uploaded (${app.paymentMethod || "Bank / Mobile"})`;
         } else if (app.status === "approved") {
           node1.className = "status-node completed";
           node2.className = "status-node completed";
           node3.className = "status-node completed";
           node4.className = "status-node completed";
           pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = `Verified & Confirmed (${app.paymentMethod || "Bank"})`;
+          document.getElementById("trackPaymentSummary").textContent = `Verified & Confirmed (${app.paymentMethod || "Bank / Mobile"})`;
+        } else if (app.status === "rejected") {
+          node1.className = "status-node completed";
+          node2.className = (app.paymentMethod || app.paymentRef) ? "status-node completed" : "status-node";
+          node3.className = "status-node rejected";
+          node3.querySelector(".status-icon").innerHTML = "&#10005;";
+          if (step3Label) step3Label.textContent = "Decision: Rejected";
+          node4.className = "status-node";
+          pendingBanner.style.display = "none";
+          document.getElementById("trackPaymentSummary").textContent = "Decision: Rejected";
+
+          if (rejectedBanner) {
+            rejectedBanner.style.display = "block";
+            const reasonWrap = document.getElementById("trackRejectionReasonWrap");
+            const reasonText = document.getElementById("trackRejectionReasonText");
+            const reason = app.rejectionReason || app.rejection_reason || "";
+            if (reason && reasonText) {
+              reasonWrap.style.display = "block";
+              reasonText.textContent = reason;
+            } else if (reasonWrap) {
+              reasonWrap.style.display = "none";
+            }
+          }
         } else {
-          // Rejected or Cancelled
+          // Cancelled
           node1.className = "status-node completed";
           pendingBanner.style.display = "none";
           document.getElementById("trackPaymentSummary").textContent = app.status.toUpperCase();

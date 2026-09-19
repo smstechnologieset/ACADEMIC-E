@@ -10,7 +10,7 @@ import {
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { type, to, name, refId, course } = body;
+    const { type, to, name, refId, course, reason, rejectionReason } = body;
 
     if (!to) {
       return NextResponse.json({ error: "Recipient email 'to' is required" }, { status: 400 });
@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
         break;
 
       case "status_rejected":
-        success = await sendStatusRejectedEmail(to, name || "Applicant", refId);
+        success = await sendStatusRejectedEmail(to, name || "Applicant", refId, reason || rejectionReason);
         break;
 
       case "cancelled":

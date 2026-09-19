@@ -142,16 +142,33 @@ export async function sendStatusApprovedEmail(
 export async function sendStatusRejectedEmail(
   to: string,
   name: string,
-  refId: string
+  refId: string,
+  reason?: string
 ): Promise<boolean> {
   const subject = `Application Status Update — ${refId}`;
+  const safeReason = reason
+    ? reason
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;")
+    : "";
   const html = baseWrapper(`
     <p>Dear <strong>${name}</strong>,</p>
     <p>Thank you for submitting your application (Ref: <strong>${refId}</strong>) for our academic programs.</p>
     <p>After thorough consideration by the Admissions Committee, we regret to inform you that we are unable to offer you placement in this admissions intake cycle.</p>
+    ${safeReason ? `
+    <div style="background: #fef2f2; border: 1px solid #fecaca; border-left: 4px solid #ef4444; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 20px 0;">
+      <p style="margin: 0 0 6px 0; font-size: 11px; font-weight: 700; color: #991b1b; text-transform: uppercase; letter-spacing: 0.5px;">Admissions Feedback / Reason for Rejection:</p>
+      <p style="margin: 0; font-size: 14px; color: #7f1d1d; line-height: 1.6; font-weight: 500; white-space: pre-wrap;">${safeReason}</p>
+    </div>
+    ` : `
     <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
       <p style="margin: 0; font-size: 13px;">We encourage you to strengthen your dossier and reapply during our subsequent intake period.</p>
     </div>
+    `}
+    <p style="font-size: 13px; color: #64748b;">You can track your application record or view feedback at any time on our <a href="https://www.academicexcellences.com/track.html?ref=${encodeURIComponent(refId)}" style="color: #df6b26; font-weight: 600;">Tracking Portal</a>.</p>
     <p style="font-size: 13px; color: #64748b;">If you believe this decision was made in error, please contact our admissions desk for further clarification.</p>
   `);
 

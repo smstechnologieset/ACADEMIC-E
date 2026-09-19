@@ -1674,6 +1674,12 @@ p:last-child {
   color: #ffffff;
 }
 
+.status-node.rejected .status-icon {
+  border-color: #ef4444;
+  background: #ef4444;
+  color: #ffffff;
+}
+
 /* Status Badges */
 .badge-status {
   display: inline-block;

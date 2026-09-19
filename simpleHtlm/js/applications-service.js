@@ -375,11 +375,7 @@ window.ApplicationsService = {
     const clean = idOrEmail.trim();
     const query = clean.toLowerCase();
 
-    // 1. Try Local / Session cache first
-    const cached = this.getApplication(clean);
-    if (cached) return cached;
-
-    // 2. Live query Supabase database
+    // 1. Query Supabase database FIRST so status changes (like rejection or approval) reflect in real-time
     try {
       const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
       const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
@@ -414,6 +410,16 @@ window.ApplicationsService = {
       }
 
       if (row) {
+        // Extract rejection reason if stored in internal_notes
+        let rejectionReason = row.rejection_reason || "";
+        const rawNotes = row.internal_notes || "";
+        if (!rejectionReason && rawNotes.includes("[Rejection Reason]:")) {
+          const match = rawNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:)))*)/i);
+          if (match && match[1]) {
+            rejectionReason = match[1].trim();
+          }
+        }
+
         const mapped = {
           id: row.id,
           firstName: row.first_name || "",
@@ -430,23 +436,72 @@ window.ApplicationsService = {
           status: row.status || "pending",
           paymentMethod: row.payment_method || "",
           paymentRef: row.transaction_ref || "",
-          internalNotes: row.internal_notes || "",
-          created_at: row.created_at || new Date().toISOString()
+          internalNotes: rawNotes,
+          rejectionReason: rejectionReason,
+          created_at: row.created_at || new Date().toISOString(),
+          updated_at: row.updated_at || new Date().toISOString()
         };
 
-        // Cache in sessionStorage and localStorage for subsequent lookups
+        // Construct event history
+        mapped.events = [
+          {
+            type: "submitted",
+            title: "Application Submitted",
+            time: mapped.created_at,
+            note: `Candidate applied for ${mapped.courseApplied}.`
+          }
+        ];
+
+        if (mapped.paymentMethod || mapped.paymentRef || mapped.status === "under_review" || mapped.status === "approved" || mapped.status === "rejected") {
+          mapped.events.push({
+            type: "payment_uploaded",
+            title: "Payment Slip Uploaded",
+            time: mapped.updated_at || mapped.created_at,
+            note: `Proof submitted via ${mapped.paymentMethod || "Bank / Mobile"} (Ref: ${mapped.paymentRef || "Verified"}).`
+          });
+        }
+
+        if (mapped.status === "approved") {
+          mapped.events.push({
+            type: "approved",
+            title: "Application Approved",
+            time: mapped.updated_at,
+            note: "Admissions verification completed successfully. Placement confirmed."
+          });
+        } else if (mapped.status === "rejected") {
+          mapped.events.push({
+            type: "rejected",
+            title: "Application Rejected",
+            time: mapped.updated_at,
+            note: rejectionReason ? `Reason: ${rejectionReason}` : "Admissions criteria not met for this intake cycle."
+          });
+        } else if (mapped.status === "cancelled") {
+          mapped.events.push({
+            type: "cancelled",
+            title: "Application Cancelled",
+            time: mapped.updated_at,
+            note: "Application was cancelled by the applicant."
+          });
+        }
+
+        // Cache fresh data in sessionStorage and localStorage
         try {
           sessionStorage.setItem("ae_current_app_" + mapped.id, JSON.stringify(mapped));
         } catch (e) {}
         const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-        const filtered = apps.filter(a => a.id !== mapped.id);
+        const filtered = apps.filter(a => a.id && a.id.toLowerCase() !== mapped.id.toLowerCase());
         filtered.unshift(mapped);
         window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, filtered);
+
         return mapped;
       }
     } catch (e) {
       console.warn("Supabase fetch application error:", e);
     }
+
+    // 2. Fallback to Local / Session cache ONLY if Supabase is offline or not found
+    const cached = this.getApplication(clean);
+    if (cached) return cached;
 
     return null;
   },

@@ -453,6 +453,28 @@
               <button type="button" class="btn btn-orange" id="modalSaveStatusBtn" style="width:100%;">Update Status &amp; Save</button>
             </div>
           </div>
+
+          <!-- Rejection Reason Section (Mandatory when Rejected is selected) -->
+          <div id="rejectionReasonSection" style="display: none; background: #fff5f5; border: 1px solid #fed7d7; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <label class="form-label" style="color: #991b1b; font-weight: 700; margin: 0;">
+                Reason for Rejection * <span style="font-size: 0.8rem; font-weight: 400; color: #b91c1c;">(Mandatory &mdash; emailed to applicant)</span>
+              </label>
+              <select id="quickRejectionReasonSelect" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #fca5a5; border-radius: 4px; background: #fff; color: #7f1d1d; cursor: pointer;">
+                <option value="">-- Quick Pre-set Reasons --</option>
+                <option value="Academic prerequisites not met for this specific program level.">Academic prerequisites not met</option>
+                <option value="Unclear or unverified National ID / FAYDA identification document.">Invalid / Unclear FAYDA ID</option>
+                <option value="Payment deposit slip could not be verified with the bank transaction records.">Payment slip could not be verified</option>
+                <option value="Incomplete academic transcripts or graduation proof submitted.">Incomplete academic credentials</option>
+                <option value="Program intake capacity reached for this cycle.">Intake capacity full</option>
+              </select>
+            </div>
+            <textarea id="modalRejectionReason" class="form-textarea" style="border-color: #fca5a5; min-height: 80px;" placeholder="Explain clearly why this application is being rejected. This explanation will be sent directly to the student in their rejection email."></textarea>
+            <div id="modalRejectionError" style="display: none; color: #dc2626; font-size: 0.82rem; margin-top: 6px; font-weight: 600;">
+              &#9888; A rejection reason is mandatory before rejecting this application.
+            </div>
+          </div>
+
           <div class="form-group">
             <label class="form-label">Internal Verification Notes</label>
             <textarea id="modalInternalNotes" class="form-textarea" placeholder="Enter verification notes, scholarship remarks..."></textarea>
@@ -882,9 +904,27 @@
     async function doBulkUpdate(newStatus) {
       if (!selectedIds.size) return;
       const ids = Array.from(selectedIds);
-      if (!confirm((newStatus === "approved" ? "Approve" : "Reject") + " " + ids.length + " application(s)?")) return;
+      let rejectionReason = "";
+      if (newStatus === "rejected") {
+        rejectionReason = prompt(
+          "Please enter the mandatory reason for rejection (this will be emailed to each rejected applicant):",
+          "Academic prerequisites or document verification criteria not met for this cycle."
+        );
+        if (!rejectionReason || !rejectionReason.trim()) {
+          showToast("Rejection cancelled: A reason is mandatory.", "error");
+          return;
+        }
+        rejectionReason = rejectionReason.trim();
+      } else {
+        if (!confirm("Approve " + ids.length + " application(s)?")) return;
+      }
       let ok = 0;
-      for (const id of ids) { try { const r = await window.AdminService.updateApplicationStatus(id, newStatus, ""); if (r && r.success) ok++; } catch(e) {} }
+      for (const id of ids) { 
+        try { 
+          const r = await window.AdminService.updateApplicationStatus(id, newStatus, "", rejectionReason); 
+          if (r && r.success) ok++; 
+        } catch(e) {} 
+      }
       logActivity(newStatus === "approved" ? "bulk_approved" : "bulk_rejected", "application", null);
       selectedIds.clear(); updateBulkBar();
       showToast("Updated " + ok + "/" + ids.length + " to " + newStatus + ".", "success");
@@ -956,6 +996,30 @@
         document.getElementById("modalMajorInst").textContent = app.previousInstitution || "—";
         document.getElementById("modalStatusSelect").value = app.status || "pending";
         document.getElementById("modalInternalNotes").value = app.internalNotes || "";
+
+        // Rejection reason setup
+        const rejectSec = document.getElementById("rejectionReasonSection");
+        const rejectText = document.getElementById("modalRejectionReason");
+        const rejectErr = document.getElementById("modalRejectionError");
+        if (rejectErr) rejectErr.style.display = "none";
+        const quickSelect = document.getElementById("quickRejectionReasonSelect");
+        if (quickSelect) quickSelect.value = "";
+
+        let currentRejectionReason = app.rejectionReason || "";
+        const curNotes = app.internalNotes || "";
+        if (!currentRejectionReason && curNotes.includes("[Rejection Reason]:")) {
+          const match = curNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:)))*)/i);
+          if (match && match[1]) currentRejectionReason = match[1].trim();
+        }
+
+        if (app.status === "rejected") {
+          if (rejectSec) rejectSec.style.display = "block";
+          if (rejectText) rejectText.value = currentRejectionReason;
+        } else {
+          if (rejectSec) rejectSec.style.display = "none";
+          if (rejectText) rejectText.value = "";
+        }
+
         document.getElementById("timelineContent").innerHTML = buildTimeline(app);
 
         function isImg(url) {
@@ -1012,14 +1076,49 @@
     document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
     document.getElementById("closeAppModalFooterBtn").addEventListener("click", closeAppModal);
 
+    // Dynamic rejection reason toggle & preset populator
+    document.getElementById("modalStatusSelect").addEventListener("change", (e) => {
+      const isReject = e.target.value === "rejected";
+      const sec = document.getElementById("rejectionReasonSection");
+      if (sec) sec.style.display = isReject ? "block" : "none";
+      if (isReject) {
+        document.getElementById("modalRejectionReason").focus();
+      } else {
+        const err = document.getElementById("modalRejectionError");
+        if (err) err.style.display = "none";
+      }
+    });
+
+    document.getElementById("quickRejectionReasonSelect").addEventListener("change", (e) => {
+      if (e.target.value) {
+        document.getElementById("modalRejectionReason").value = e.target.value;
+        const err = document.getElementById("modalRejectionError");
+        if (err) err.style.display = "none";
+      }
+    });
+
     document.getElementById("modalSaveStatusBtn").addEventListener("click", async () => {
       if (!currentViewingApp) return;
       const btn = document.getElementById("modalSaveStatusBtn");
-      const orig = btn.textContent; btn.textContent = "Saving..."; btn.disabled = true;
+      const orig = btn.textContent;
       const newStatus = document.getElementById("modalStatusSelect").value;
-      const notes = document.getElementById("modalInternalNotes").value;
+      const notes = document.getElementById("modalInternalNotes").value.trim();
+      let rejectionReason = "";
+
+      if (newStatus === "rejected") {
+        rejectionReason = document.getElementById("modalRejectionReason").value.trim();
+        if (!rejectionReason) {
+          const errEl = document.getElementById("modalRejectionError");
+          errEl.textContent = "A rejection reason is mandatory before rejecting this application.";
+          errEl.style.display = "block";
+          document.getElementById("modalRejectionReason").focus();
+          return;
+        }
+      }
+
+      btn.textContent = "Saving..."; btn.disabled = true;
       try {
-        const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes);
+        const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes, rejectionReason);
         if (res && res.success) {
           logActivity(newStatus === "approved" ? "approved_application" : (newStatus === "rejected" ? "rejected_application" : "updated_application"), "application", currentViewingApp.id);
           closeAppModal(); loadOverview(); renderApplications();
