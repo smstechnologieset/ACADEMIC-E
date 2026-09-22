@@ -825,6 +825,120 @@
           </div>
         </form>
       </div>
+  <!-- CSV EXPORT MODAL -->
+  <div class="admin-modal" id="csvExportModal">
+    <div class="modal-card" style="max-width:640px;width:94%;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size:1.28rem;color:#0b1b3d;margin:0;display:flex;align-items:center;gap:8px;">
+            <span>📊</span> Export Applications to CSV
+          </h3>
+          <p style="font-size:0.8rem;color:#64748b;margin:4px 0 0 0;">Download applicant records to share student lists with partner institutions or program providers.</p>
+        </div>
+        <button type="button" class="btn-remove-file" id="closeCsvExportModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:22px 24px;">
+
+        <!-- Scope Selection -->
+        <div style="margin-bottom:18px;">
+          <label class="form-label" style="font-weight:700;color:#0b1b3d;margin-bottom:10px;">Select Export Scope</label>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="csvScopeGroup">
+            <label id="csvScopeAllLabel" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;cursor:pointer;transition:all 0.2s;">
+              <input type="radio" name="csvExportScope" id="csvScopeAll" value="all" checked style="margin-top:3px;" />
+              <div>
+                <strong style="display:block;font-size:0.92rem;color:#1e3a8a;">All Applications</strong>
+                <span style="font-size:0.75rem;color:#2563eb;">Complete database dump of all candidates</span>
+              </div>
+            </label>
+
+            <label id="csvScopeFilterLabel" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;cursor:pointer;transition:all 0.2s;">
+              <input type="radio" name="csvExportScope" id="csvScopeFilter" value="filter" style="margin-top:3px;" />
+              <div>
+                <strong style="display:block;font-size:0.92rem;color:#0b1b3d;">Custom Filtered</strong>
+                <span style="font-size:0.75rem;color:#64748b;">Filter by program, qualification, status, dates</span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Filter Controls -->
+        <div id="csvFilterControls" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin-bottom:18px;transition:all 0.2s;opacity:0.5;pointer-events:none;">
+          <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;color:#475569;letter-spacing:0.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
+            <span>⚡</span> Filter Criteria
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Program / Course</label>
+              <select id="csvModalFilterCourse" class="form-select" style="font-size:0.85rem;height:38px;">
+                <option value="all">All Programs</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Qualification Level</label>
+              <select id="csvModalFilterQual" class="form-select" style="font-size:0.85rem;height:38px;">
+                <option value="all">All Qualifications</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-grid-2" style="margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Application Status</label>
+              <select id="csvModalFilterStatus" class="form-select" style="font-size:0.85rem;height:38px;">
+                <option value="all">All Statuses</option>
+                <option value="approved">Approved / Admitted (Ready for Enrollment)</option>
+                <option value="under_review">Under Review</option>
+                <option value="pending">Pending Payment</option>
+                <option value="rejected">Rejected</option>
+                <option value="cancelled">Cancelled</option>
+              </select>
+            </div>
+
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Date Presets</label>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;height:38px;align-items:center;">
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="all" style="padding:4px 9px;font-size:0.75rem;background:#0b1b3d;color:#fff;border:none;border-radius:4px;cursor:pointer;">All Time</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="7d" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">Last 7d</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="30d" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">Last 30d</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="month" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">This Month</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-grid-2">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;">Submission Date From</label>
+              <input type="date" id="csvModalFilterDateFrom" class="form-input" style="font-size:0.85rem;height:38px;" />
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;">Submission Date To</label>
+              <input type="date" id="csvModalFilterDateTo" class="form-input" style="font-size:0.85rem;height:38px;" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Preview Match Indicator -->
+        <div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <div>
+            <div style="font-size:0.9rem;font-weight:700;color:#0b1b3d;" id="csvModalSummaryText">
+              Exporting: <span id="csvModalMatchCount" style="color:#2563eb;font-size:1.05rem;">0</span> of <span id="csvModalTotalCount">0</span> applications
+            </div>
+            <div style="font-size:0.76rem;color:#64748b;margin-top:3px;" id="csvModalSummarySubtext">
+              Includes candidate contacts, academic qualifications, FAYDA IDs, and payment references.
+            </div>
+          </div>
+          <span id="csvModalStatusPill" style="font-size:0.75rem;font-weight:700;background:#dcfce7;color:#15803d;padding:4px 12px;border-radius:20px;">Ready</span>
+        </div>
+
+      </div>
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" class="btn btn-sm" id="closeCsvExportModalFooterBtn" style="padding:9px 18px;">Cancel</button>
+        <button type="button" class="btn-dark-admin" id="executeCsvDownloadBtn" style="padding:10px 24px;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
+          <span>&#8681;</span> <span id="executeCsvDownloadBtnText">Download CSV File</span>
+        </button>
+      </div>
     </div>
   </div>
 
@@ -1133,7 +1247,224 @@
     searchInput.addEventListener("input", renderApplications);
     statusSelect.addEventListener("change", renderApplications);
     courseSelect.addEventListener("change", renderApplications);
-    document.getElementById("exportCsvBtn").addEventListener("click", () => window.AdminService.exportApplicationsToCSV());
+    // CSV EXPORT MODAL CONTROLLER
+    const csvExportModal = document.getElementById("csvExportModal");
+    const csvScopeAll = document.getElementById("csvScopeAll");
+    const csvScopeFilter = document.getElementById("csvScopeFilter");
+    const csvScopeAllLabel = document.getElementById("csvScopeAllLabel");
+    const csvScopeFilterLabel = document.getElementById("csvScopeFilterLabel");
+    const csvFilterControls = document.getElementById("csvFilterControls");
+    const csvModalFilterCourse = document.getElementById("csvModalFilterCourse");
+    const csvModalFilterQual = document.getElementById("csvModalFilterQual");
+    const csvModalFilterStatus = document.getElementById("csvModalFilterStatus");
+    const csvModalFilterDateFrom = document.getElementById("csvModalFilterDateFrom");
+    const csvModalFilterDateTo = document.getElementById("csvModalFilterDateTo");
+    const csvModalMatchCount = document.getElementById("csvModalMatchCount");
+    const csvModalTotalCount = document.getElementById("csvModalTotalCount");
+    const csvModalStatusPill = document.getElementById("csvModalStatusPill");
+    const executeCsvDownloadBtn = document.getElementById("executeCsvDownloadBtn");
+    const executeCsvDownloadBtnText = document.getElementById("executeCsvDownloadBtnText");
+
+    function getCsvModalFilters() {
+      const scope = (csvScopeAll && csvScopeAll.checked) ? "all" : "filter";
+      return {
+        scope,
+        course: csvModalFilterCourse ? csvModalFilterCourse.value : "all",
+        qualification: csvModalFilterQual ? csvModalFilterQual.value : "all",
+        status: csvModalFilterStatus ? csvModalFilterStatus.value : "all",
+        dateFrom: csvModalFilterDateFrom ? csvModalFilterDateFrom.value : "",
+        dateTo: csvModalFilterDateTo ? csvModalFilterDateTo.value : ""
+      };
+    }
+
+    function updateCsvScopeUI() {
+      const isFilter = csvScopeFilter && csvScopeFilter.checked;
+      if (isFilter) {
+        if (csvScopeFilterLabel) {
+          csvScopeFilterLabel.style.border = "2px solid #2563eb";
+          csvScopeFilterLabel.style.background = "#eff6ff";
+        }
+        if (csvScopeAllLabel) {
+          csvScopeAllLabel.style.border = "1px solid #cbd5e1";
+          csvScopeAllLabel.style.background = "#f8fafc";
+        }
+        if (csvFilterControls) {
+          csvFilterControls.style.opacity = "1";
+          csvFilterControls.style.pointerEvents = "auto";
+        }
+      } else {
+        if (csvScopeAllLabel) {
+          csvScopeAllLabel.style.border = "2px solid #2563eb";
+          csvScopeAllLabel.style.background = "#eff6ff";
+        }
+        if (csvScopeFilterLabel) {
+          csvScopeFilterLabel.style.border = "1px solid #cbd5e1";
+          csvScopeFilterLabel.style.background = "#f8fafc";
+        }
+        if (csvFilterControls) {
+          csvFilterControls.style.opacity = "0.5";
+          csvFilterControls.style.pointerEvents = "none";
+        }
+      }
+      refreshCsvModalCounts();
+    }
+
+    function refreshCsvModalCounts() {
+      const filters = getCsvModalFilters();
+      const stats = window.AdminService.getFilteredApplicationsCount(filters);
+      
+      if (csvModalMatchCount) csvModalMatchCount.textContent = stats.matched;
+      if (csvModalTotalCount) csvModalTotalCount.textContent = stats.total;
+
+      if (executeCsvDownloadBtn && executeCsvDownloadBtnText) {
+        if (stats.matched > 0) {
+          if (csvModalStatusPill) {
+            csvModalStatusPill.textContent = "Ready to Export";
+            csvModalStatusPill.style.background = "#dcfce7";
+            csvModalStatusPill.style.color = "#15803d";
+          }
+          executeCsvDownloadBtn.disabled = false;
+          executeCsvDownloadBtn.style.opacity = "1";
+          executeCsvDownloadBtn.style.cursor = "pointer";
+          executeCsvDownloadBtnText.textContent = `Download CSV (${stats.matched} Records)`;
+        } else {
+          if (csvModalStatusPill) {
+            csvModalStatusPill.textContent = "0 Matches";
+            csvModalStatusPill.style.background = "#fee2e2";
+            csvModalStatusPill.style.color = "#b91c1c";
+          }
+          executeCsvDownloadBtn.disabled = true;
+          executeCsvDownloadBtn.style.opacity = "0.5";
+          executeCsvDownloadBtn.style.cursor = "not-allowed";
+          executeCsvDownloadBtnText.textContent = "No Records to Download";
+        }
+      }
+    }
+
+    function populateCsvExportModal() {
+      const apps = window.AdminService._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+      
+      // 1. Populate Courses
+      if (csvModalFilterCourse) {
+        const currentCourseVal = csvModalFilterCourse.value;
+        csvModalFilterCourse.innerHTML = '<option value="all">All Programs / Courses</option>';
+        const courseSet = new Set();
+        try {
+          window.CoursesService.getAllCourses().forEach(c => {
+            if (c && c.title) courseSet.add(c.title);
+          });
+        } catch(e) {}
+        apps.forEach(a => {
+          if (a && a.courseApplied) courseSet.add(a.courseApplied);
+        });
+        Array.from(courseSet).sort().forEach(cName => {
+          const opt = document.createElement("option");
+          opt.value = cName;
+          opt.textContent = cName;
+          csvModalFilterCourse.appendChild(opt);
+        });
+        if (courseSet.has(currentCourseVal)) csvModalFilterCourse.value = currentCourseVal;
+      }
+
+      // 2. Populate Qualifications
+      if (csvModalFilterQual) {
+        const currentQualVal = csvModalFilterQual.value;
+        csvModalFilterQual.innerHTML = '<option value="all">All Qualifications</option>';
+        const qualSet = new Set();
+        [
+          "High School Diploma / Grade 12 Complete",
+          "TVET / Technical Certificate",
+          "Associate Degree / Advanced Diploma",
+          "Bachelor's Degree (BA / BSc)",
+          "Master's Degree (MA / MSc / MBA)",
+          "Doctorate / PhD"
+        ].forEach(q => qualSet.add(q));
+        apps.forEach(a => {
+          if (a && a.qualification && a.qualification.trim()) qualSet.add(a.qualification.trim());
+        });
+        Array.from(qualSet).sort().forEach(qName => {
+          const opt = document.createElement("option");
+          opt.value = qName;
+          opt.textContent = qName;
+          csvModalFilterQual.appendChild(opt);
+        });
+        if (qualSet.has(currentQualVal)) csvModalFilterQual.value = currentQualVal;
+      }
+
+      // 3. Refresh Scope & Counts
+      updateCsvScopeUI();
+    }
+
+    function openCsvExportModal() {
+      if (!csvExportModal) return;
+      populateCsvExportModal();
+      csvExportModal.classList.add("open");
+    }
+
+    function closeCsvExportModal() {
+      if (csvExportModal) csvExportModal.classList.remove("open");
+    }
+
+    document.getElementById("exportCsvBtn")?.addEventListener("click", openCsvExportModal);
+    document.getElementById("closeCsvExportModalBtn")?.addEventListener("click", closeCsvExportModal);
+    document.getElementById("closeCsvExportModalFooterBtn")?.addEventListener("click", closeCsvExportModal);
+
+    csvScopeAll?.addEventListener("change", updateCsvScopeUI);
+    csvScopeFilter?.addEventListener("change", updateCsvScopeUI);
+
+    [csvModalFilterCourse, csvModalFilterQual, csvModalFilterStatus, csvModalFilterDateFrom, csvModalFilterDateTo].forEach(el => {
+      if (!el) return;
+      el.addEventListener("change", refreshCsvModalCounts);
+      el.addEventListener("input", refreshCsvModalCounts);
+    });
+
+    // Date Presets
+    document.querySelectorAll(".csv-preset-btn").forEach(btn => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".csv-preset-btn").forEach(b => {
+          b.style.background = "#ffffff";
+          b.style.color = "#475569";
+          b.style.border = "1px solid #cbd5e1";
+        });
+        btn.style.background = "#0b1b3d";
+        btn.style.color = "#ffffff";
+        btn.style.border = "none";
+
+        const preset = btn.dataset.preset;
+        const today = new Date();
+        const yyyyMmDd = (d) => d.toISOString().split("T")[0];
+
+        if (preset === "all") {
+          if (csvModalFilterDateFrom) csvModalFilterDateFrom.value = "";
+          if (csvModalFilterDateTo) csvModalFilterDateTo.value = "";
+        } else if (preset === "7d") {
+          const past = new Date(today);
+          past.setDate(today.getDate() - 7);
+          if (csvModalFilterDateFrom) csvModalFilterDateFrom.value = yyyyMmDd(past);
+          if (csvModalFilterDateTo) csvModalFilterDateTo.value = yyyyMmDd(today);
+        } else if (preset === "30d") {
+          const past = new Date(today);
+          past.setDate(today.getDate() - 30);
+          if (csvModalFilterDateFrom) csvModalFilterDateFrom.value = yyyyMmDd(past);
+          if (csvModalFilterDateTo) csvModalFilterDateTo.value = yyyyMmDd(today);
+        } else if (preset === "month") {
+          const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+          if (csvModalFilterDateFrom) csvModalFilterDateFrom.value = yyyyMmDd(firstDay);
+          if (csvModalFilterDateTo) csvModalFilterDateTo.value = yyyyMmDd(today);
+        }
+        refreshCsvModalCounts();
+      });
+    });
+
+    // Execute Download
+    executeCsvDownloadBtn?.addEventListener("click", () => {
+      const filters = getCsvModalFilters();
+      const count = window.AdminService.exportApplicationsToCSV(filters);
+      if (count > 0) {
+        showToast(`Successfully exported ${count} application records to CSV!`, "success");
+        closeCsvExportModal();
+      }
+    });
 
     // DATABASE SYNC
     const syncBadge = document.getElementById("dbSyncBadge");

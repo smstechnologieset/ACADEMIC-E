@@ -1,14 +1,38 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const supabase = createAdminClient();
+    const { searchParams } = new URL(request.url);
+    const course = searchParams.get("course");
+    const qualification = searchParams.get("qualification");
+    const status = searchParams.get("status");
+    const from = searchParams.get("from");
+    const to = searchParams.get("to");
 
-    const { data: apps, error } = await supabase
+    let query = supabase
       .from("applications")
       .select("*")
       .order("created_at", { ascending: false });
+
+    if (course && course !== "all") {
+      query = query.ilike("course_applied", course);
+    }
+    if (qualification && qualification !== "all") {
+      query = query.ilike("qualification", qualification);
+    }
+    if (status && status !== "all") {
+      query = query.eq("status", status);
+    }
+    if (from) {
+      query = query.gte("created_at", from);
+    }
+    if (to) {
+      query = query.lte("created_at", `${to}T23:59:59.999Z`);
+    }
+
+    const { data: apps, error } = await query;
 
     if (error) {
       return NextResponse.json({ error: error.message }, { status: 500 });
@@ -59,7 +83,7 @@ export async function GET() {
         .join(",")
     );
 
-    const csv = [headers.join(","), ...rows].join("\n");
+    const csv = "\ufeff" + [headers.join(","), ...rows].join("\r\n");
 
     return new NextResponse(csv, {
       status: 200,

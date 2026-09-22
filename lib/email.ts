@@ -4,7 +4,7 @@
  */
 
 const FROM_ADDRESS = process.env.RESEND_FROM_EMAIL || "Academic Excellence <admin@academicexcellences.com>";
-const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "solhm1@yahoo.com";
+const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "academicexcellenceco@gmail.com";
 
 async function sendEmail(
   to: string | string[],
@@ -234,7 +234,7 @@ export async function sendContactInquiryEmail(data: {
   `);
 
   await sendEmail(
-    ["admin@academicexcellences.com", "solhm1@yahoo.com"],
+    ["admin@academicexcellences.com", "academicexcellenceco@gmail.com"],
     adminSubject,
     adminHtml,
     safeEmail

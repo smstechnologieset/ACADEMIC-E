@@ -597,45 +597,117 @@ window.AdminService = {
     return { success: true, application: targetApp };
   },
 
-  exportApplicationsToCSV() {
+  getFilteredApplications(filters = {}) {
     const apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
-    if (!apps || apps.length === 0) {
-      alert("No applications to export.");
-      return;
+    if (!apps || !apps.length) return [];
+    if (!filters || filters.scope === "all") return apps;
+
+    return apps.filter(a => {
+      // Course Filter
+      if (filters.course && filters.course !== "all") {
+        if ((a.courseApplied || "").trim().toLowerCase() !== filters.course.trim().toLowerCase()) {
+          return false;
+        }
+      }
+      // Qualification Filter
+      if (filters.qualification && filters.qualification !== "all") {
+        if ((a.qualification || "").trim().toLowerCase() !== filters.qualification.trim().toLowerCase()) {
+          return false;
+        }
+      }
+      // Status Filter
+      if (filters.status && filters.status !== "all") {
+        if ((a.status || "").toLowerCase() !== filters.status.toLowerCase()) {
+          return false;
+        }
+      }
+      // Date From Filter
+      if (filters.dateFrom) {
+        const fromTs = new Date(filters.dateFrom).getTime();
+        if (!a.created_at || new Date(a.created_at).getTime() < fromTs) {
+          return false;
+        }
+      }
+      // Date To Filter (inclusive of the entire day)
+      if (filters.dateTo) {
+        const toTs = new Date(filters.dateTo + "T23:59:59.999").getTime();
+        if (!a.created_at || new Date(a.created_at).getTime() > toTs) {
+          return false;
+        }
+      }
+      return true;
+    });
+  },
+
+  getFilteredApplicationsCount(filters = {}) {
+    const apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+    const total = apps ? apps.length : 0;
+    const filtered = this.getFilteredApplications(filters);
+    return { total, matched: filtered.length };
+  },
+
+  exportApplicationsToCSV(filters = {}) {
+    const filtered = this.getFilteredApplications(filters);
+    if (!filtered || filtered.length === 0) {
+      alert("No applications match the selected export criteria.");
+      return 0;
     }
 
     const headers = [
       "Application ID", "Submission Date", "Full Name", "Age", "Email", "Phone",
       "Address", "Place", "Qualification", "Course Applied", "Fayda ID",
-      "Status", "Payment Method", "Payment Ref", "Internal Notes"
+      "Status", "Payment Method", "Payment Ref", "Rejection Reason", "Internal Notes"
     ];
 
-    const rows = apps.map(a => [
-      `"${a.id || ""}"`,
+    const rows = filtered.map(a => [
+      `"${(a.id || "").replace(/"/g, '""')}"`,
       `"${window.AcademicDB.formatDate(a.created_at)}"`,
       `"${(a.fullName || "").replace(/"/g, '""')}"`,
-      `"${a.age || ""}"`,
-      `"${a.email || ""}"`,
-      `"${a.phone || ""}"`,
+      `"${(a.age || "").toString().replace(/"/g, '""')}"`,
+      `"${(a.email || "").replace(/"/g, '""')}"`,
+      `"${(a.phone || "").replace(/"/g, '""')}"`,
       `"${(a.fullAddress || "").replace(/"/g, '""')}"`,
-      `"${a.place || ""}"`,
-      `"${a.qualification || ""}"`,
-      `"${a.courseApplied || ""}"`,
-      `"${a.faydaIdNumber || ""}"`,
-      `"${a.status || ""}"`,
-      `"${a.paymentMethod || ""}"`,
-      `"${a.paymentRef || ""}"`,
+      `"${(a.place || "").replace(/"/g, '""')}"`,
+      `"${(a.qualification || "").replace(/"/g, '""')}"`,
+      `"${(a.courseApplied || "").replace(/"/g, '""')}"`,
+      `"${(a.faydaIdNumber || "").replace(/"/g, '""')}"`,
+      `"${(a.status || "").replace(/"/g, '""')}"`,
+      `"${(a.paymentMethod || "").replace(/"/g, '""')}"`,
+      `"${(a.paymentRef || "").replace(/"/g, '""')}"`,
+      `"${(a.rejection_reason || a.rejectionReason || "").replace(/"/g, '""')}"`,
       `"${(a.internalNotes || "").replace(/"/g, '""')}"`
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," + [headers.join(","), ...rows.map(e => e.join(","))].join("\n");
-    const encodedUri = encodeURI(csvContent);
+    // Prepend UTF-8 BOM (\ufeff) for seamless Excel & Google Sheets character encoding
+    const csvContent = "\ufeff" + [headers.join(","), ...rows.map(e => e.join(","))].join("\r\n");
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `academic_excellence_applications_${new Date().toISOString().split("T")[0]}.csv`);
+    link.setAttribute("href", url);
+
+    // Contextual filename
+    let filenameParts = ["academic_excellence"];
+    if (filters && filters.scope === "filter") {
+      if (filters.status && filters.status !== "all") filenameParts.push(filters.status);
+      if (filters.course && filters.course !== "all") {
+        const cleanCourse = filters.course.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 24);
+        if (cleanCourse) filenameParts.push(cleanCourse);
+      }
+      if (filters.qualification && filters.qualification !== "all") {
+        const cleanQual = filters.qualification.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-+|-+$/g, "").slice(0, 16);
+        if (cleanQual) filenameParts.push(cleanQual);
+      }
+    } else {
+      filenameParts.push("all_applications");
+    }
+    filenameParts.push(new Date().toISOString().split("T")[0]);
+
+    link.setAttribute("download", `${filenameParts.join("_")}.csv`);
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    return filtered.length;
   },
 
   // 4. COURSES CMS CRUD
