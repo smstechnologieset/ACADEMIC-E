@@ -341,7 +341,7 @@
               </div>
               <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
                 <button type="button" class="btn-sm btn-sync-db" id="appRefreshBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;padding:10px 16px;">&#8635; Refresh</button>
-                <button type="button" class="btn-sm" id="exportCsvBtn" style="background:#0b1b3d;color:#fff;border:none;padding:10px 18px;">Export CSV</button>
+                <button type="button" class="btn-sm" id="exportCsvBtn" onclick="window.openCsvExportModal &amp;&amp; window.openCsvExportModal()" style="background:#0b1b3d;color:#fff;border:none;padding:10px 18px;cursor:pointer;">Export CSV</button>
               </div>
             </div>
             <div class="bulk-bar" id="bulkBar">
@@ -825,8 +825,11 @@
           </div>
         </form>
       </div>
+    </div>
+  </div>
+
   <!-- CSV EXPORT MODAL -->
-  <div class="admin-modal" id="csvExportModal">
+  <div class="admin-modal" id="csvExportModal" style="z-index:99999;">
     <div class="modal-card" style="max-width:640px;width:94%;">
       <div class="modal-header">
         <div>
@@ -1404,6 +1407,9 @@
     function closeCsvExportModal() {
       if (csvExportModal) csvExportModal.classList.remove("open");
     }
+
+    window.openCsvExportModal = openCsvExportModal;
+    window.closeCsvExportModal = closeCsvExportModal;
 
     document.getElementById("exportCsvBtn")?.addEventListener("click", openCsvExportModal);
     document.getElementById("closeCsvExportModalBtn")?.addEventListener("click", closeCsvExportModal);
