@@ -201,6 +201,59 @@
       border-color: #1854a1;
       color: #ffffff !important;
     }
+
+    /* CSV & PDF EXPORT MODAL STYLING */
+    .csv-modal-select,
+    .csv-modal-input {
+      width: 100% !important;
+      height: 44px !important;
+      min-height: 44px !important;
+      padding: 10px 14px !important;
+      font-size: 0.9rem !important;
+      line-height: 1.4 !important;
+      font-weight: 500 !important;
+      color: #0b1b3d !important;
+      background-color: #ffffff !important;
+      border: 1.5px solid #cbd5e1 !important;
+      border-radius: 6px !important;
+      box-sizing: border-box !important;
+      font-family: inherit !important;
+      outline: none !important;
+      display: block !important;
+      transition: border-color 0.2s, box-shadow 0.2s !important;
+    }
+    .csv-modal-select {
+      -webkit-appearance: none !important;
+      -moz-appearance: none !important;
+      appearance: none !important;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%230b1b3d' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E") !important;
+      background-repeat: no-repeat !important;
+      background-position: right 14px center !important;
+      background-size: 14px !important;
+      padding: 10px 38px 10px 14px !important;
+      cursor: pointer !important;
+    }
+    .csv-modal-select option {
+      font-size: 0.9rem !important;
+      color: #0b1b3d !important;
+      background: #ffffff !important;
+      padding: 8px 12px !important;
+    }
+    .csv-modal-select:focus,
+    .csv-modal-input:focus {
+      border-color: #2563eb !important;
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15) !important;
+    }
+    #executeCsvDownloadBtn:hover {
+      background: #f1f5f9 !important;
+      border-color: #94a3b8 !important;
+    }
+    #executeExcelDownloadBtn:hover {
+      background: #047857 !important;
+    }
+    #executePdfDownloadBtn:hover {
+      background: #1854a1 !important;
+    }
   </style>
 </head>
 <body>
@@ -830,23 +883,23 @@
 
   <!-- CSV EXPORT MODAL -->
   <div class="admin-modal" id="csvExportModal" style="z-index:99999;">
-    <div class="modal-card" style="max-width:640px;width:94%;">
-      <div class="modal-header">
+    <div class="modal-card" style="max-width:720px;width:95%;">
+      <div class="modal-header" style="border-bottom:1px solid #e2e8f0;padding:18px 24px;">
         <div>
           <h3 style="font-size:1.28rem;color:#0b1b3d;margin:0;display:flex;align-items:center;gap:8px;">
-            <span>📊</span> Export Applications to CSV
+            <span>📊</span> Export Applications (CSV, Excel &amp; PDF)
           </h3>
           <p style="font-size:0.8rem;color:#64748b;margin:4px 0 0 0;">Download applicant records to share student lists with partner institutions or program providers.</p>
         </div>
         <button type="button" class="btn-remove-file" id="closeCsvExportModalBtn">&times;</button>
       </div>
-      <div class="modal-body" style="padding:22px 24px;">
+      <div class="modal-body" style="padding:20px 24px;">
 
         <!-- Scope Selection -->
-        <div style="margin-bottom:18px;">
-          <label class="form-label" style="font-weight:700;color:#0b1b3d;margin-bottom:10px;">Select Export Scope</label>
+        <div style="margin-bottom:16px;">
+          <label class="form-label" style="font-weight:700;color:#0b1b3d;margin-bottom:8px;">Select Export Scope</label>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;" id="csvScopeGroup">
-            <label id="csvScopeAllLabel" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;cursor:pointer;transition:all 0.2s;">
+            <label id="csvScopeAllLabel" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:2px solid #2563eb;background:#eff6ff;border-radius:8px;cursor:pointer;transition:all 0.2s;">
               <input type="radio" name="csvExportScope" id="csvScopeAll" value="all" checked style="margin-top:3px;" />
               <div>
                 <strong style="display:block;font-size:0.92rem;color:#1e3a8a;">All Applications</strong>
@@ -854,7 +907,7 @@
               </div>
             </label>
 
-            <label id="csvScopeFilterLabel" style="display:flex;align-items:flex-start;gap:10px;padding:14px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;cursor:pointer;transition:all 0.2s;">
+            <label id="csvScopeFilterLabel" style="display:flex;align-items:flex-start;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:#f8fafc;border-radius:8px;cursor:pointer;transition:all 0.2s;">
               <input type="radio" name="csvExportScope" id="csvScopeFilter" value="filter" style="margin-top:3px;" />
               <div>
                 <strong style="display:block;font-size:0.92rem;color:#0b1b3d;">Custom Filtered</strong>
@@ -865,22 +918,22 @@
         </div>
 
         <!-- Filter Controls -->
-        <div id="csvFilterControls" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:18px;margin-bottom:18px;transition:all 0.2s;opacity:0.5;pointer-events:none;">
+        <div id="csvFilterControls" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:16px 18px;margin-bottom:16px;transition:all 0.2s;opacity:0.5;pointer-events:none;">
           <div style="font-size:0.75rem;font-weight:800;text-transform:uppercase;color:#475569;letter-spacing:0.6px;margin-bottom:12px;display:flex;align-items:center;gap:6px;">
             <span>⚡</span> Filter Criteria
           </div>
 
           <div class="form-grid-2" style="margin-bottom:12px;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Program / Course</label>
-              <select id="csvModalFilterCourse" class="form-select" style="font-size:0.85rem;height:38px;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">Program / Course</label>
+              <select id="csvModalFilterCourse" class="csv-modal-select">
                 <option value="all">All Programs</option>
               </select>
             </div>
 
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Qualification Level</label>
-              <select id="csvModalFilterQual" class="form-select" style="font-size:0.85rem;height:38px;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">Qualification Level</label>
+              <select id="csvModalFilterQual" class="csv-modal-select">
                 <option value="all">All Qualifications</option>
               </select>
             </div>
@@ -888,8 +941,8 @@
 
           <div class="form-grid-2" style="margin-bottom:12px;">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Application Status</label>
-              <select id="csvModalFilterStatus" class="form-select" style="font-size:0.85rem;height:38px;">
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">Application Status</label>
+              <select id="csvModalFilterStatus" class="csv-modal-select">
                 <option value="all">All Statuses</option>
                 <option value="approved">Approved / Admitted (Ready for Enrollment)</option>
                 <option value="under_review">Under Review</option>
@@ -900,30 +953,30 @@
             </div>
 
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;">Date Presets</label>
-              <div style="display:flex;gap:5px;flex-wrap:wrap;height:38px;align-items:center;">
-                <button type="button" class="btn-sm csv-preset-btn" data-preset="all" style="padding:4px 9px;font-size:0.75rem;background:#0b1b3d;color:#fff;border:none;border-radius:4px;cursor:pointer;">All Time</button>
-                <button type="button" class="btn-sm csv-preset-btn" data-preset="7d" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">Last 7d</button>
-                <button type="button" class="btn-sm csv-preset-btn" data-preset="30d" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">Last 30d</button>
-                <button type="button" class="btn-sm csv-preset-btn" data-preset="month" style="padding:4px 9px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;">This Month</button>
+              <label class="form-label" style="font-size:0.78rem;font-weight:700;color:#334155;margin-bottom:6px;">Date Quick Presets</label>
+              <div style="display:flex;gap:5px;flex-wrap:wrap;height:44px;align-items:center;">
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="all" style="padding:6px 11px;font-size:0.75rem;background:#0b1b3d;color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;">All Time</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="7d" style="padding:6px 11px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;font-weight:600;">Last 7d</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="30d" style="padding:6px 11px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;font-weight:600;">Last 30d</button>
+                <button type="button" class="btn-sm csv-preset-btn" data-preset="month" style="padding:6px 11px;font-size:0.75rem;background:#fff;color:#475569;border:1px solid #cbd5e1;border-radius:4px;cursor:pointer;font-weight:600;">This Month</button>
               </div>
             </div>
           </div>
 
           <div class="form-grid-2">
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;">Submission Date From</label>
-              <input type="date" id="csvModalFilterDateFrom" class="form-input" style="font-size:0.85rem;height:38px;" />
+              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:6px;">Submission Date From</label>
+              <input type="date" id="csvModalFilterDateFrom" class="csv-modal-input" />
             </div>
             <div class="form-group" style="margin:0;">
-              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;">Submission Date To</label>
-              <input type="date" id="csvModalFilterDateTo" class="form-input" style="font-size:0.85rem;height:38px;" />
+              <label class="form-label" style="font-size:0.78rem;font-weight:600;color:#64748b;margin-bottom:6px;">Submission Date To</label>
+              <input type="date" id="csvModalFilterDateTo" class="csv-modal-input" />
             </div>
           </div>
         </div>
 
         <!-- Live Preview Match Indicator -->
-        <div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid #2563eb;border-radius:8px;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
           <div>
             <div style="font-size:0.9rem;font-weight:700;color:#0b1b3d;" id="csvModalSummaryText">
               Exporting: <span id="csvModalMatchCount" style="color:#2563eb;font-size:1.05rem;">0</span> of <span id="csvModalTotalCount">0</span> applications
@@ -936,15 +989,24 @@
         </div>
 
       </div>
-      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;">
-        <button type="button" class="btn btn-sm" id="closeCsvExportModalFooterBtn" style="padding:9px 18px;">Cancel</button>
-        <button type="button" class="btn-dark-admin" id="executeCsvDownloadBtn" style="padding:10px 24px;font-weight:700;display:inline-flex;align-items:center;gap:8px;">
-          <span>&#8681;</span> <span id="executeCsvDownloadBtnText">Download CSV File</span>
-        </button>
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;padding:14px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;">
+        <button type="button" class="btn btn-sm" id="closeCsvExportModalFooterBtn" style="padding:9px 18px;background:#ffffff;border:1px solid #cbd5e1;color:#475569;font-weight:600;">Cancel</button>
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+          <button type="button" class="btn-sm" id="executeCsvDownloadBtn" style="background:#ffffff;border:1.5px solid #cbd5e1;color:#334155;padding:9px 14px;border-radius:6px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer;" title="Download plain CSV file">
+            <span>📋</span> CSV
+          </button>
+          <button type="button" class="btn-sm" id="executeExcelDownloadBtn" style="background:#059669;color:#ffffff;border:none;padding:9px 18px;border-radius:6px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer;box-shadow:0 2px 6px rgba(5,150,105,0.25);" title="Download styled Excel (.xls) with brand colors & status badges">
+            <span>📊</span> Download Excel (.xls)
+          </button>
+          <button type="button" class="btn-sm" id="executePdfDownloadBtn" style="background:#0b1b3d;color:#ffffff;border:none;padding:9px 20px;border-radius:6px;font-weight:700;display:inline-flex;align-items:center;gap:6px;cursor:pointer;box-shadow:0 2px 6px rgba(11,27,61,0.25);" title="Download official branded PDF report with letterhead">
+            <span>📄</span> Download PDF
+          </button>
+        </div>
       </div>
     </div>
   </div>
 
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js"></script>
   <script src="../js/courses-service.js"></script>
@@ -1266,7 +1328,8 @@
     const csvModalTotalCount = document.getElementById("csvModalTotalCount");
     const csvModalStatusPill = document.getElementById("csvModalStatusPill");
     const executeCsvDownloadBtn = document.getElementById("executeCsvDownloadBtn");
-    const executeCsvDownloadBtnText = document.getElementById("executeCsvDownloadBtnText");
+    const executeExcelDownloadBtn = document.getElementById("executeExcelDownloadBtn");
+    const executePdfDownloadBtn = document.getElementById("executePdfDownloadBtn");
 
     function getCsvModalFilters() {
       const scope = (csvScopeAll && csvScopeAll.checked) ? "all" : "filter";
@@ -1319,29 +1382,25 @@
       if (csvModalMatchCount) csvModalMatchCount.textContent = stats.matched;
       if (csvModalTotalCount) csvModalTotalCount.textContent = stats.total;
 
-      if (executeCsvDownloadBtn && executeCsvDownloadBtnText) {
-        if (stats.matched > 0) {
-          if (csvModalStatusPill) {
-            csvModalStatusPill.textContent = "Ready to Export";
-            csvModalStatusPill.style.background = "#dcfce7";
-            csvModalStatusPill.style.color = "#15803d";
-          }
-          executeCsvDownloadBtn.disabled = false;
-          executeCsvDownloadBtn.style.opacity = "1";
-          executeCsvDownloadBtn.style.cursor = "pointer";
-          executeCsvDownloadBtnText.textContent = `Download CSV (${stats.matched} Records)`;
+      const hasMatches = stats.matched > 0;
+      if (csvModalStatusPill) {
+        if (hasMatches) {
+          csvModalStatusPill.textContent = "Ready to Export";
+          csvModalStatusPill.style.background = "#dcfce7";
+          csvModalStatusPill.style.color = "#15803d";
         } else {
-          if (csvModalStatusPill) {
-            csvModalStatusPill.textContent = "0 Matches";
-            csvModalStatusPill.style.background = "#fee2e2";
-            csvModalStatusPill.style.color = "#b91c1c";
-          }
-          executeCsvDownloadBtn.disabled = true;
-          executeCsvDownloadBtn.style.opacity = "0.5";
-          executeCsvDownloadBtn.style.cursor = "not-allowed";
-          executeCsvDownloadBtnText.textContent = "No Records to Download";
+          csvModalStatusPill.textContent = "0 Matches";
+          csvModalStatusPill.style.background = "#fee2e2";
+          csvModalStatusPill.style.color = "#b91c1c";
         }
       }
+
+      [executeCsvDownloadBtn, executeExcelDownloadBtn, executePdfDownloadBtn].forEach(btn => {
+        if (!btn) return;
+        btn.disabled = !hasMatches;
+        btn.style.opacity = hasMatches ? "1" : "0.5";
+        btn.style.cursor = hasMatches ? "pointer" : "not-allowed";
+      });
     }
 
     function populateCsvExportModal() {
@@ -1462,13 +1521,42 @@
       });
     });
 
-    // Execute Download
+    // Execute Download Handlers
     executeCsvDownloadBtn?.addEventListener("click", () => {
       const filters = getCsvModalFilters();
       const count = window.AdminService.exportApplicationsToCSV(filters);
       if (count > 0) {
         showToast(`Successfully exported ${count} application records to CSV!`, "success");
         closeCsvExportModal();
+      }
+    });
+
+    executeExcelDownloadBtn?.addEventListener("click", () => {
+      const filters = getCsvModalFilters();
+      const count = window.AdminService.exportApplicationsToExcel(filters);
+      if (count > 0) {
+        showToast(`Successfully exported ${count} application records to styled Excel (.xls)!`, "success");
+        closeCsvExportModal();
+      }
+    });
+
+    executePdfDownloadBtn?.addEventListener("click", async () => {
+      const filters = getCsvModalFilters();
+      const originalHtml = executePdfDownloadBtn.innerHTML;
+      try {
+        executePdfDownloadBtn.disabled = true;
+        executePdfDownloadBtn.innerHTML = "<span>⏳</span> Generating PDF...";
+        const count = await window.AdminService.exportApplicationsToPDF(filters);
+        if (count > 0) {
+          showToast(`Generated official PDF report for ${count} students!`, "success");
+          closeCsvExportModal();
+        }
+      } catch(err) {
+        console.error("PDF generation error:", err);
+        showToast("Error generating PDF. Please check popup permissions.", "error");
+      } finally {
+        executePdfDownloadBtn.disabled = false;
+        executePdfDownloadBtn.innerHTML = originalHtml;
       }
     });
 
