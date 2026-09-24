@@ -15,6 +15,26 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  // Ensure hero background video autoplays reliably across all browsers
+  const bgVideos = document.querySelectorAll('.hero-video-bg');
+  bgVideos.forEach(video => {
+    video.muted = true;
+    const playAttempt = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          const resume = () => {
+            video.play().catch(() => {});
+          };
+          document.addEventListener('click', resume, { once: true });
+          document.addEventListener('touchstart', resume, { once: true });
+          document.addEventListener('scroll', resume, { once: true });
+        });
+      }
+    };
+    playAttempt();
+  });
+
   // 2. Mobile Menu Toggle
   const toggleBtn = document.querySelector('.mobile-nav-toggle');
   const navMenu = document.querySelector('.nav-menu');

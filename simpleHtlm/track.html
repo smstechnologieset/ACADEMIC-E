@@ -20,12 +20,6 @@
 
   <!-- SITE HEADER / NAVIGATION -->
   <header class="site-header" id="top">
-    <!-- Globe video background (persistent across all pages) -->
-    <video class="header-video-bg" autoplay loop muted playsinline aria-hidden="true" poster="assets/globe-poster.jpg">
-      <source type="video/mp4" src="https://bpgpartnership.com/wp-content/uploads/2024/08/Globe.mp4" />
-      <source type="video/webm" src="https://bpgpartnership.com/wp-content/uploads/2024/08/Globe.webm" />
-    </video>
-    <div class="header-video-overlay" aria-hidden="true"></div>
     <div class="container nav-wrapper">
       <a href="index.html" class="logo-link" aria-label="Academic Excellence Home">
         <img src="assets/logo.svg" alt="Academic Excellence Logo" class="logo-img" />
@@ -51,6 +45,9 @@
   <main>
     <!-- HERO BANNER -->
     <section class="hero-section" style="min-height: 38vh; padding-top: 130px; padding-bottom: 50px;">
+      <video class="hero-video-bg" autoplay loop muted playsinline poster="assets/globe-poster.jpg">
+        <source src="assets/globe.mp4" type="video/mp4" />
+      </video>
       <div class="hero-overlay" style="opacity: 0.85;" aria-hidden="true"></div>
       <div class="container hero-content">
         <div class="hero-badge-wrap">

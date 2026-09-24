@@ -111,48 +111,23 @@ p:last-child {
    HEADER & NAVIGATION
    ========================================================================== */
 .site-header {
-  position: relative;
+  position: absolute;
   top: 0;
   left: 0;
   width: 100%;
   z-index: 100;
   padding: 24px 0;
   background: transparent;
-  overflow: hidden;
+  transition: background 0.3s ease, padding 0.3s ease, box-shadow 0.3s ease;
 }
 
-/* Globe video inside header */
-.header-video-bg {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  object-position: center 30%;
-  z-index: 0;
-  pointer-events: none;
-}
-
-/* Dark gradient overlay on the header video */
-.header-video-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(
-    to bottom,
-    rgba(11, 27, 61, 0.72) 0%,
-    rgba(11, 27, 61, 0.55) 100%
-  );
-  z-index: 1;
-  pointer-events: none;
-}
-
-/* Nav content sits above the video */
+/* Nav content sits above background */
 .site-header .container.nav-wrapper {
   position: relative;
   z-index: 2;
 }
 
-/* When scrolled: fix to top, hide video, use solid bg */
+/* When scrolled: fix to top, use solid blurred navy bg */
 .site-header.scrolled {
   position: fixed;
   background: rgba(11, 27, 61, 0.96);
@@ -160,12 +135,6 @@ p:last-child {
   padding: 14px 0;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.28);
   animation: slideDown 0.3s ease;
-}
-
-/* Hide the video and overlay when header is fixed/scrolled */
-.site-header.scrolled .header-video-bg,
-.site-header.scrolled .header-video-overlay {
-  display: none;
 }
 
 @keyframes slideDown {

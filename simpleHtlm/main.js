@@ -5,12 +5,34 @@
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Header scroll effect
   const header = document.querySelector('.site-header');
-  window.addEventListener('scroll', () => {
-    if (window.scrollY > 50) {
-      header.classList.add('scrolled');
-    } else {
-      header.classList.remove('scrolled');
-    }
+  if (header) {
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+      } else {
+        header.classList.remove('scrolled');
+      }
+    });
+  }
+
+  // Ensure hero background video autoplays reliably across all browsers
+  const bgVideos = document.querySelectorAll('.hero-video-bg');
+  bgVideos.forEach(video => {
+    video.muted = true;
+    const playAttempt = () => {
+      const p = video.play();
+      if (p !== undefined) {
+        p.catch(() => {
+          const resume = () => {
+            video.play().catch(() => {});
+          };
+          document.addEventListener('click', resume, { once: true });
+          document.addEventListener('touchstart', resume, { once: true });
+          document.addEventListener('scroll', resume, { once: true });
+        });
+      }
+    };
+    playAttempt();
   });
 
   // 2. Mobile Menu Toggle
