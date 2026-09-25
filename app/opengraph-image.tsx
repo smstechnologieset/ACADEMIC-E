@@ -119,7 +119,7 @@ export default async function Image() {
           }}
         >
           <div style={{ fontSize: "16px", fontWeight: "600", color: "#93c5fd" }}>
-            ✦ Subsidized Tuition in ETB
+            ✦ Tuition in ETB
           </div>
           <div style={{ fontSize: "16px", fontWeight: "600", color: "#93c5fd" }}>
             ✦ 24-Week Fast Tracks

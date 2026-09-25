@@ -23,7 +23,7 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Apply Online | Academic Excellence Ethiopia",
-    description: "Subsidized education intake with Ethiopian FAYDA ID verification.",
+    description: " education intake with Ethiopian FAYDA ID verification.",
   },
 };
 
