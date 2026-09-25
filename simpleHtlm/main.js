@@ -2,6 +2,30 @@
  * Academic Excellence — Static Site Interactive Script
  */
 
+/**
+ * Qualification Requirements accordion toggle.
+ * Called via inline onclick on each .qual-card element.
+ */
+function toggleQualCard(card) {
+  const isExpanded = card.getAttribute('aria-expanded') === 'true';
+  // Close all other cards
+  document.querySelectorAll('.qual-card[aria-expanded="true"]').forEach(c => {
+    if (c !== card) c.setAttribute('aria-expanded', 'false');
+  });
+  card.setAttribute('aria-expanded', isExpanded ? 'false' : 'true');
+}
+
+// Keyboard accessibility for qual-cards
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' || e.key === ' ') {
+    const card = e.target.closest('.qual-card');
+    if (card) {
+      e.preventDefault();
+      toggleQualCard(card);
+    }
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   // 1. Header scroll effect
   const header = document.querySelector('.site-header');

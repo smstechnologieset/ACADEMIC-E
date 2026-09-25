@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260925-3" />
 </head>
 <body>
 
@@ -61,19 +61,83 @@
       </div>
     </section>
 
+    <!-- DEDICATED PROGRAMS VIDEO SHOWCASE SECTION (BPG Split Aesthetic) -->
+    <section class="program-video-showcase-section" id="program-overview">
+      <div class="program-video-split-grid">
+        
+        <!-- Left: Video Column with BPG Accent Styling -->
+        <div class="program-video-col">
+          <!-- BPG Signature Vertical Orange Accent Bar -->
+          <div class="video-accent-bar" aria-hidden="true"></div>
+          
+          <!-- Video Element with Ambient Overlay -->
+          <div class="video-wrapper">
+            <video id="programShowcaseVideo" class="showcase-video" autoplay loop muted playsinline poster="assets/globe-poster.jpg">
+              <source src="assets/7691551-hd_1920_1080_25fps.mp4" type="video/mp4" />
+            </video>
+            <div class="video-gradient-overlay" aria-hidden="true"></div>
+            
+            <!-- Floating Badge on Video -->
+            <div class="video-floating-badge">
+              <span class="video-pulse-dot"></span>
+              <span>Interactive Learning in Action</span>
+            </div>
+
+            <!-- Video Controls Pill (Play/Pause & Sound) -->
+            <div class="video-controls-pill">
+              <button type="button" class="video-ctrl-btn" id="videoPlayPauseBtn" aria-label="Pause Video" title="Play / Pause">
+                <svg id="pauseIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                <svg id="playIcon" width="16" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none;"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              </button>
+              <button type="button" class="video-ctrl-btn" id="videoMuteBtn" aria-label="Unmute Video" title="Mute / Unmute">
+                <svg id="muteIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9v3a3 3 0 0 0 5.12 2.12M15 9.34V4a3 3 0 0 0-5.94-.6"></path><path d="M17 16.95A7 7 0 0 1 5 12v-2m14 0v2a7 7 0 0 1-.11 1.23"></path><line x1="12" y1="19" x2="12" y2="23"></line><line x1="8" y1="23" x2="16" y2="23"></line></svg>
+                <svg id="soundIcon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none;"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+              </button>
+            </div>
+          </div>
+
+          <!-- Decorative Tan Tile (BPG Signature) -->
+          <div class="video-tile-tan" aria-hidden="true"></div>
+        </div>
+
+        <!-- Right: Text Content Column -->
+        <div class="program-video-text-col">
+          <span class="program-eyebrow">Curriculum Overview</span>
+          <h2 class="program-showcase-title">What Are Job-Ready Courses?</h2>
+          <p class="program-showcase-lead">
+            Job-Ready Courses are structured learning pathways designed to align education with industry requirements and workforce demands. Drawing from a library of nearly 10,000 learning resources, these programs help learners acquire practical skills that lead to employment, promotions, career advancement, and higher earning potential. Most programs can be completed within <strong>24 weeks</strong>, offering flexibility for both students and working professionals.
+          </p>
+          <p class="program-showcase-desc">
+            Students can choose from over <strong>120 Diploma and Certificate programs</strong> in four key categories: Business Skills, Productivity and Collaboration Tools, Information Technology (IT) Skills, and Professional Certifications.
+          </p>
+
+          <!-- Highlight Box -->
+          <div class="program-cert-highlight">
+            <div class="cert-highlight-icon" aria-hidden="true">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 15l-2 5l9-13h-7l2-5l-9 13h7z"/></svg>
+            </div>
+            <div>
+              <strong>Internationally Recognized Certifications:</strong>
+              <span>Upon successful completion, learners receive certifications associated with the University in New York, USA. Students achieving a GPA of 3.6 or higher (90%+) are eligible for a <em>Merit Badge</em> recognizing outstanding academic performance.</span>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- BPG Grounding Blue Band with Geometric Colored Tiles -->
+      <div class="program-video-base-band" aria-hidden="true">
+        <div class="container program-band-inner">
+          <div class="band-tile band-tile-slate"></div>
+          <div class="band-tile band-tile-orange"></div>
+          <div class="band-tile band-tile-tan"></div>
+        </div>
+      </div>
+    </section>
+
     <!-- CATALOG FILTER & COURSES GRID -->
     <section class="section-padding" style="background-color: #f8fafc;">
       <div class="container">
-        
-        <!-- Job-Ready Description Banner -->
-        <div style="background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:28px 32px;margin-bottom:32px;">
-          <h2 style="font-size:1.35rem;color:#0b1b3d;margin-bottom:12px;">What Are Job-Ready Courses?</h2>
-          <p style="color:#475569;line-height:1.8;margin-bottom:14px;">Job-Ready Courses are structured learning pathways designed to align education with industry requirements and workforce demands. Drawing from a library of nearly 10,000 learning resources, these programs help learners acquire practical skills that lead to employment, promotions, career advancement, and higher earning potential. Most programs can be completed within <strong>24 weeks</strong>, offering flexibility for both students and working professionals.</p>
-          <p style="color:#475569;line-height:1.8;margin-bottom:14px;">Students can choose from over <strong>120 Diploma and Certificate programs</strong> in four key categories: Business Skills, Productivity and Collaboration Tools, Information Technology (IT) Skills, and Professional Certifications.</p>
-          <div style="background:#f8fafc;border-radius:8px;padding:18px 22px;margin-top:10px;">
-            <strong style="color:#0b1b3d;">Internationally Recognized Certifications:</strong> Upon successful completion, learners receive certifications associated with the University in New York, USA. Students achieving a GPA of 3.6 or higher (90%+) are eligible for a <em>Merit Badge</em> recognizing outstanding academic performance.
-          </div>
-        </div>
 
         <!-- Filter Bar -->
         <div class="catalog-filter-bar">
@@ -237,6 +301,61 @@
       });
 
       renderCourses();
+
+      // Program Showcase Video Controls & Autoplay Support
+      const showVideo = document.getElementById("programShowcaseVideo");
+      const playPauseBtn = document.getElementById("videoPlayPauseBtn");
+      const pauseIcon = document.getElementById("pauseIcon");
+      const playIcon = document.getElementById("playIcon");
+      const muteBtn = document.getElementById("videoMuteBtn");
+      const muteIcon = document.getElementById("muteIcon");
+      const soundIcon = document.getElementById("soundIcon");
+
+      if (showVideo) {
+        showVideo.muted = true;
+        const playPromise = showVideo.play();
+        if (playPromise !== undefined) {
+          playPromise.catch(() => {
+            const resumeOnInteraction = () => {
+              showVideo.play().catch(() => {});
+            };
+            document.addEventListener('click', resumeOnInteraction, { once: true });
+            document.addEventListener('touchstart', resumeOnInteraction, { once: true });
+            document.addEventListener('scroll', resumeOnInteraction, { once: true });
+          });
+        }
+
+        if (playPauseBtn) {
+          playPauseBtn.addEventListener("click", () => {
+            if (showVideo.paused) {
+              showVideo.play();
+              if (pauseIcon) pauseIcon.style.display = "";
+              if (playIcon) playIcon.style.display = "none";
+              playPauseBtn.setAttribute("aria-label", "Pause Video");
+            } else {
+              showVideo.pause();
+              if (pauseIcon) pauseIcon.style.display = "none";
+              if (playIcon) playIcon.style.display = "";
+              playPauseBtn.setAttribute("aria-label", "Play Video");
+            }
+          });
+        }
+
+        if (muteBtn) {
+          muteBtn.addEventListener("click", () => {
+            showVideo.muted = !showVideo.muted;
+            if (showVideo.muted) {
+              if (muteIcon) muteIcon.style.display = "";
+              if (soundIcon) soundIcon.style.display = "none";
+              muteBtn.setAttribute("aria-label", "Unmute Video");
+            } else {
+              if (muteIcon) muteIcon.style.display = "none";
+              if (soundIcon) soundIcon.style.display = "";
+              muteBtn.setAttribute("aria-label", "Mute Video");
+            }
+          });
+        }
+      }
     });
   </script>
 </body>

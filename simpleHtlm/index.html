@@ -16,7 +16,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
 
   <!-- Stylesheet -->
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="style.css?v=20260925-2" />
 </head>
 <body>
 
@@ -68,7 +68,7 @@
 
         <div class="hero-card">
           <p>
-            Transforming Lives Through Education, Skills Development, and Workforce Readiness. o expand equitable access to internationally recognized education, workforce development, and career advancement opportunities for Ethiopian learners. 
+            Transforming Lives Through Education, Skills Development, and Workforce Readiness.expand equitable access to internationally recognized education, workforce development, and career advancement opportunities for Ethiopian learners. 
           </p>
         </div>
 
@@ -190,12 +190,12 @@ To expand access to affordable internationally recognized education and workforc
     </section>
 
     <!-- 5. SECTION 5 (new): QUALIFICATION REQUIREMENTS -->
-    <section class="section-padding qual-req-section" id="eligibility">
+    <section class="section-padding qual-req-section" id="eligibility" style="background:#0b1b3d;color:#ffffff;position:relative;">
       <div class="container">
         <div class="section-header">
           <span class="qual-req-eyebrow">Who Can Apply</span>
-          <h2 class="section-title">Qualification Requirements</h2>
-          <p class="section-desc">
+          <h2 class="section-title" style="color:#ffffff !important;">Qualification Requirements</h2>
+          <p class="section-desc" style="color:#dce9f5 !important;">
             The Academic Excellence program is designed to support learners and professionals who meet the eligibility criteria. Review the requirements below to see if you qualify.
           </p>
         </div>
@@ -464,94 +464,39 @@ To expand access to affordable internationally recognized education and workforc
       </div>
     </section>
 
-    <!-- 7. SECTION 7: ADMISSIONS CALL-TO-ACTION (CTA Banner) -->
+    <!-- 7. SECTION 7: ADMISSIONS CALL-TO-ACTION (BPG-Style Split Layout) -->
     <section class="cta-section">
-      <div class="container cta-content">
-        <h2 class="cta-title">Join Academic Excellence</h2>
-        <p class="cta-desc">
-          At Academic Excellence, we do not simply facilitate education — we facilitate possibilities, transform aspirations into opportunities, and invest in Ethiopia's future. Whether you are a recent graduate, working professional, government employee, or entrepreneur, we invite you to take the next step.
-        </p>
-        <div class="cta-buttons">
-          <a href="contact.html" class="btn btn-orange">Inquire Today</a>
-          <a href="apply.html" class="btn btn-outline-white">Apply Now &rarr;</a>
+      <!-- Split photo + text grid -->
+      <div class="cta-split-grid">
+        <!-- Left: Photo with orange vertical accent -->
+        <div class="cta-photo-col" aria-hidden="true">
+          <div class="cta-orange-accent"></div>
+          <img src="assets/join-us.jpg" alt="Professionals collaborating" class="cta-photo-img" />
+          <!-- Geometric corner tile -->
+          <div class="cta-photo-tile-tan"></div>
         </div>
-      </div>
-    </section>
-
-    <!-- 8. SECTION 8: CONTACT & INQUIRIES (From Screenshot 5) -->
-    <section class="section-padding contact-section" id="contact">
-      <div class="container contact-split-grid">
-        
-        <!-- Left Column: Partnerships & Media / Admissions Info -->
-        <div class="contact-info-col">
-          <h3 class="contact-col-heading">Admissions &amp; Partnership Inquiries</h3>
-          <p class="contact-desc">
-            If you are interested in exploring academic programs, institutional sponsorships, or collaborating with Academic Excellence to expand higher education opportunities in Ethiopia, please reach out to our team.
+        <!-- Right: Text content -->
+        <div class="cta-text-col">
+          <h2 class="cta-title">Join Academic Excellence</h2>
+          <p class="cta-desc">
+            At Academic Excellence, we do not simply facilitate education — we facilitate possibilities, transform aspirations into opportunities, and invest in Ethiopia's future. Whether you are a recent graduate, working professional, government employee, or entrepreneur, we invite you to take the next step.
           </p>
-
-          <div class="contact-detail-group">
-            <div class="contact-detail-label">Email</div>
-            <div class="contact-detail-value">
-              <a href="mailto:academicexcellenceco@gmail.com">academicexcellenceco@gmail.com</a>
-            </div>
+          <div class="cta-buttons">
+            <a href="contact.html" class="btn cta-btn-outline">Inquire Today</a>
+            <a href="apply.html" class="btn cta-btn-dark">Apply Now &rarr;</a>
           </div>
-
-          <!-- <div class="contact-detail-group">
-            <div class="contact-detail-label">Telephone</div>
-            <div class="contact-detail-value">+251 11 555 2345</div>
-          </div> -->
         </div>
-
-        <!-- Right Column: General Inquiries Form -->
-        <div class="contact-form-col">
-          <h3 class="contact-col-heading">General Inquiries</h3>
-          <p class="contact-desc">
-            For general inquiries please contact us using the form below:
-          </p>
-
-          <form id="academicInquiryForm">
-            <div class="form-field-group">
-              <input type="text" id="fullName" class="form-input" placeholder="Full Name *" required />
-            </div>
-
-            <div class="form-field-group">
-              <input type="text" id="companyName" class="form-input" placeholder="Organization / Educational Level" />
-            </div>
-
-            <div class="form-field-group">
-              <input type="email" id="emailAddress" class="form-input" placeholder="Email Address *" required />
-            </div>
-
-            <div class="form-field-group">
-              <input type="tel" id="phoneNumber" class="form-input" placeholder="Phone Number" />
-            </div>
-
-            <div class="form-field-group">
-              <input type="text" id="countryRegion" class="form-input" placeholder="Country / Region (e.g. Ethiopia)" />
-            </div>
-
-            <div class="form-field-group">
-              <select id="natureOfInquiry" class="form-select">
-                <option value="" disabled selected>Nature of Inquiry</option>
-                <option value="admissions">Program Admissions &amp; Enrollment</option>
-                <option value="curriculum">Curriculum &amp; U.S. Accreditation Details</option>
-                <option value="partnership">Corporate / Institutional Partnership</option>
-                <option value="payment">Tuition &amp; Bank Transfer Support</option>
-                <option value="other">Other Inquiry</option>
-              </select>
-            </div>
-
-            <div class="form-field-group">
-              <textarea id="message" class="form-textarea" placeholder="Your Message or Questions..."></textarea>
-            </div>
-
-            <button type="submit" class="btn-form-submit">Submit Inquiry</button>
-            <div id="formStatus" class="form-status"></div>
-          </form>
+      </div>
+      <!-- Grounding blue band with geometric tiles -->
+      <div class="cta-base-band">
+        <div class="cta-band-inner">
+          <div class="cta-band-tile cta-band-tile-orange"></div>
+          <div class="cta-band-tile cta-band-tile-tan"></div>
+          <div class="cta-band-tile cta-band-tile-slate"></div>
         </div>
-
       </div>
     </section>
+
 
   </main>
 
@@ -612,6 +557,10 @@ To expand access to affordable internationally recognized education and workforc
   <script>
     function toggleQualCard(card) {
       const isOpen = card.getAttribute('aria-expanded') === 'true';
+      // Close other cards for clean accordion feel
+      document.querySelectorAll('.qual-card[aria-expanded="true"]').forEach(function(c) {
+        if (c !== card) c.setAttribute('aria-expanded', 'false');
+      });
       card.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
     }
 
