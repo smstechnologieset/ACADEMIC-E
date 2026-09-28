@@ -14,7 +14,7 @@ const baseWrapper = (content) => `
       🎓 Academic Excellence
     </div>
     <div style="color: #93c5fd; font-size: 13px; margin-top: 6px; font-weight: 500;">
-      Education Initiative &amp; Admissions Office
+      Admissions Office
     </div>
   </div>
   <div style="padding: 32px 30px; color: #1e293b; font-size: 15px; line-height: 1.7;">
@@ -22,7 +22,7 @@ const baseWrapper = (content) => `
   </div>
   <div style="padding: 24px 30px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
     <p style="font-size: 12px; color: #64748b; margin: 0 0 6px 0;">
-      Academic Excellence Education Initiative • Powered by <a href="https://smstechnologieset.com/" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">SMS Technologies</a>
+      Academic Excellence • Powered by <a href="https://smstechnologieset.com/" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">SMS Technologies</a>
     </p>
     <p style="font-size: 11px; color: #94a3b8; margin: 0;">
       Bole Sub-City, Education Hub, Addis Ababa, Ethiopia • official inquiries: admin@academicexcellences.com
@@ -146,7 +146,7 @@ module.exports = async function handler(req, res) {
           <p style="font-size: 14px;">📌 <strong>Important: Please save your Reference ID.</strong> You will need it to upload your payment transfer slip and track your application status in real-time.</p>
           <p style="font-size: 14px; font-weight: 600; margin-top: 20px;">Next Steps to Finalize Your Admissions:</p>
           <ol style="font-size: 14px; padding-left: 20px; line-height: 1.8;">
-            <li>Transfer your subsidized intake fee (15,000 ETB) via Telebirr, CBE Bank, CBE Birr, or Awash Bank.</li>
+            <li>Transfer your subsidized intake fee</li>
             <li>Upload your payment receipt screenshot or bank slip on our portal.</li>
             <li>Track your application progress anytime at <a href="https://academicexcellences.com/track.html" style="color: #2563eb; font-weight: 600;">academicexcellences.com/track.html</a>.</li>
           </ol>
