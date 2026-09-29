@@ -231,7 +231,7 @@ export function ApplicationDossierPdf({ application, events = [], fee }: Dossier
 
         {/* Footer */}
         <Text style={styles.footer}>
-          Academic Excellence Education Initiative • Powered by SMS Technologies • Generated {new Date().toLocaleString()}
+          Academic Excellence  • Powered by SMS Technologies • Generated {new Date().toLocaleString()}
         </Text>
       </Page>
     </Document>

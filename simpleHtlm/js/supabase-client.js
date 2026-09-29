@@ -58,7 +58,7 @@ const defaultSettings = {
       id: "pm-cbe",
       name: "Commercial Bank of Ethiopia (CBE)",
       accountNumber: "1000 3948 29384",
-      accountName: "Academic Excellence Education Initiative",
+      accountName: "Academic Excellence ",
       instructions: "Transfer via CBE Mobile Banking, CBE Birr, or direct counter deposit.",
       badge: "Standard Bank",
       is_active: true
@@ -67,7 +67,7 @@ const defaultSettings = {
       id: "pm-cbebirr",
       name: "CBE Birr Wallet",
       accountNumber: "0911 55 2345",
-      accountName: "Academic Excellence Education Initiative",
+      accountName: "Academic Excellence ",
       instructions: "Transfer via CBE Birr mobile app or USSD *847# with your Reference ID.",
       badge: "Mobile Wallet",
       is_active: true

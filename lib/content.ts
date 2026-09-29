@@ -24,7 +24,7 @@ export const siteConfig = {
 
 export const bankDetails = {
   bankName: "Commercial Bank of Ethiopia (CBE) / Awash Bank",
-  accountName: "Academic Excellence Education Initiative",
+  accountName: "Academic Excellence",
   accountNumber: "1000 3948 29384",
   routingNumber: "CBEETAA",
   swiftCode: "CBETETAA",
