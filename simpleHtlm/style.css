@@ -3301,3 +3301,594 @@ p:last-child {
     font-size: 1.7rem;
   }
 }
+
+/* ==========================================================================
+   ABOUT PAGE STYLES (BPG-Inspired Aesthetic)
+   ========================================================================== */
+
+/* ── Split Layout: Photo + Text ── */
+.about-split-layout {
+  display: grid;
+  grid-template-columns: 1fr 1.08fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.about-media-col {
+  position: relative;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(11, 27, 61, 0.12);
+  min-height: 480px;
+}
+
+.about-media-accent-bar {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  background: var(--accent-orange);
+  z-index: 3;
+}
+
+.about-media-img {
+  width: 100%;
+  height: 100%;
+  min-height: 480px;
+  object-fit: cover;
+  display: block;
+}
+
+.about-media-tile-tan {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 72px;
+  height: 72px;
+  background: #9e8a60;
+  z-index: 2;
+}
+
+.about-media-overlay-card {
+  position: absolute;
+  bottom: 24px;
+  left: 36px;
+  right: 36px;
+  background: rgba(11, 27, 61, 0.90);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-left: 4px solid var(--accent-orange);
+  padding: 16px 22px;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.about-overlay-number {
+  font-family: var(--font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-orange);
+  line-height: 1;
+}
+
+.about-overlay-label {
+  font-size: 0.88rem;
+  color: #dce9f5;
+  line-height: 1.4;
+  font-weight: 600;
+}
+
+.about-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.about-heading-serif {
+  font-family: var(--font-serif);
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 20px;
+  line-height: 1.25;
+}
+
+.about-lead-text {
+  font-size: 1.05rem;
+  color: #334155;
+  line-height: 1.8;
+  margin-bottom: 16px;
+  font-weight: 500;
+}
+
+.about-body-text {
+  font-size: 0.98rem;
+  color: #475569;
+  line-height: 1.75;
+  margin-bottom: 16px;
+}
+
+.about-body-text strong {
+  color: var(--primary-navy);
+}
+
+.about-highlight-pill-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-left: 4px solid var(--accent-orange);
+  border-radius: 8px;
+  padding: 18px 22px;
+  margin-top: 10px;
+  font-size: 0.92rem;
+  color: #334155;
+  line-height: 1.65;
+}
+
+.highlight-pill-icon {
+  color: var(--accent-orange);
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.about-highlight-pill-box strong {
+  color: var(--primary-navy);
+  display: block;
+  margin-bottom: 4px;
+}
+
+/* ── Vision, Mission, Motto Tri-Cards ── */
+.about-tri-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+}
+
+.about-tri-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 38px 30px;
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 4px 20px rgba(11, 27, 61, 0.05);
+}
+
+.about-tri-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(11, 27, 61, 0.12);
+}
+
+.tri-card-orange { border-top: 5px solid var(--accent-orange); }
+.tri-card-navy   { border-top: 5px solid var(--primary-navy); }
+.tri-card-tan    { border-top: 5px solid #9e8a60; }
+
+.tri-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.tri-card-icon {
+  width: 54px;
+  height: 54px;
+  border-radius: 12px;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-navy);
+}
+
+.tri-card-orange .tri-card-icon { color: var(--accent-orange); background: rgba(223,107,38,0.1); }
+.tri-card-navy .tri-card-icon   { color: var(--primary-blue); background: rgba(24,84,161,0.1); }
+.tri-card-tan .tri-card-icon    { color: #9e8a60; background: rgba(158,138,96,0.12); }
+
+.tri-card-tag {
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: #64748b;
+  background: #f8fafc;
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+.tri-card-title {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 14px;
+  line-height: 1.4;
+}
+
+.tri-card-text {
+  font-size: 0.95rem;
+  color: #475569;
+  line-height: 1.75;
+  flex-grow: 1;
+}
+
+/* ── Ecosystem Section ── */
+.about-ecosystem-grid {
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  gap: 52px;
+  align-items: center;
+}
+
+.about-focus-list {
+  list-style: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.about-focus-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 14px;
+  font-size: 0.94rem;
+  line-height: 1.6;
+  color: #475569;
+}
+
+.focus-list-bullet {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--accent-orange);
+  background: rgba(223,107,38,0.12);
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.about-focus-list strong {
+  color: var(--primary-navy);
+  display: block;
+}
+
+.ecosystem-col-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.ecosystem-pillar-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 18px;
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 24px;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.ecosystem-pillar-card:hover {
+  transform: translateX(4px);
+  box-shadow: 0 8px 24px rgba(11, 27, 61, 0.08);
+}
+
+.pillar-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary-blue);
+  flex-shrink: 0;
+}
+
+.ecosystem-pillar-card h4 {
+  font-family: var(--font-serif);
+  font-size: 1.08rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 6px;
+}
+
+.ecosystem-pillar-card p {
+  font-size: 0.9rem;
+  color: #475569;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Advisory Council Grid (BPG Style) ── */
+.advisory-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 32px;
+}
+
+.advisory-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 6px 20px rgba(11, 27, 61, 0.06);
+  position: relative;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.advisory-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 36px rgba(11, 27, 61, 0.12);
+}
+
+.advisory-card-top-bar {
+  height: 5px;
+  background: var(--accent-orange);
+  width: 100%;
+}
+
+.advisory-photo-frame {
+  position: relative;
+  height: 240px;
+  overflow: hidden;
+  background: #0b1b3d;
+}
+
+.advisory-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.advisory-card:hover .advisory-photo {
+  transform: scale(1.04);
+}
+
+.advisory-tile-tan {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  background: #9e8a60;
+  z-index: 2;
+}
+
+.advisory-tile-orange {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  width: 48px;
+  height: 48px;
+  background: var(--accent-orange);
+  z-index: 2;
+}
+
+.advisory-info {
+  padding: 24px;
+}
+
+.advisory-role-badge {
+  display: inline-block;
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent-orange);
+  background: rgba(223,107,38,0.1);
+  border: 1px solid rgba(223,107,38,0.25);
+  padding: 3px 10px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.advisory-name {
+  font-family: var(--font-serif);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 4px;
+}
+
+.advisory-role {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--primary-blue);
+  margin-bottom: 12px;
+}
+
+.advisory-bio {
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.65;
+  margin: 0;
+}
+
+/* ── Responsive Rules for About Page ── */
+@media (max-width: 960px) {
+  .about-split-layout {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .about-media-col {
+    min-height: 340px;
+  }
+  .about-media-img {
+    min-height: 340px;
+  }
+  .about-tri-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .about-ecosystem-grid {
+    grid-template-columns: 1fr;
+    gap: 36px;
+  }
+  .advisory-grid {
+    grid-template-columns: 1fr;
+    gap: 24px;
+  }
+  .about-heading-serif {
+    font-size: 1.8rem;
+  }
+}
+
+/* ══════════════════════════════════════════════════════════════
+   POSTGRADUATE DIPLOMAS (PGD) & FAQ COMPONENT STYLES
+   ══════════════════════════════════════════════════════════════ */
+.pgd-elective-pill {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  padding: 10px 14px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  color: #1e293b;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+}
+
+.pgd-elective-pill:hover {
+  border-color: var(--accent-orange);
+  background: #fffbf7;
+  color: var(--accent-orange);
+  transform: translateY(-1px);
+}
+
+.soft-skill-card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  padding: 24px 20px;
+  transition: all 0.25s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+}
+
+.soft-skill-card:hover {
+  border-color: var(--primary-navy);
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(11, 27, 61, 0.08);
+}
+
+.soft-skill-icon {
+  font-size: 1.8rem;
+  margin-bottom: 12px;
+}
+
+.soft-skill-card h4 {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  margin-bottom: 8px;
+}
+
+.soft-skill-card p {
+  font-size: 0.88rem;
+  color: #64748b;
+  line-height: 1.55;
+  margin: 0;
+}
+
+.sim-badge {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #93c5fd;
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: 20px;
+}
+
+/* ── FAQ Details / Summary Accordion ── */
+.faq-accordion-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.faq-item {
+  background: #f8fafc;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.faq-item[open] {
+  border-color: var(--primary-navy);
+  background: #ffffff;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+}
+
+.faq-question {
+  padding: 18px 24px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--primary-navy);
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  user-select: none;
+  list-style: none;
+}
+
+.faq-question::-webkit-details-marker {
+  display: none;
+}
+
+.faq-chevron {
+  font-size: 1.1rem;
+  color: var(--accent-orange);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
+  margin-left: 12px;
+}
+
+.faq-item[open] .faq-chevron {
+  transform: rotate(180deg);
+}
+
+.faq-answer {
+  padding: 0 24px 20px 24px;
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.7;
+  border-top: 1px solid #f1f5f9;
+  margin-top: 4px;
+  padding-top: 16px;
+}
+
+.faq-answer p {
+  margin: 0;
+}
+
+@media (max-width: 768px) {
+  .responsive-two-col {
+    grid-template-columns: 1fr !important;
+    gap: 32px !important;
+  }
+  .desktop-only-divider {
+    display: none !important;
+  }
+}
+
+
