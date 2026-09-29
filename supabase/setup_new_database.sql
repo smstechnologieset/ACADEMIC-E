@@ -337,7 +337,7 @@ insert into site_settings (key, value) values
   ('contactEmail', 'admin@academicexcellences.com'),
   ('partnershipsEmail', 'admin@academicexcellences.com'),
   ('phone', '+251 11 555 2345'),
-  ('address', 'Bole Sub-City, Education Hub, Addis Ababa, Ethiopia')
+  ('address', 'Addis Ababa, Ethiopia')
 on conflict (key) do update set value = excluded.value;
 
 -- --- 9.2 CMS Site Settings (JSONB) ---
@@ -352,7 +352,7 @@ insert into cms_site_settings (id, data) values
     "contactEmail": "admin@academicexcellences.com",
     "partnershipsEmail": "admin@academicexcellences.com",
     "phone": "+251 11 555 2345",
-    "address": "Bole Sub-City, Education Hub, Addis Ababa, Ethiopia"
+    "address": "Addis Ababa, Ethiopia"
   }'::jsonb)
 on conflict (id) do update set data = excluded.data;
 

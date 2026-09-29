@@ -16,7 +16,7 @@ export const siteConfig = {
   url: "https://academice.edu.et",
   contactEmail: "admissions@academice.edu.et",
   phone: "+251 11 555 2345",
-  address: "Bole Sub-City, Education Hub, Addis Ababa, Ethiopia",
+  address: "Education Hub, Addis Ababa, Ethiopia",
   hours: "Monday - Friday: 8:30 AM - 5:30 PM EAT",
   partnersSummary:
     "Implemented in collaboration with N, RI, and University in New York (part of one of the largest public university systems in the United States) and delivered via the Skillsoft Percipio learning platform.",

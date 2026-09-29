@@ -1095,7 +1095,7 @@ window.AdminService = {
         <div class="report-footer">
           <div>
             <div style="font-weight:700;color:#0b1b3d;">Academic Excellence Admissions Office</div>
-            <div>Bole Sub-City, Education Hub, Addis Ababa, Ethiopia &bull; www.academicexcellences.com</div>
+            <div>Addis Ababa, Ethiopia &bull; www.academicexcellences.com</div>
             <div style="margin-top:3px;font-style:italic;">Report filter: ${filterDesc.join(" • ")}</div>
           </div>
           <div class="signature-box">

@@ -25,7 +25,7 @@ const baseWrapper = (content) => `
       Academic Excellence • Powered by <a href="https://smstechnologieset.com/" target="_blank" style="color: #2563eb; text-decoration: none; font-weight: 600;">SMS Technologies</a>
     </p>
     <p style="font-size: 11px; color: #94a3b8; margin: 0;">
-      Bole Sub-City, Education Hub, Addis Ababa, Ethiopia • official inquiries: admin@academicexcellences.com
+      Addis Ababa, Ethiopia • official inquiries: admin@academicexcellences.com
     </p>
   </div>
 </div>

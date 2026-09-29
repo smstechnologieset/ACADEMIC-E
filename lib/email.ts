@@ -68,7 +68,7 @@ const baseWrapper = (content: string) => `
   <div style="padding: 20px 30px; background: #f8fafc; border-top: 1px solid #e2e8f0; text-align: center;">
     <p style="font-size: 11px; color: #94a3b8; margin: 0;">
       Academic Excellence • Powered by SMS Technologies<br/>
-      Bole Sub-City, Education Hub, Addis Ababa, Ethiopia
+      , Addis Ababa, Ethiopia
     </p>
   </div>
 </div>

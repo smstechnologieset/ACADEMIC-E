@@ -43,7 +43,7 @@ const defaultSettings = {
   contactEmail: "admin@academicexcellences.com",
   partnershipsEmail: "admin@academicexcellences.com",
   phone: "+251 11 555 2345",
-  address: "Bole Sub-City, Education Hub, Addis Ababa, Ethiopia",
+  address: "Addis Ababa, Ethiopia",
   paymentMethods: [
     {
       id: "pm-telebirr",
