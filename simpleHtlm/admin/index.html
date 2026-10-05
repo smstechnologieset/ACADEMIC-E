@@ -715,7 +715,6 @@
               <label class="form-label">Category *</label>
               <select id="courseInputCategory" class="form-select">
                 <option value="job-ready">Job-Ready (24 Weeks)</option>
-                <option value="pgd">Postgraduate Diploma (PGD)</option>
                 <option value="executive">Executive Track</option>
               </select>
             </div>
@@ -1794,7 +1793,7 @@
       e.preventDefault();
       const id = document.getElementById("editCourseId").value;
       const cat = document.getElementById("courseInputCategory").value;
-      const catLabels = { "job-ready":"Job-Ready (24 Weeks)", "pgd":"Postgraduate Diploma (PGD)", "executive":"Executive Track" };
+      const catLabels = { "job-ready":"Job-Ready (24 Weeks)", "executive":"Executive Track" };
       const payload = {
         id: id || undefined,
         title: document.getElementById("courseInputTitle").value.trim(),

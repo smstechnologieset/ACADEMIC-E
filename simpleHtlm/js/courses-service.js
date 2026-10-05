@@ -254,83 +254,6 @@ const defaultCourses = [
     ],
     prerequisites: "Relevant experience in the chosen certification domain preferred.",
     tuitionFee: "Subsidized Intake (Application Fee applies)"
-  },
-
-  // ── POSTGRADUATE DIPLOMAS (PGD) — COMING SOON ──────────────────
-  {
-    id: "course-pgd-management",
-    title: "Postgraduate Diploma in Management",
-    slug: "pgd-management",
-    category: "pgd",
-    categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months",
-    level: "Postgraduate Diploma (PGD)",
-    isFeatured: true,
-    description: "Advanced postgraduate qualification covering Project Management, Human Resource Management, Marketing, Digital Marketing, Business Analytics, Strategy & Innovation, Leadership, Entrepreneurship, Financial Management, and Digital Transformation. Includes 2 professional soft-skill courses and access to Business Simulation Game.",
-    highlights: [
-      "Six specialization courses from 14+ available areas",
-      "Two professional soft-skill courses",
-      "80+ hours of learning per specialization course",
-      "Business Simulation Game: My Business – My Strategies"
-    ],
-    syllabus: [
-      { module: "Term 1: Strategic Management & Executive Decision Frameworks", weeks: "Months 1-3" },
-      { module: "Term 2: Managerial Finance & Global Market Economics", weeks: "Months 4-6" },
-      { module: "Term 3: Operations, Technology Disruption & Agile Leadership", weeks: "Months 7-9" },
-      { module: "Term 4: Global Business Simulation & Applied Management Thesis", weeks: "Months 10-12" }
-    ],
-    prerequisites: "Bachelor's degree in any discipline with professional work experience.",
-    tuitionFee: "Special PGD Enrollment"
-  },
-  {
-    id: "course-pgd-it",
-    title: "Postgraduate Diploma in Information Technology",
-    slug: "pgd-information-technology",
-    category: "pgd",
-    categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months",
-    level: "Postgraduate Diploma (PGD)",
-    isFeatured: false,
-    description: "Advanced postgraduate IT qualification covering Cybersecurity, AI, Machine Learning, Data Science, Cloud Computing, Ethical Hacking, Python, Big Data, Blockchain, AWS, Azure, IoT, and Networking. Includes 2 professional soft-skill courses.",
-    highlights: [
-      "Six specialization courses from 14+ available areas",
-      "Two professional soft-skill courses",
-      "80+ hours of learning per specialization course",
-      "Business Simulation Game: My Business – My Strategies"
-    ],
-    syllabus: [
-      { module: "Term 1: Enterprise Information Systems & Database Architecture", weeks: "Months 1-3" },
-      { module: "Term 2: Advanced Network Engineering & Cloud Virtualization", weeks: "Months 4-6" },
-      { module: "Term 3: Enterprise IT Governance (ITIL, COBIT & ISO)", weeks: "Months 7-9" },
-      { module: "Term 4: Strategic Technology Leadership Capstone", weeks: "Months 10-12" }
-    ],
-    prerequisites: "Bachelor's degree in IT, Engineering, Sciences, or related field.",
-    tuitionFee: "Special PGD Enrollment"
-  },
-  {
-    id: "course-pgd-ai-gai",
-    title: "Postgraduate Diploma in Artificial Intelligence & Generative AI (AI/GAI)",
-    slug: "pgd-artificial-intelligence-generative-ai",
-    category: "pgd",
-    categoryLabel: "Postgraduate Diploma (PGD)",
-    duration: "12 Months",
-    level: "Postgraduate Diploma (PGD)",
-    isFeatured: true,
-    description: "Intensive 12-month postgraduate qualification featuring 6 specialization courses in AI, Machine Learning, Generative AI, and enterprise AI strategy. Includes 2 soft-skill leadership modules and real-time business simulations.",
-    highlights: [
-      "Advanced Deep Learning & Transformer Architectures",
-      "Custom Fine-Tuning & Retrieval-Augmented Generation (RAG)",
-      "C-Suite AI Strategy, Ethics & Responsible AI",
-      "Executive Capstone with University in New York Mentors"
-    ],
-    syllabus: [
-      { module: "Term 1: Mathematical Foundations of AI & Machine Intelligence", weeks: "Months 1-3" },
-      { module: "Term 2: Computer Vision, Transformers & Foundation Models", weeks: "Months 4-6" },
-      { module: "Term 3: Enterprise RAG Pipelines & Autonomous Agents", weeks: "Months 7-9" },
-      { module: "Term 4: Executive Business Simulation & Thesis Project", weeks: "Months 10-12" }
-    ],
-    prerequisites: "Bachelor's degree or higher in STEM, Business, or analytical field.",
-    tuitionFee: "Special PGD Enrollment"
   }
 ];
 
@@ -341,17 +264,19 @@ window.CoursesService = {
       window.AcademicDB.setLocal(window.AcademicDB.keys.COURSES, defaultCourses);
       return defaultCourses;
     }
-    let modified = false;
-    stored.forEach(c => {
+    // Purge any stale PGD courses from legacy localStorage if present
+    const cleanCourses = stored.filter(c => c.category !== 'pgd' && !(c.id && c.id.includes('pgd')));
+    let modified = cleanCourses.length !== stored.length;
+    cleanCourses.forEach(c => {
       if (c.tuitionFee && (c.tuitionFee.includes("1,500") || c.tuitionFee.includes("1500"))) {
         c.tuitionFee = "Subsidized Intake (Application Fee applies)";
         modified = true;
       }
     });
     if (modified) {
-      window.AcademicDB.setLocal(window.AcademicDB.keys.COURSES, stored);
+      window.AcademicDB.setLocal(window.AcademicDB.keys.COURSES, cleanCourses);
     }
-    return stored;
+    return cleanCourses;
   },
 
   getCourseBySlug(slug) {
