@@ -396,6 +396,103 @@
       height: 100%;
       object-fit: cover;
     }
+
+    /* MANAGE USERS & RBAC STYLES */
+    .staff-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0b1b3d, #1e3a8a);
+      color: #ffffff;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 700;
+      font-size: 0.85rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 6px rgba(11,27,61,0.2);
+    }
+    .staff-badge-active {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #dcfce7;
+      color: #15803d;
+      border: 1px solid #bbf7d0;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .staff-badge-suspended {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      background: #fee2e2;
+      color: #b91c1c;
+      border: 1px solid #fecaca;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .perm-toggle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+      margin-top: 14px;
+    }
+    .perm-toggle-card {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      background: #f8fafc;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      transition: all 0.2s ease;
+    }
+    .perm-toggle-card:hover {
+      background: #ffffff;
+      border-color: #cbd5e1;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .perm-preset-btn {
+      background: #f1f5f9;
+      border: 1px solid #cbd5e1;
+      color: #334155;
+      font-size: 0.75rem;
+      font-weight: 600;
+      padding: 5px 12px;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+    .perm-preset-btn:hover {
+      background: #e2e8f0;
+      color: #0b1b3d;
+    }
+    .module-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f1f5f9;
+      color: #334155;
+      border: 1px solid #e2e8f0;
+      font-size: 0.72rem;
+      padding: 2px 7px;
+      border-radius: 4px;
+      font-weight: 600;
+      margin-right: 4px;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -435,6 +532,7 @@
         <div class="admin-nav-item" data-tab="tabActivity">&#128336; Activity Log</div>
         <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Configuration</div>
         <div class="admin-nav-item" data-tab="tabSettings">&#9881; Payment &amp; Settings</div>
+        <div class="admin-nav-item" id="navItemUsers" data-tab="tabUsers">&#128101; Manage Users</div>
         <div style="margin:16px 14px;border-top:1px solid rgba(255,255,255,0.1);"></div>
         <a href="../index.html" class="admin-nav-item" style="text-decoration:none;">&#127760; Live Website</a>
         <div class="admin-nav-item" id="adminLogoutBtn" style="color:#f87171;">&#128682; Log Out</div>
@@ -1588,6 +1686,87 @@
           </div>
         </section>
 
+        <!-- TAB: MANAGE USERS (SUPER ADMIN ONLY) -->
+        <section id="tabUsers" class="admin-tab-pane" style="display:none;">
+          <div style="max-width:1150px;display:flex;flex-direction:column;gap:24px;">
+
+            <!-- Header & Action Bar -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+              <div>
+                <h3 style="font-size:1.35rem;color:#0b1b3d;margin:0;">Staff Accounts &amp; Access Control</h3>
+                <p style="color:#64748b;font-size:0.88rem;margin:4px 0 0;">Create and manage staff logins, reset credentials, and configure granular permission toggles for each dashboard section.</p>
+              </div>
+              <button type="button" id="btnAddNewStaffUser" style="background:#0b1b3d;color:#ffffff;border:none;padding:10px 22px;font-weight:700;font-size:0.9rem;border-radius:6px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 2px 8px rgba(11,27,61,0.25);transition:background 0.2s;" onmouseover="this.style.background='#1854a1'" onmouseout="this.style.background='#0b1b3d'">
+                <span style="font-size:1.1rem;line-height:1;">+</span> Add Staff Member
+              </button>
+            </div>
+
+            <!-- KPI Summary Cards -->
+            <div class="kpi-grid-new" style="grid-template-columns:repeat(auto-fit,minmax(210px,1fr));">
+              <div class="kpi-card-new">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#1e3a8a;margin-bottom:8px;">Total Staff Accounts</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#0b1b3d;" id="kpiStaffTotal">0</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Team members configured</div>
+              </div>
+              <div class="kpi-card-new">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#15803d;margin-bottom:8px;">Active Staff</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#15803d;" id="kpiStaffActive">0</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Enabled to sign in</div>
+              </div>
+              <div class="kpi-card-new">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#b91c1c;margin-bottom:8px;">Suspended / Inactive</div>
+                <div style="font-size:1.9rem;font-weight:800;color:#b91c1c;" id="kpiStaffSuspended">0</div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:4px;">Sign-in disabled</div>
+              </div>
+              <div class="kpi-card-new" style="background:#eff6ff;border:1px solid #bfdbfe;">
+                <div style="font-size:0.72rem;text-transform:uppercase;letter-spacing:1.5px;color:#1d4ed8;margin-bottom:8px;">Master Super Admin</div>
+                <div style="font-size:1.05rem;font-weight:800;color:#1e3a8a;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;" id="kpiSuperAdminEmail">solhm1@yahoo.com</div>
+                <div style="font-size:0.78rem;color:#2563eb;margin-top:4px;">Full unrestricted privileges</div>
+              </div>
+            </div>
+
+            <!-- Filter & Search Toolbar -->
+            <div style="background:#fff;border:1px solid #e2e8f0;padding:16px 20px;border-radius:10px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+              <div style="display:flex;align-items:center;gap:12px;flex:1;min-width:240px;max-width:480px;">
+                <input type="text" id="staffSearchInput" class="form-input" placeholder="Search staff by name, email, or role title..." style="width:100%;height:38px;padding:8px 14px;font-size:0.88rem;" />
+              </div>
+              <div style="display:flex;align-items:center;gap:10px;">
+                <label style="font-size:0.82rem;font-weight:600;color:#475569;">Status:</label>
+                <select id="staffStatusFilter" class="form-input" style="height:38px;padding:6px 12px;font-size:0.85rem;width:140px;">
+                  <option value="all">All Accounts</option>
+                  <option value="active">Active Only</option>
+                  <option value="suspended">Suspended Only</option>
+                </select>
+                <button type="button" id="btnRefreshStaffList" class="btn-sm" style="height:38px;padding:0 14px;background:#f8fafc;border:1px solid #cbd5e1;color:#334155;font-weight:600;border-radius:6px;cursor:pointer;">
+                  &#8635; Refresh
+                </button>
+              </div>
+            </div>
+
+            <!-- Staff Accounts Data Table -->
+            <div class="data-table-card" style="overflow:hidden;border:1px solid #e2e8f0;border-radius:10px;">
+              <div class="table-responsive">
+                <table class="admin-table" style="margin:0;">
+                  <thead>
+                    <tr>
+                      <th style="width:24%;">Staff Member</th>
+                      <th style="width:20%;">Login Email</th>
+                      <th style="width:26%;">Allowed Dashboard Modules</th>
+                      <th style="width:10%;">Status</th>
+                      <th style="width:10%;">Last Login</th>
+                      <th style="width:10%;text-align:right;">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody id="staffTableBody">
+                    <tr><td colspan="6" style="text-align:center;padding:32px;color:#64748b;">Loading staff accounts...</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
       </div>
     </main>
   </div>
@@ -2007,6 +2186,120 @@
     </div>
   </div>
 
+  <!-- STAFF USER ADD / EDIT MODAL -->
+  <div class="admin-modal" id="staffUserModal" style="z-index:99999;">
+    <div class="modal-card" style="max-width:860px;max-height:92vh;display:flex;flex-direction:column;">
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size:1.3rem;color:#0b1b3d;margin:0;" id="staffModalTitle">Add New Staff Member</h3>
+          <div style="font-size:0.84rem;color:#64748b;margin-top:3px;">Configure login credentials and select which sections of the dashboard this staff user can see and access.</div>
+        </div>
+        <button type="button" class="btn-remove-file" id="closeStaffModalBtn">&times;</button>
+      </div>
+
+      <div class="modal-body" style="overflow-y:auto;padding:24px;flex:1;">
+        <form id="staffUserForm">
+          <input type="hidden" id="staffUserId" value="" />
+
+          <!-- Account Details Card -->
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:20px;border-radius:8px;margin-bottom:22px;">
+            <div style="font-size:0.9rem;font-weight:700;color:#0b1b3d;margin-bottom:14px;display:flex;align-items:center;gap:6px;">
+              <span>👤</span> Staff Profile &amp; Login Credentials
+            </div>
+            <div class="form-grid-2" style="margin-bottom:14px;">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Full Name *</label>
+                <input type="text" id="staffFullName" class="form-input" placeholder="e.g., Hanna Tadesse" required />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Role / Job Title *</label>
+                <input type="text" id="staffRoleTitle" class="form-input" placeholder="e.g., Admissions Officer" required />
+              </div>
+            </div>
+
+            <div class="form-grid-2">
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Login Email *</label>
+                <input type="email" id="staffEmail" class="form-input" placeholder="staff@academicexcellences.com" required autocomplete="username" />
+              </div>
+              <div class="form-group" style="margin:0;">
+                <label class="form-label">Password *</label>
+                <div style="position:relative;display:flex;align-items:center;">
+                  <input type="password" id="staffPassword" class="form-input" placeholder="Enter secure password" required autocomplete="new-password" style="padding-right:75px;" />
+                  <button type="button" id="staffTogglePassBtn" style="position:absolute;right:8px;background:none;border:none;color:#64748b;font-size:0.78rem;font-weight:600;cursor:pointer;padding:4px 6px;">Show</button>
+                </div>
+                <div style="display:flex;justify-content:flex-end;margin-top:4px;">
+                  <button type="button" id="staffGeneratePassBtn" style="background:none;border:none;color:#2563eb;font-size:0.75rem;font-weight:600;cursor:pointer;padding:0;">⚡ Generate Random Password</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:14px;padding-top:14px;border-top:1px solid #e2e8f0;display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+              <label class="form-label" style="margin:0;font-weight:700;">Account Status:</label>
+              <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:0.88rem;color:#15803d;font-weight:600;">
+                <input type="radio" name="staffStatusRadio" value="active" checked /> Active (Can Log In)
+              </label>
+              <label style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;font-size:0.88rem;color:#b91c1c;font-weight:600;margin-left:14px;">
+                <input type="radio" name="staffStatusRadio" value="suspended" /> Suspended (Access Blocked)
+              </label>
+            </div>
+          </div>
+
+          <!-- Permissions Configuration Card -->
+          <div style="background:#ffffff;border:1px solid #e2e8f0;padding:20px;border-radius:8px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:12px;">
+              <div>
+                <div style="font-size:0.95rem;font-weight:700;color:#0b1b3d;display:flex;align-items:center;gap:6px;">
+                  <span>🔒</span> Allowed Dashboard Functionalities (Permissions)
+                </div>
+                <div style="font-size:0.78rem;color:#64748b;margin-top:2px;">Turn toggles ON or OFF to control which sections this staff user can see upon login.</div>
+              </div>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                <button type="button" class="perm-preset-btn" id="btnPermSelectAll">Select All</button>
+                <button type="button" class="perm-preset-btn" id="btnPermAdmissions">Admissions Only</button>
+                <button type="button" class="perm-preset-btn" id="btnPermCms">Content Editor</button>
+                <button type="button" class="perm-preset-btn" id="btnPermClearAll">Clear All</button>
+              </div>
+            </div>
+
+            <div class="perm-toggle-grid" id="staffPermGrid">
+              <!-- 10 Granular Modules Injected Here -->
+            </div>
+          </div>
+
+        </form>
+      </div>
+
+      <div class="modal-footer" style="padding:16px 24px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:space-between;align-items:center;">
+        <button type="button" class="btn btn-sm" id="closeStaffModalFooterBtn" style="padding:9px 18px;background:#ffffff;border:1px solid #cbd5e1;color:#475569;font-weight:600;">Cancel</button>
+        <button type="button" id="saveStaffUserSubmitBtn" style="background:#0b1b3d;color:#ffffff;border:none;padding:10px 24px;border-radius:6px;font-weight:700;font-size:0.9rem;cursor:pointer;box-shadow:0 2px 6px rgba(11,27,61,0.25);transition:background 0.2s;" onmouseover="this.style.background='#1854a1'" onmouseout="this.style.background='#0b1b3d'">
+          Save Staff Member
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STAFF DELETE CONFIRMATION MODAL -->
+  <div class="admin-modal" id="staffDeleteModal" style="z-index:99999;">
+    <div class="modal-card" style="max-width:480px;">
+      <div class="modal-header" style="border-bottom:1px solid #fee2e2;background:#fef2f2;">
+        <h3 style="font-size:1.15rem;color:#991b1b;margin:0;">Delete Staff Account?</h3>
+        <button type="button" class="btn-remove-file" id="closeStaffDeleteModalBtn">&times;</button>
+      </div>
+      <div class="modal-body" style="padding:22px;">
+        <p style="color:#334155;font-size:0.92rem;margin:0 0 12px 0;">Are you sure you want to permanently delete this staff user account?</p>
+        <div style="background:#f8fafc;border:1px solid #e2e8f0;padding:12px 14px;border-radius:6px;font-size:0.88rem;color:#0b1b3d;margin-bottom:14px;">
+          <strong id="deleteStaffTargetName">—</strong> (<span id="deleteStaffTargetEmail" style="color:#64748b;">—</span>)
+        </div>
+        <p style="color:#dc2626;font-size:0.8rem;margin:0;font-weight:600;">⚠️ This action is permanent. The staff member will immediately lose all access to the dashboard.</p>
+      </div>
+      <div class="modal-footer" style="padding:14px 22px;background:#f8fafc;border-top:1px solid #e2e8f0;display:flex;justify-content:flex-end;gap:10px;">
+        <button type="button" class="btn btn-sm" id="cancelStaffDeleteBtn" style="padding:8px 16px;background:#ffffff;border:1px solid #cbd5e1;color:#475569;font-weight:600;">Cancel</button>
+        <button type="button" id="confirmStaffDeleteBtn" style="background:#dc2626;color:#ffffff;border:none;padding:8px 18px;border-radius:6px;font-weight:700;font-size:0.88rem;cursor:pointer;">Delete Account</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../js/supabase-client.js?v=20261008_5"></script>
@@ -2017,14 +2310,71 @@
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
-    // AUTH
+    // PERMISSION MODULE DEFINITIONS
+    const MODULE_DEFS = [
+      { id: "overview", tabId: "tabOverview", label: "Overview & Finance", icon: "📊", desc: "View revenue KPIs, total admissions & summary cards" },
+      { id: "applications", tabId: "tabApplications", label: "Applications Management", icon: "📝", desc: "View, approve, review, reject & export student applications" },
+      { id: "courses", tabId: "tabCourses", label: "Programs & Courses", icon: "🎓", desc: "Create, edit, toggle visibility & manage degree curricula" },
+      { id: "content_cms", tabId: "tabContentCms", label: "Page Content CMS", icon: "📑", desc: "Edit hero banners, program intros, contact info & page texts" },
+      { id: "stats", tabId: "tabStats", label: "Homepage Stats", icon: "📈", desc: "Modify stats counter numbers (students, acceptance rate, etc.)" },
+      { id: "faqs", tabId: "tabFaqs", label: "FAQ Editor", icon: "❓", desc: "Add, edit, reorder & delete frequently asked questions" },
+      { id: "testimonials", tabId: "tabTestimonials", label: "Testimonials Manager", icon: "⭐", desc: "Manage student & alumni reviews and ratings" },
+      { id: "inquiries", tabId: "tabInquiries", label: "Contact Inquiries", icon: "💌", desc: "Read and respond to student inquiries & messages" },
+      { id: "activity", tabId: "tabActivity", label: "Activity Log", icon: "🕒", desc: "Inspect admin actions, status changes & system audit trail" },
+      { id: "settings", tabId: "tabSettings", label: "Payment & Settings", icon: "⚙️", desc: "Configure application fee, payment accounts & banking channels" }
+    ];
+
+    // AUTH & ROLE-BASED ACCESS CONTROL (RBAC)
     window.AdminService.requireAuth();
     const currentAuth = window.AdminService.checkAuth();
-    if (currentAuth && currentAuth.email) {
-      const el = document.getElementById("adminHeaderEmail");
-      if (el) el.textContent = currentAuth.email;
+    const isStaffUser = currentAuth && currentAuth.role === "Staff";
+
+    if (currentAuth) {
+      const emailEl = document.getElementById("adminHeaderEmail");
+      if (emailEl && currentAuth.email) emailEl.textContent = currentAuth.email;
+
+      const titleBadge = document.querySelector(".admin-topbar strong");
+      if (titleBadge) {
+        if (isStaffUser) {
+          titleBadge.textContent = `${currentAuth.name || "Staff User"} · ${currentAuth.roleTitle || "Staff Member"}`;
+        } else {
+          titleBadge.textContent = "Super Administrator";
+        }
+      }
+
+      // Update avatar circle
+      const avatarCircle = document.querySelector(".admin-topbar div[style*='border-radius:50%']");
+      if (avatarCircle) {
+        if (isStaffUser && currentAuth.name) {
+          const initials = currentAuth.name.split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+          avatarCircle.textContent = initials || "ST";
+        } else {
+          avatarCircle.textContent = "SA";
+        }
+      }
     }
+
     document.getElementById("adminLogoutBtn").addEventListener("click", () => window.AdminService.logout());
+
+    // RBAC: If Staff user, filter sidebar and lock down unauthorized tabs
+    if (isStaffUser) {
+      // 1. Completely hide Manage Users tab
+      const navUsers = document.getElementById("navItemUsers");
+      if (navUsers) navUsers.style.display = "none";
+      const paneUsers = document.getElementById("tabUsers");
+      if (paneUsers) paneUsers.style.display = "none";
+
+      // 2. Hide modules that are not permitted
+      const userPerms = currentAuth.permissions || {};
+      MODULE_DEFS.forEach(m => {
+        if (!userPerms[m.id]) {
+          const navEl = document.querySelector(`.admin-nav-item[data-tab="${m.tabId}"]`);
+          if (navEl) navEl.style.display = "none";
+          const paneEl = document.getElementById(m.tabId);
+          if (paneEl) paneEl.style.display = "none";
+        }
+      });
+    }
 
     // TOAST
     function showToast(msg, type = "success") {
@@ -2055,7 +2405,8 @@
       tabTestimonials: "Testimonials Manager",
       tabInquiries: "Contact Inquiries",
       tabActivity: "Activity Log",
-      tabSettings: "Intake & Payment Settings"
+      tabSettings: "Intake & Payment Settings",
+      tabUsers: "Staff Users & Role-Based Permissions"
     };
     const tabs  = document.querySelectorAll(".admin-nav-item[data-tab]");
     const panes = document.querySelectorAll(".admin-tab-pane");
@@ -2063,6 +2414,18 @@
     let lazyLoaded = {};
 
     function switchTab(targetId) {
+      if (isStaffUser) {
+        if (targetId === "tabUsers") {
+          showToast("Access Denied: Staff accounts cannot access User Management.", "error");
+          return;
+        }
+        const m = MODULE_DEFS.find(mod => mod.tabId === targetId);
+        if (m && (!currentAuth.permissions || !currentAuth.permissions[m.id])) {
+          showToast(`Access Denied: You do not have permission to access ${m.label}.`, "error");
+          return;
+        }
+      }
+
       tabs.forEach(t => t.classList.remove("active"));
       tabs.forEach(t => { if (t.dataset.tab === targetId) t.classList.add("active"); });
       panes.forEach(p => p.style.display = p.id === targetId ? "block" : "none");
@@ -2074,8 +2437,26 @@
       if (targetId === "tabTestimonials" && !lazyLoaded.testimonials) { lazyLoaded.testimonials = true; loadTestimonials(); }
       if (targetId === "tabInquiries"    && !lazyLoaded.inquiries)    { lazyLoaded.inquiries = true;    loadInquiries(); }
       if (targetId === "tabActivity"     && !lazyLoaded.activity)     { lazyLoaded.activity = true;     loadActivityLog(); }
+      if (targetId === "tabUsers")                                    { loadStaffUsers(); }
     }
     tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+
+    // Auto-switch to first allowed tab if staff member cannot access Overview
+    if (isStaffUser) {
+      const userPerms = currentAuth.permissions || {};
+      if (!userPerms.overview) {
+        const firstAllowed = MODULE_DEFS.find(m => userPerms[m.id] === true);
+        if (firstAllowed) {
+          switchTab(firstAllowed.tabId);
+        } else {
+          const overviewPane = document.getElementById("tabOverview");
+          if (overviewPane) {
+            overviewPane.style.display = "block";
+            overviewPane.innerHTML = "<div style='background:#fff;border:1px solid #e2e8f0;padding:48px;border-radius:10px;text-align:center;'><h3 style='color:#0b1b3d;'>No Permissions Assigned</h3><p style='color:#64748b;'>Your staff account does not currently have access to any dashboard modules. Please contact your Super Administrator.</p></div>";
+          }
+        }
+      }
+    }
 
     // SUPABASE REST
     const SUPA_URL = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
@@ -3887,6 +4268,449 @@
         showToast("Form reset to saved content.", "success");
       });
     }
+
+    // ==========================================
+    // 11. STAFF USERS & PERMISSIONS CONTROLLER
+    // ==========================================
+    let cachedStaffUsers = [];
+    let staffUserToDelete = null;
+
+    // Render 10 Permission Toggles into the Modal
+    function renderStaffPermGrid(selectedPerms = {}) {
+      const grid = document.getElementById("staffPermGrid");
+      if (!grid) return;
+      grid.innerHTML = MODULE_DEFS.map(m => {
+        const isChecked = selectedPerms[m.id] !== false && selectedPerms[m.id] !== undefined ? selectedPerms[m.id] : false;
+        return `
+          <div class="perm-toggle-card ${isChecked ? 'active-perm' : ''}" id="permCard_${m.id}">
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;">
+                <span style="font-size:1.05rem;">${m.icon}</span>
+                <span style="font-size:0.88rem;font-weight:700;color:#0b1b3d;">${m.label}</span>
+              </div>
+              <div style="font-size:0.75rem;color:#64748b;margin-top:2px;line-height:1.3;">${m.desc}</div>
+            </div>
+            <label class="cms-switch" style="margin:0;">
+              <input type="checkbox" id="permInput_${m.id}" data-module="${m.id}" ${isChecked ? 'checked' : ''} />
+              <span class="cms-slider"></span>
+            </label>
+          </div>
+        `;
+      }).join("");
+
+      // Bind card highlight on switch change
+      grid.querySelectorAll("input[type='checkbox']").forEach(cb => {
+        cb.addEventListener("change", (e) => {
+          const card = document.getElementById("permCard_" + e.target.dataset.module);
+          if (card) {
+            if (e.target.checked) card.classList.add("active-perm");
+            else card.classList.remove("active-perm");
+          }
+        });
+      });
+    }
+
+    // Modal Presets
+    const setAllPermCheckboxes = (val) => {
+      MODULE_DEFS.forEach(m => {
+        const cb = document.getElementById("permInput_" + m.id);
+        const card = document.getElementById("permCard_" + m.id);
+        if (cb) cb.checked = val;
+        if (card) {
+          if (val) card.classList.add("active-perm");
+          else card.classList.remove("active-perm");
+        }
+      });
+    };
+
+    const btnPermSelectAll = document.getElementById("btnPermSelectAll");
+    if (btnPermSelectAll) btnPermSelectAll.addEventListener("click", () => setAllPermCheckboxes(true));
+
+    const btnPermClearAll = document.getElementById("btnPermClearAll");
+    if (btnPermClearAll) btnPermClearAll.addEventListener("click", () => setAllPermCheckboxes(false));
+
+    const btnPermAdmissions = document.getElementById("btnPermAdmissions");
+    if (btnPermAdmissions) btnPermAdmissions.addEventListener("click", () => {
+      setAllPermCheckboxes(false);
+      ["applications", "inquiries"].forEach(modId => {
+        const cb = document.getElementById("permInput_" + modId);
+        const card = document.getElementById("permCard_" + modId);
+        if (cb) cb.checked = true;
+        if (card) card.classList.add("active-perm");
+      });
+    });
+
+    const btnPermCms = document.getElementById("btnPermCms");
+    if (btnPermCms) btnPermCms.addEventListener("click", () => {
+      setAllPermCheckboxes(false);
+      ["content_cms", "stats", "faqs", "testimonials"].forEach(modId => {
+        const cb = document.getElementById("permInput_" + modId);
+        const card = document.getElementById("permCard_" + modId);
+        if (cb) cb.checked = true;
+        if (card) card.classList.add("active-perm");
+      });
+    });
+
+    // Password Toggle & Generator
+    const staffPassInput = document.getElementById("staffPassword");
+    const staffTogglePassBtn = document.getElementById("staffTogglePassBtn");
+    if (staffTogglePassBtn && staffPassInput) {
+      staffTogglePassBtn.addEventListener("click", () => {
+        if (staffPassInput.type === "password") {
+          staffPassInput.type = "text";
+          staffTogglePassBtn.textContent = "Hide";
+        } else {
+          staffPassInput.type = "password";
+          staffTogglePassBtn.textContent = "Show";
+        }
+      });
+    }
+
+    const staffGeneratePassBtn = document.getElementById("staffGeneratePassBtn");
+    if (staffGeneratePassBtn && staffPassInput) {
+      staffGeneratePassBtn.addEventListener("click", () => {
+        const chars = "abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789!@#$%";
+        let generated = "";
+        for (let i = 0; i < 12; i++) {
+          generated += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        staffPassInput.value = generated;
+        staffPassInput.type = "text";
+        if (staffTogglePassBtn) staffTogglePassBtn.textContent = "Hide";
+        showToast("Generated strong password!", "success");
+      });
+    }
+
+    // Modal Opening & Closing
+    const staffUserModal = document.getElementById("staffUserModal");
+    const staffDeleteModal = document.getElementById("staffDeleteModal");
+
+    const openStaffModal = (staff = null) => {
+      const title = document.getElementById("staffModalTitle");
+      const idEl = document.getElementById("staffUserId");
+      const nameEl = document.getElementById("staffFullName");
+      const roleEl = document.getElementById("staffRoleTitle");
+      const emailEl = document.getElementById("staffEmail");
+      const passEl = document.getElementById("staffPassword");
+
+      if (staff) {
+        title.textContent = "Edit Staff Member";
+        idEl.value = staff.id;
+        nameEl.value = staff.name || "";
+        roleEl.value = staff.roleTitle || "";
+        emailEl.value = staff.email || "";
+        passEl.value = staff.password || "";
+        passEl.type = "password";
+        if (staffTogglePassBtn) staffTogglePassBtn.textContent = "Show";
+        const statusRadios = document.getElementsByName("staffStatusRadio");
+        for (let r of statusRadios) {
+          r.checked = r.value === (staff.status || "active");
+        }
+        renderStaffPermGrid(staff.permissions || {});
+      } else {
+        title.textContent = "Add New Staff Member";
+        idEl.value = "";
+        nameEl.value = "";
+        roleEl.value = "Admissions Officer";
+        emailEl.value = "";
+        passEl.value = "";
+        passEl.type = "password";
+        if (staffTogglePassBtn) staffTogglePassBtn.textContent = "Show";
+        const statusRadios = document.getElementsByName("staffStatusRadio");
+        for (let r of statusRadios) {
+          r.checked = r.value === "active";
+        }
+        // Default: applications, courses, inquiries enabled
+        renderStaffPermGrid({ applications: true, courses: true, inquiries: true });
+      }
+      staffUserModal.classList.add("open");
+    };
+
+    const closeStaffModal = () => staffUserModal && staffUserModal.classList.remove("open");
+    document.getElementById("btnAddNewStaffUser")?.addEventListener("click", () => openStaffModal(null));
+    document.getElementById("closeStaffModalBtn")?.addEventListener("click", closeStaffModal);
+    document.getElementById("closeStaffModalFooterBtn")?.addEventListener("click", closeStaffModal);
+
+    const closeStaffDeleteModal = () => staffDeleteModal && staffDeleteModal.classList.remove("open");
+    document.getElementById("closeStaffDeleteModalBtn")?.addEventListener("click", closeStaffDeleteModal);
+    document.getElementById("cancelStaffDeleteBtn")?.addEventListener("click", closeStaffDeleteModal);
+
+    // Save Staff User
+    const saveStaffUserSubmitBtn = document.getElementById("saveStaffUserSubmitBtn");
+    if (saveStaffUserSubmitBtn) {
+      saveStaffUserSubmitBtn.addEventListener("click", async () => {
+        const id = document.getElementById("staffUserId").value.trim();
+        const name = document.getElementById("staffFullName").value.trim();
+        const roleTitle = document.getElementById("staffRoleTitle").value.trim();
+        const email = document.getElementById("staffEmail").value.trim();
+        const password = document.getElementById("staffPassword").value.trim();
+
+        if (!name) { showToast("Please enter the staff member's full name.", "error"); return; }
+        if (!roleTitle) { showToast("Please specify a role or job title.", "error"); return; }
+        if (!email || !email.includes("@")) { showToast("Please enter a valid email address.", "error"); return; }
+        if (!password || password.length < 4) { showToast("Password must be at least 4 characters long.", "error"); return; }
+
+        let status = "active";
+        const statusRadios = document.getElementsByName("staffStatusRadio");
+        for (let r of statusRadios) {
+          if (r.checked) status = r.value;
+        }
+
+        // Collect permissions
+        const permissions = {};
+        MODULE_DEFS.forEach(m => {
+          const cb = document.getElementById("permInput_" + m.id);
+          permissions[m.id] = cb ? cb.checked : false;
+        });
+
+        // Check duplicate email
+        const existingWithEmail = cachedStaffUsers.find(s => s.email.toLowerCase() === email.toLowerCase() && s.id !== id);
+        if (existingWithEmail) {
+          showToast("A staff account with this email already exists.", "error");
+          return;
+        }
+
+        const userData = {
+          name,
+          roleTitle,
+          email,
+          password,
+          status,
+          permissions
+        };
+        if (id) userData.id = id;
+
+        saveStaffUserSubmitBtn.disabled = true;
+        saveStaffUserSubmitBtn.textContent = "Saving...";
+
+        try {
+          const res = await window.AdminService.saveStaffUser(userData);
+          if (res.success) {
+            showToast(id ? "Staff user account updated successfully!" : "Staff member added successfully!", "success");
+            closeStaffModal();
+            loadStaffUsers();
+            if (typeof logActivity === "function") {
+              logActivity(id ? "updated_staff_user" : "created_staff_user", "settings", `${name} (${email})`);
+            }
+          } else {
+            showToast("Failed to save staff member: " + (res.error || "Unknown error"), "error");
+          }
+        } catch (err) {
+          showToast("Error saving staff user: " + err.message, "error");
+        } finally {
+          saveStaffUserSubmitBtn.disabled = false;
+          saveStaffUserSubmitBtn.textContent = "Save Staff Member";
+        }
+      });
+    }
+
+    // Delete Confirmation
+    const confirmStaffDeleteBtn = document.getElementById("confirmStaffDeleteBtn");
+    if (confirmStaffDeleteBtn) {
+      confirmStaffDeleteBtn.addEventListener("click", async () => {
+        if (!staffUserToDelete) return;
+        confirmStaffDeleteBtn.disabled = true;
+        confirmStaffDeleteBtn.textContent = "Deleting...";
+
+        try {
+          const res = await window.AdminService.deleteStaffUser(staffUserToDelete.id);
+          if (res.success) {
+            showToast("Staff account successfully deleted.", "success");
+            closeStaffDeleteModal();
+            loadStaffUsers();
+            if (typeof logActivity === "function") {
+              logActivity("deleted_staff_user", "settings", `${staffUserToDelete.name} (${staffUserToDelete.email})`);
+            }
+          } else {
+            showToast("Failed to delete staff account.", "error");
+          }
+        } catch (err) {
+          showToast("Error deleting staff account: " + err.message, "error");
+        } finally {
+          confirmStaffDeleteBtn.disabled = false;
+          confirmStaffDeleteBtn.textContent = "Delete Account";
+          staffUserToDelete = null;
+        }
+      });
+    }
+
+    // Load & Render Staff Users
+    async function loadStaffUsers() {
+      const tbody = document.getElementById("staffTableBody");
+      if (!tbody) return;
+
+      try {
+        const staffList = await window.AdminService.getStaffUsersAsync();
+        cachedStaffUsers = Array.isArray(staffList) ? staffList : [];
+
+        // Update KPIs
+        const total = cachedStaffUsers.length;
+        const active = cachedStaffUsers.filter(s => s.status !== "suspended" && s.status !== "inactive").length;
+        const suspended = total - active;
+
+        const kpiTotal = document.getElementById("kpiStaffTotal");
+        const kpiActive = document.getElementById("kpiStaffActive");
+        const kpiSuspended = document.getElementById("kpiStaffSuspended");
+        if (kpiTotal) kpiTotal.textContent = total;
+        if (kpiActive) kpiActive.textContent = active;
+        if (kpiSuspended) kpiSuspended.textContent = suspended;
+
+        renderStaffTable();
+      } catch (err) {
+        console.error("Error loading staff users:", err);
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:24px;color:#dc2626;">Failed to load staff accounts: ${err.message}</td></tr>`;
+      }
+    }
+
+    function renderStaffTable() {
+      const tbody = document.getElementById("staffTableBody");
+      if (!tbody) return;
+
+      const q = (document.getElementById("staffSearchInput")?.value || "").toLowerCase().trim();
+      const statusFilter = document.getElementById("staffStatusFilter")?.value || "all";
+
+      let filtered = cachedStaffUsers.filter(staff => {
+        if (!staff) return false;
+        const matchQ = !q || (
+          (staff.name || "").toLowerCase().includes(q) ||
+          (staff.email || "").toLowerCase().includes(q) ||
+          (staff.roleTitle || "").toLowerCase().includes(q)
+        );
+        const currentStatus = (staff.status === "suspended" || staff.status === "inactive") ? "suspended" : "active";
+        const matchStatus = statusFilter === "all" || currentStatus === statusFilter;
+        return matchQ && matchStatus;
+      });
+
+      if (!filtered.length) {
+        if (cachedStaffUsers.length === 0) {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center;padding:48px 20px;color:#64748b;">
+                <div style="font-size:2.2rem;margin-bottom:8px;">👥</div>
+                <div style="font-size:1.05rem;font-weight:700;color:#0b1b3d;margin-bottom:4px;">No Staff Accounts Yet</div>
+                <div style="font-size:0.85rem;max-width:420px;margin:0 auto 16px auto;">Add staff members, coordinators, or content managers to allow them restricted access to the dashboard.</div>
+                <button type="button" class="btn btn-sm btn-orange" onclick="document.getElementById('btnAddNewStaffUser').click();">
+                  + Add Your First Staff Member
+                </button>
+              </td>
+            </tr>
+          `;
+        } else {
+          tbody.innerHTML = `
+            <tr>
+              <td colspan="6" style="text-align:center;padding:32px;color:#64748b;">
+                No staff members matching your search criteria.
+              </td>
+            </tr>
+          `;
+        }
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(staff => {
+        const initials = (staff.name || staff.email).split(" ").map(w => w[0]).join("").toUpperCase().slice(0, 2);
+        const isActive = staff.status !== "suspended" && staff.status !== "inactive";
+
+        // Count enabled modules
+        const perms = staff.permissions || {};
+        const enabledModules = MODULE_DEFS.filter(m => perms[m.id] === true);
+        const permCount = enabledModules.length;
+
+        const permPills = enabledModules.slice(0, 3).map(m => `
+          <span class="module-pill" title="${m.label}">${m.icon} ${m.label}</span>
+        `).join("");
+
+        const moreCount = permCount > 3 ? `<span class="module-pill" style="background:#e0f2fe;color:#0369a1;font-weight:700;">+${permCount - 3} more</span>` : "";
+        const permSummary = permCount === 0 
+          ? `<span style="color:#94a3b8;font-size:0.78rem;font-style:italic;">No modules enabled</span>`
+          : `<div><div style="margin-bottom:4px;font-size:0.75rem;font-weight:700;color:#1e3a8a;">${permCount} of ${MODULE_DEFS.length} sections</div><div style="display:flex;flex-wrap:wrap;">${permPills}${moreCount}</div></div>`;
+
+        const lastLoginStr = staff.lastLogin 
+          ? new Date(staff.lastLogin).toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" }) 
+          : "<span style='color:#94a3b8;'>Never</span>";
+
+        return `
+          <tr>
+            <td>
+              <div style="display:flex;align-items:center;gap:12px;">
+                <div class="staff-avatar">${initials}</div>
+                <div>
+                  <div style="font-weight:700;color:#0b1b3d;font-size:0.92rem;">${staff.name || "Unnamed"}</div>
+                  <div style="font-size:0.78rem;color:#64748b;">${staff.roleTitle || "Staff Member"}</div>
+                </div>
+              </div>
+            </td>
+            <td>
+              <div style="font-size:0.86rem;font-weight:600;color:#1e3a8a;">${staff.email}</div>
+              <div style="font-size:0.72rem;color:#94a3b8;margin-top:2px;">Password: ••••••••</div>
+            </td>
+            <td>${permSummary}</td>
+            <td>
+              <span class="${isActive ? 'staff-badge-active' : 'staff-badge-suspended'}" data-staff-id="${staff.id}" data-action="toggle-status" title="Click to toggle status">
+                ${isActive ? '● Active' : '■ Suspended'}
+              </span>
+            </td>
+            <td style="font-size:0.82rem;color:#475569;">${lastLoginStr}</td>
+            <td style="text-align:right;">
+              <div style="display:inline-flex;gap:6px;">
+                <button type="button" class="btn-sm" data-staff-id="${staff.id}" data-action="edit" style="background:#f1f5f9;border:1px solid #cbd5e1;color:#0b1b3d;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:600;" title="Edit Staff & Permissions">
+                  ✎ Edit
+                </button>
+                <button type="button" class="btn-sm" data-staff-id="${staff.id}" data-action="delete" style="background:#fef2f2;border:1px solid #fecaca;color:#dc2626;padding:5px 10px;border-radius:4px;cursor:pointer;font-weight:600;" title="Delete Staff Account">
+                  🗑
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join("");
+
+      // Attach row action listeners
+      tbody.querySelectorAll("button[data-action='edit']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const staffId = btn.dataset.staffId;
+          const staff = cachedStaffUsers.find(s => s.id === staffId);
+          if (staff) openStaffModal(staff);
+        });
+      });
+
+      tbody.querySelectorAll("button[data-action='delete']").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const staffId = btn.dataset.staffId;
+          const staff = cachedStaffUsers.find(s => s.id === staffId);
+          if (staff) {
+            staffUserToDelete = staff;
+            document.getElementById("deleteStaffTargetName").textContent = staff.name || "Staff Member";
+            document.getElementById("deleteStaffTargetEmail").textContent = staff.email;
+            staffDeleteModal.classList.add("open");
+          }
+        });
+      });
+
+      tbody.querySelectorAll("span[data-action='toggle-status']").forEach(badge => {
+        badge.addEventListener("click", async () => {
+          const staffId = badge.dataset.staffId;
+          const staff = cachedStaffUsers.find(s => s.id === staffId);
+          if (!staff) return;
+          const newStatus = (staff.status === "suspended" || staff.status === "inactive") ? "active" : "suspended";
+          try {
+            await window.AdminService.toggleStaffStatus(staffId, newStatus);
+            showToast(`Staff account status updated to ${newStatus}.`, "success");
+            loadStaffUsers();
+          } catch (e) {
+            showToast("Failed to update status: " + e.message, "error");
+          }
+        });
+      });
+    }
+
+    // Search and filter listeners
+    document.getElementById("staffSearchInput")?.addEventListener("input", renderStaffTable);
+    document.getElementById("staffStatusFilter")?.addEventListener("change", renderStaffTable);
+    document.getElementById("btnRefreshStaffList")?.addEventListener("click", () => {
+      loadStaffUsers();
+      showToast("Staff accounts list refreshed.", "success");
+    });
 
     // RESPONSIVE CHARTS
     const chartsRow = document.getElementById("chartsRow");

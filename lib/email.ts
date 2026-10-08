@@ -315,3 +315,49 @@ export async function sendContactInquiryEmail(data: {
   return true;
 }
 
+export async function sendPasswordResetOtpEmail(
+  to: string,
+  name: string,
+  otpCode: string
+): Promise<boolean> {
+  const subject = `🔐 Password Reset Code: ${otpCode} — Academic Excellence`;
+  const html = baseWrapper(`
+    <p>Dear <strong>${name}</strong>,</p>
+    <p>We received a request to reset the password for your administrator or staff account on the <strong>Academic Excellence Administration Portal</strong>.</p>
+    <p>Use the following 6-digit verification code to complete your password reset:</p>
+    <div style="background: #eff6ff; border: 2px dashed #3b82f6; padding: 22px 20px; border-radius: 10px; margin: 22px 0; text-align: center;">
+      <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 2px; color: #1e40af; font-weight: 700; margin-bottom: 8px;">Your 6-Digit Verification Code</div>
+      <div style="font-size: 36px; font-weight: 900; letter-spacing: 8px; color: #1e3a8a; font-family: monospace;">${otpCode}</div>
+      <div style="font-size: 12px; color: #64748b; margin-top: 8px;">⏱️ This code will expire in <strong>15 minutes</strong>.</div>
+    </div>
+    <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 12px 16px; border-radius: 0 6px 6px 0; margin-bottom: 20px;">
+      <p style="margin: 0; font-size: 12px; color: #991b1b;">
+        <strong>Security Notice:</strong> If you did not request this password reset, please ignore this email or notify the Super Administrator immediately. No changes have been made to your account.
+      </p>
+    </div>
+    <p style="font-size: 12px; color: #64748b;">Enter this code on the password reset screen along with your new password to complete the update.</p>
+  `);
+
+  return sendEmail(to, subject, html);
+}
+
+export async function sendPasswordResetSuccessEmail(
+  to: string,
+  name: string
+): Promise<boolean> {
+  const subject = `✅ Password Successfully Updated — Academic Excellence Admin Portal`;
+  const html = baseWrapper(`
+    <p>Dear <strong>${name}</strong>,</p>
+    <p>The password for your account (<strong>${to}</strong>) on the <strong>Academic Excellence Administration Portal</strong> has been successfully updated.</p>
+    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 14px 18px; border-radius: 0 6px 6px 0; margin: 20px 0;">
+      <p style="margin: 0; font-size: 13px; color: #166534;">
+        ✅ <strong>Security Confirmation:</strong> Your new password is now active. You can log in using your updated credentials.
+      </p>
+    </div>
+    <p style="font-size: 12px; color: #64748b;">
+      If you did not perform this change, please contact the Super Administrator (<a href="mailto:admin@academicexcellences.com" style="color: #2563eb;">admin@academicexcellences.com</a>) immediately to secure your account.
+    </p>
+  `);
+
+  return sendEmail(to, subject, html);
+}

@@ -11,38 +11,188 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Open+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;0,800;1,400&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="../style.css" />
+  <style>
+    .auth-alert-box {
+      padding: 12px 16px;
+      font-size: 0.88rem;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      line-height: 1.4;
+      display: none;
+    }
+    .auth-alert-error {
+      background: #fdf2f2;
+      border: 1px solid #f8b4b4;
+      color: #9b1c1c;
+    }
+    .auth-alert-success {
+      background: #f0fdf4;
+      border: 1px solid #bbf7d0;
+      color: #166534;
+    }
+    .auth-alert-info {
+      background: #eff6ff;
+      border: 1px solid #bfdbfe;
+      color: #1e40af;
+    }
+    .pass-field-wrapper {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    .pass-toggle-btn {
+      position: absolute;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #64748b;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      padding: 4px 6px;
+      border-radius: 4px;
+      transition: color 0.15s ease;
+    }
+    .pass-toggle-btn:hover {
+      color: #0b1b3d;
+    }
+    .otp-input-field {
+      font-size: 1.5rem !important;
+      font-weight: 800 !important;
+      letter-spacing: 6px !important;
+      text-align: center !important;
+      font-family: monospace !important;
+      height: 52px !important;
+      color: #0b1b3d !important;
+      background: #f8fafc !important;
+      border: 2px solid #cbd5e1 !important;
+      border-radius: 8px !important;
+    }
+    .otp-input-field:focus {
+      border-color: #2563eb !important;
+      background: #ffffff !important;
+      box-shadow: 0 0 0 3px rgba(37,99,235,0.15) !important;
+    }
+  </style>
 </head>
 <body style="background-color: var(--primary-navy);">
 
   <div class="admin-login-wrapper">
-    <div class="admin-login-card">
-      <div style="text-align: center; margin-bottom: 25px;">
+    <div class="admin-login-card" style="max-width: 460px; width: 100%;">
+      
+      <!-- Brand Header -->
+      <div style="text-align: center; margin-bottom: 24px;">
         <img src="../assets/logo-dark.svg" alt="Academic Excellence" style="height: 48px; margin: 0 auto 16px auto;" />
-        <h2 style="font-size: 1.6rem; color: #0b1b3d; margin-bottom: 6px;">Staff Administration</h2>
-        <p style="font-size: 0.9rem; color: #64748b;">Sign in to access candidate applications, courses CMS &amp; financials.</p>
+        <h2 style="font-size: 1.6rem; color: #0b1b3d; margin-bottom: 6px;" id="authHeaderTitle">Staff Administration</h2>
+        <p style="font-size: 0.9rem; color: #64748b; line-height: 1.4;" id="authHeaderDesc">Sign in to access candidate applications, courses CMS &amp; financials.</p>
       </div>
 
-      <div id="loginErrorMsg" style="display: none; background: #fdf2f2; border: 1px solid #f8b4b4; color: #9b1c1c; padding: 12px; font-size: 0.88rem; margin-bottom: 20px;"></div>
+      <!-- Feedback / Alert Banner -->
+      <div id="authAlertBox" class="auth-alert-box"></div>
 
-      <form id="adminLoginForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
-        <div class="form-group">
-          <label class="form-label">Administrator Email</label>
-          <input type="email" id="adminEmail" class="form-input" placeholder="solhm1@yahoo.com" required autocomplete="username" />
+      <!-- ========================================== -->
+      <!-- VIEW 1: SIGN IN FORM                       -->
+      <!-- ========================================== -->
+      <div id="loginView">
+        <form id="adminLoginForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+          <div class="form-group">
+            <label class="form-label">Administrator / Staff Email</label>
+            <input type="email" id="adminEmail" class="form-input" placeholder="solhm1@yahoo.com" required autocomplete="username" />
+          </div>
+
+          <div class="form-group">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+              <label class="form-label" style="margin-bottom: 0;">Password</label>
+              <a href="javascript:void(0);" id="openForgotPassBtn" style="font-size: 0.82rem; color: var(--primary-blue); font-weight: 700; text-decoration: none;">Forgot Password?</a>
+            </div>
+            <div class="pass-field-wrapper">
+              <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password" style="padding-right: 65px;" />
+              <button type="button" class="pass-toggle-btn" id="toggleLoginPassBtn">Show</button>
+            </div>
+          </div>
+
+          <div style="margin-top: 25px;">
+            <button type="submit" id="adminSubmitBtn" class="btn btn-orange" style="width: 100%;">Sign In to Dashboard &rarr;</button>
+          </div>
+        </form>
+      </div>
+
+      <!-- ========================================== -->
+      <!-- VIEW 2: FORGOT PASSWORD RECOVERY           -->
+      <!-- ========================================== -->
+      <div id="forgotPassView" style="display: none;">
+        
+        <!-- STEP A: REQUEST 6-DIGIT OTP -->
+        <div id="forgotStepRequest">
+          <form id="forgotRequestForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+            <div class="form-group">
+              <label class="form-label">Registered Account Email</label>
+              <input type="email" id="forgotEmail" class="form-input" placeholder="solhm1@yahoo.com" required autocomplete="email" />
+              <div style="font-size: 0.78rem; color: #64748b; margin-top: 5px;">
+                Enter the email associated with your Super Admin or Staff account to receive a 6-digit verification code.
+              </div>
+            </div>
+
+            <div style="margin-top: 22px;">
+              <button type="submit" id="sendOtpBtn" class="btn btn-orange" style="width: 100%;">Send Verification Code &rarr;</button>
+            </div>
+
+            <div style="margin-top: 18px; text-align: center;">
+              <a href="javascript:void(0);" id="backToLoginFromReqBtn" style="font-size: 0.85rem; color: var(--primary-blue); font-weight: 700; text-decoration: none;">
+                &larr; Back to Sign In
+              </a>
+            </div>
+          </form>
         </div>
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="adminPassword" class="form-input" placeholder="••••••••••••" required autocomplete="current-password" />
+        <!-- STEP B: VERIFY OTP & ENTER NEW PASSWORD -->
+        <div id="forgotStepVerify" style="display: none;">
+          <form id="forgotVerifyForm" action="javascript:void(0);" onsubmit="event.preventDefault(); return false;">
+            
+            <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #2563eb; padding: 12px 14px; border-radius: 6px; font-size: 0.82rem; color: #1e40af; margin-bottom: 18px; line-height: 1.4;">
+              Verification code sent to <strong id="otpRecipientEmail">—</strong>.<br/>
+              Please check your inbox or spam folder and enter the 6 digits below.
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label" style="text-align: center; display: block;">6-Digit Verification Code *</label>
+              <input type="text" id="resetOtpCode" class="form-input otp-input-field" placeholder="••••••" maxlength="6" pattern="[0-9]{6}" required autocomplete="one-time-code" />
+            </div>
+
+            <div class="form-group" style="margin-bottom: 16px;">
+              <label class="form-label">New Password *</label>
+              <div class="pass-field-wrapper">
+                <input type="password" id="resetNewPass" class="form-input" placeholder="At least 6 characters" minlength="6" required autocomplete="new-password" style="padding-right: 65px;" />
+                <button type="button" class="pass-toggle-btn" id="toggleNewPassBtn">Show</button>
+              </div>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Confirm New Password *</label>
+              <div class="pass-field-wrapper">
+                <input type="password" id="resetConfirmPass" class="form-input" placeholder="Re-enter new password" minlength="6" required autocomplete="new-password" style="padding-right: 65px;" />
+                <button type="button" class="pass-toggle-btn" id="toggleConfirmPassBtn">Show</button>
+              </div>
+            </div>
+
+            <div style="margin-top: 22px;">
+              <button type="submit" id="resetSubmitBtn" class="btn btn-orange" style="width: 100%;">Update &amp; Save New Password &rarr;</button>
+            </div>
+
+            <div style="margin-top: 16px; display: flex; justify-content: space-between; align-items: center; font-size: 0.82rem;">
+              <a href="javascript:void(0);" id="resendOtpLink" style="color: var(--primary-blue); font-weight: 700; text-decoration: none;">Resend Code</a>
+              <a href="javascript:void(0);" id="backToLoginFromVerifyBtn" style="color: #64748b; font-weight: 600; text-decoration: none;">&larr; Back to Sign In</a>
+            </div>
+          </form>
         </div>
 
-        <div style="margin-top: 25px;">
-          <button type="submit" id="adminSubmitBtn" class="btn btn-orange" style="width: 100%;">Sign In to Dashboard &rarr;</button>
-        </div>
-      </form>
+      </div>
 
+      <!-- Footer Info -->
       <div style="margin-top: 25px; padding-top: 20px; border-top: 1px solid #e2e8f0; font-size: 0.82rem; color: #64748b; text-align: center;">
         Academic Excellence Admissions &amp; FAYDA Registry Portal &bull; <a href="../index.html" style="color: var(--primary-blue); font-weight: 600;">Return to Website</a>
       </div>
+
     </div>
   </div>
 
@@ -52,46 +202,277 @@
   <script src="../js/admin-service.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      // Check if already authenticated and not explicitly in logout mode
+      // 1. Auth check
       const params = new URLSearchParams(window.location.search);
       if (params.get("logout") !== "1" && window.AdminService.checkAuth()) {
         window.location.replace("index.html?auth=1");
         return;
       }
 
-      const form = document.getElementById("adminLoginForm");
-      const errBox = document.getElementById("loginErrorMsg");
-      const submitBtn = document.getElementById("adminSubmitBtn");
+      // DOM Elements
+      const headerTitle = document.getElementById("authHeaderTitle");
+      const headerDesc = document.getElementById("authHeaderDesc");
+      const alertBox = document.getElementById("authAlertBox");
 
-      async function submitLogin(email, pass) {
-        errBox.style.display = "none";
-        submitBtn.textContent = "Authenticating with Supabase...";
-        submitBtn.disabled = true;
+      const loginView = document.getElementById("loginView");
+      const forgotPassView = document.getElementById("forgotPassView");
+      const forgotStepRequest = document.getElementById("forgotStepRequest");
+      const forgotStepVerify = document.getElementById("forgotStepVerify");
+
+      const loginForm = document.getElementById("adminLoginForm");
+      const adminEmail = document.getElementById("adminEmail");
+      const adminPassword = document.getElementById("adminPassword");
+      const loginSubmitBtn = document.getElementById("adminSubmitBtn");
+      const toggleLoginPassBtn = document.getElementById("toggleLoginPassBtn");
+      const openForgotPassBtn = document.getElementById("openForgotPassBtn");
+
+      const forgotRequestForm = document.getElementById("forgotRequestForm");
+      const forgotEmail = document.getElementById("forgotEmail");
+      const sendOtpBtn = document.getElementById("sendOtpBtn");
+      const backToLoginFromReqBtn = document.getElementById("backToLoginFromReqBtn");
+
+      const forgotVerifyForm = document.getElementById("forgotVerifyForm");
+      const resetOtpCode = document.getElementById("resetOtpCode");
+      const resetNewPass = document.getElementById("resetNewPass");
+      const resetConfirmPass = document.getElementById("resetConfirmPass");
+      const resetSubmitBtn = document.getElementById("resetSubmitBtn");
+      const toggleNewPassBtn = document.getElementById("toggleNewPassBtn");
+      const toggleConfirmPassBtn = document.getElementById("toggleConfirmPassBtn");
+      const resendOtpLink = document.getElementById("resendOtpLink");
+      const backToLoginFromVerifyBtn = document.getElementById("backToLoginFromVerifyBtn");
+      const otpRecipientEmail = document.getElementById("otpRecipientEmail");
+
+      let currentResetEmail = "";
+      let isSupabaseRecoveryHash = false;
+
+      // Alert helper
+      function showAlert(msg, type = "error") {
+        alertBox.textContent = msg;
+        alertBox.className = "auth-alert-box auth-alert-" + type;
+        alertBox.style.display = "block";
+      }
+      function hideAlert() {
+        alertBox.style.display = "none";
+        alertBox.textContent = "";
+      }
+
+      // Toggle password visibility helper
+      function wirePasswordToggle(button, input) {
+        if (!button || !input) return;
+        button.addEventListener("click", () => {
+          if (input.type === "password") {
+            input.type = "text";
+            button.textContent = "Hide";
+          } else {
+            input.type = "password";
+            button.textContent = "Show";
+          }
+        });
+      }
+      wirePasswordToggle(toggleLoginPassBtn, adminPassword);
+      wirePasswordToggle(toggleNewPassBtn, resetNewPass);
+      wirePasswordToggle(toggleConfirmPassBtn, resetConfirmPass);
+
+      // View switcher
+      function showLoginView(successMsg = null) {
+        loginView.style.display = "block";
+        forgotPassView.style.display = "none";
+        forgotStepRequest.style.display = "block";
+        forgotStepVerify.style.display = "none";
+        headerTitle.textContent = "Staff Administration";
+        headerDesc.textContent = "Sign in to access candidate applications, courses CMS & financials.";
+        if (successMsg) {
+          showAlert(successMsg, "success");
+        } else {
+          hideAlert();
+        }
+      }
+
+      function showForgotStepRequest() {
+        loginView.style.display = "none";
+        forgotPassView.style.display = "block";
+        forgotStepRequest.style.display = "block";
+        forgotStepVerify.style.display = "none";
+        headerTitle.textContent = "Reset Password";
+        headerDesc.textContent = "Enter your registered email to receive a 6-digit verification code.";
+        hideAlert();
+        if (adminEmail.value.trim()) {
+          forgotEmail.value = adminEmail.value.trim();
+        }
+        forgotEmail.focus();
+      }
+
+      function showForgotStepVerify(email) {
+        currentResetEmail = email;
+        otpRecipientEmail.textContent = email;
+        loginView.style.display = "none";
+        forgotPassView.style.display = "block";
+        forgotStepRequest.style.display = "none";
+        forgotStepVerify.style.display = "block";
+        headerTitle.textContent = "Enter Verification Code";
+        headerDesc.textContent = "Set a new password for your administration account.";
+        resetOtpCode.value = "";
+        resetNewPass.value = "";
+        resetConfirmPass.value = "";
+        resetOtpCode.focus();
+      }
+
+      // Check for Supabase Hash Recovery Link: #access_token=...&type=recovery
+      if (window.location.hash && window.location.hash.includes("type=recovery")) {
+        isSupabaseRecoveryHash = true;
+        showForgotStepVerify("Your Registered Email");
+        showAlert("Password recovery verified from email link. Please set your new password below.", "info");
+        const otpGroup = resetOtpCode.closest(".form-group");
+        if (otpGroup) otpGroup.style.display = "none";
+      }
+
+      openForgotPassBtn.addEventListener("click", showForgotStepRequest);
+      backToLoginFromReqBtn.addEventListener("click", () => showLoginView());
+      backToLoginFromVerifyBtn.addEventListener("click", () => showLoginView());
+
+      // ── SUBMIT LOGIN ──
+      loginForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+        const email = adminEmail.value.trim();
+        const pass = adminPassword.value.trim();
+
+        if (!email || !pass) {
+          showAlert("Please enter both your email and password.");
+          return;
+        }
+
+        loginSubmitBtn.disabled = true;
+        loginSubmitBtn.textContent = "Signing in...";
 
         try {
           const res = await window.AdminService.login(email, pass);
           if (res.success) {
             window.location.replace("index.html?auth=1");
           } else {
-            errBox.textContent = res.error;
-            errBox.style.display = "block";
-            submitBtn.textContent = "Sign In to Dashboard \u2192";
-            submitBtn.disabled = false;
+            showAlert(res.error || "Invalid login credentials. Please check your email and password.");
+            loginSubmitBtn.disabled = false;
+            loginSubmitBtn.textContent = "Sign In to Dashboard \u2192";
           }
-        } catch (e) {
-          errBox.textContent = "Authentication error: " + (e.message || "Failed to log in");
-          errBox.style.display = "block";
-          submitBtn.textContent = "Sign In to Dashboard \u2192";
-          submitBtn.disabled = false;
+        } catch (err) {
+          showAlert("Sign in error: " + (err.message || "Network error"));
+          loginSubmitBtn.disabled = false;
+          loginSubmitBtn.textContent = "Sign In to Dashboard \u2192";
         }
-      }
-
-      form.addEventListener("submit", (e) => {
-        e.preventDefault();
-        const email = document.getElementById("adminEmail").value;
-        const pass = document.getElementById("adminPassword").value;
-        submitLogin(email, pass);
       });
+
+      // ── STEP 1: REQUEST OTP CODE ──
+      forgotRequestForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+        const email = forgotEmail.value.trim().toLowerCase();
+
+        if (!email || !email.includes("@")) {
+          showAlert("Please enter a valid email address.");
+          return;
+        }
+
+        sendOtpBtn.disabled = true;
+        sendOtpBtn.textContent = "Sending Verification Code...";
+
+        try {
+          const res = await window.AdminService.requestPasswordReset(email);
+          if (res.success) {
+            showForgotStepVerify(email);
+            showAlert("Verification code sent! Please check your email.", "success");
+          } else {
+            showAlert(res.error || "Could not find an account with this email.");
+          }
+        } catch (err) {
+          showAlert("Error sending verification code: " + err.message);
+        } finally {
+          sendOtpBtn.disabled = false;
+          sendOtpBtn.textContent = "Send Verification Code \u2192";
+        }
+      });
+
+      // Resend OTP Link
+      resendOtpLink.addEventListener("click", async () => {
+        if (!currentResetEmail) return;
+        resendOtpLink.textContent = "Sending...";
+        try {
+          const res = await window.AdminService.requestPasswordReset(currentResetEmail);
+          if (res.success) {
+            showAlert("A fresh verification code was sent to " + currentResetEmail, "success");
+          } else {
+            showAlert(res.error || "Failed to resend code.");
+          }
+        } catch (err) {
+          showAlert("Error resending code: " + err.message);
+        } finally {
+          resendOtpLink.textContent = "Resend Code";
+        }
+      });
+
+      // ── STEP 2: VERIFY OTP & RESET PASSWORD ──
+      forgotVerifyForm.addEventListener("submit", async (e) => {
+        e.preventDefault();
+        hideAlert();
+
+        const code = resetOtpCode.value.trim();
+        const newPass = resetNewPass.value.trim();
+        const confirmPass = resetConfirmPass.value.trim();
+
+        if (!isSupabaseRecoveryHash && (!code || code.length < 6)) {
+          showAlert("Please enter the 6-digit verification code sent to your email.");
+          resetOtpCode.focus();
+          return;
+        }
+
+        if (newPass.length < 6) {
+          showAlert("Your new password must be at least 6 characters long.");
+          resetNewPass.focus();
+          return;
+        }
+
+        if (newPass !== confirmPass) {
+          showAlert("The passwords do not match. Please re-enter.");
+          resetConfirmPass.focus();
+          return;
+        }
+
+        resetSubmitBtn.disabled = true;
+        resetSubmitBtn.textContent = "Updating Password...";
+
+        try {
+          // Native Supabase Hash Recovery handling
+          if (isSupabaseRecoveryHash && window.AdminService.updateSupabasePassword) {
+            const supaRes = await window.AdminService.updateSupabasePassword(newPass);
+            if (supaRes.success) {
+              window.location.hash = "";
+              showLoginView("Password successfully updated! You can now sign in with your new password.");
+              return;
+            } else {
+              showAlert(supaRes.error || "Failed to update password.");
+              resetSubmitBtn.disabled = false;
+              resetSubmitBtn.textContent = "Update & Save New Password \u2192";
+              return;
+            }
+          }
+
+          // OTP Verification & Reset handling
+          const res = await window.AdminService.verifyAndResetPassword(currentResetEmail, code, newPass);
+          if (res.success) {
+            adminEmail.value = currentResetEmail;
+            adminPassword.value = "";
+            showLoginView("Password reset successful! Sign in with your new password.");
+          } else {
+            showAlert(res.error || "Failed to reset password. Please check the code.");
+            resetSubmitBtn.disabled = false;
+            resetSubmitBtn.textContent = "Update & Save New Password \u2192";
+          }
+        } catch (err) {
+          showAlert("Password reset error: " + err.message);
+          resetSubmitBtn.disabled = false;
+          resetSubmitBtn.textContent = "Update & Save New Password \u2192";
+        }
+      });
+
     });
   </script>
 </body>

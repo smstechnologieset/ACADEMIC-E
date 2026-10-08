@@ -29,7 +29,8 @@ const StorageKeys = {
   INQUIRIES: "ae_db_inquiries",
   ADMIN_AUTH: "ae_admin_session",
   DRAFT_APP: "ae_draft_application",
-  PENDING_REF: "ae_pending_payment_ref"
+  PENDING_REF: "ae_pending_payment_ref",
+  STAFF_USERS: "ae_db_staff_users"
 };
 
 // Initial Seed Settings

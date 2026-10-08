@@ -13,6 +13,38 @@ window.AdminService = {
       return { success: false, error: "Please enter both your email and password." };
     }
 
+    // 0. Check Staff User Accounts first
+    try {
+      const staffList = await this.getStaffUsersAsync();
+      const staff = Array.isArray(staffList) ? staffList.find(s => s && s.email && s.email.trim().toLowerCase() === cleanEmail.toLowerCase()) : null;
+      if (staff) {
+        if (staff.status === "suspended" || staff.status === "inactive") {
+          return { success: false, error: "This staff account has been suspended or deactivated. Please contact the administrator." };
+        }
+        if (String(staff.password || "").trim() !== cleanPass) {
+          return { success: false, error: "Invalid password for staff account. Please verify your credentials." };
+        }
+        // Build Staff Session with explicit permissions
+        const staffSession = {
+          id: staff.id,
+          token: "ae_staff_" + Date.now() + "_" + Math.random().toString(36).substr(2, 8),
+          email: staff.email,
+          name: staff.name || staff.email.split("@")[0],
+          role: "Staff",
+          roleTitle: staff.roleTitle || "Staff Member",
+          permissions: staff.permissions || {},
+          loginTime: new Date().toISOString()
+        };
+        // Update last login timestamp asynchronously
+        staff.lastLogin = new Date().toISOString();
+        this.saveStaffUser(staff, false).catch(() => {});
+        this._saveSession(staffSession);
+        return { success: true, isStaff: true };
+      }
+    } catch (staffErr) {
+      console.warn("Staff lookup error, continuing to Supabase Auth:", staffErr);
+    }
+
     // 1. Authenticate via Supabase Client SDK if initialized
     const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
     if (client && client.auth) {
@@ -1381,5 +1413,285 @@ window.AdminService = {
     });
     await this.updateSettings({ paymentMethods: methods });
     return { success: true, paymentMethods: methods };
+  },
+
+  // 6. STAFF USERS & ROLE-BASED ACCESS CONTROL (RBAC)
+  getStaffUsers() {
+    return (window.AcademicDB && window.AcademicDB.getLocal) 
+      ? window.AcademicDB.getLocal(window.AcademicDB.keys.STAFF_USERS, []) 
+      : [];
+  },
+
+  async getStaffUsersAsync() {
+    let local = this.getStaffUsers();
+    try {
+      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+      // 1. Try Direct Supabase REST fetch for site_settings
+      const res = await fetch(`${supabaseUrl}/rest/v1/site_settings?key=eq.staff_users&select=key,value`, {
+        headers: { "apikey": supabaseKey, "Authorization": `Bearer ${supabaseKey}` }
+      });
+      if (res.ok) {
+        const rows = await res.json();
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].value) {
+          const parsed = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
+          if (Array.isArray(parsed)) {
+            if (window.AcademicDB && window.AcademicDB.setLocal) {
+              window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, parsed);
+            }
+            return parsed;
+          }
+        }
+      }
+
+      // 2. Fallback to API route /api/send-email?action=get_staff_users
+      const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) 
+        ? window.AcademicDB.getEmailApiEndpoint() 
+        : "https://www.academicexcellences.com/api/send-email";
+      const apiRes = await fetch(`${emailApiBase}?action=get_staff_users`);
+      if (apiRes.ok) {
+        const apiData = await apiRes.json();
+        if (Array.isArray(apiData)) {
+          if (window.AcademicDB && window.AcademicDB.setLocal) {
+            window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, apiData);
+          }
+          return apiData;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch remote staff_users, using local cache:", e);
+    }
+    return Array.isArray(local) ? local : [];
+  },
+
+  async _syncStaffUsersRemote(staffList) {
+    const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+    const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+    const session = this.checkAuth();
+    const token = (session && session.token && session.token.includes(".")) ? session.token : supabaseKey;
+    const payloadStr = JSON.stringify(staffList);
+
+    // Try direct Supabase REST first
+    try {
+      const res = await fetch(`${supabaseUrl}/rest/v1/site_settings`, {
+        method: "POST",
+        headers: {
+          "apikey": supabaseKey,
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates"
+        },
+        body: JSON.stringify([{
+          key: "staff_users",
+          value: payloadStr,
+          updated_at: new Date().toISOString()
+        }])
+      });
+      if (res.ok) return true;
+    } catch (err) {
+      console.warn("Direct site_settings staff sync attempt failed:", err);
+    }
+
+    // Fallback: Send through API route /api/send-email
+    try {
+      const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) 
+        ? window.AcademicDB.getEmailApiEndpoint() 
+        : "https://www.academicexcellences.com/api/send-email";
+      const apiRes = await fetch(emailApiBase, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "save_staff_users",
+          staff_users: staffList
+        })
+      });
+      if (apiRes.ok) return true;
+    } catch (apiErr) {
+      console.warn("API route staff sync failed:", apiErr);
+    }
+    return false;
+  },
+
+  async saveStaffUser(userData, syncRemote = true) {
+    const list = await this.getStaffUsersAsync();
+    const staffList = Array.isArray(list) ? [...list] : [];
+
+    let target;
+    if (userData.id) {
+      const idx = staffList.findIndex(s => s.id === userData.id);
+      if (idx !== -1) {
+        staffList[idx] = { ...staffList[idx], ...userData, updatedAt: new Date().toISOString() };
+        target = staffList[idx];
+      } else {
+        target = { ...userData, updatedAt: new Date().toISOString() };
+        staffList.push(target);
+      }
+    } else {
+      target = {
+        ...userData,
+        id: "staff_" + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        status: userData.status || "active",
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        lastLogin: null
+      };
+      staffList.push(target);
+    }
+
+    // Save locally
+    if (window.AcademicDB && window.AcademicDB.setLocal) {
+      window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, staffList);
+    }
+
+    // Sync remote
+    if (syncRemote !== false) {
+      await this._syncStaffUsersRemote(staffList);
+    }
+
+    return { success: true, user: target, staffUsers: staffList };
+  },
+
+  async deleteStaffUser(id) {
+    const list = await this.getStaffUsersAsync();
+    const staffList = (Array.isArray(list) ? list : []).filter(s => s.id !== id);
+
+    if (window.AcademicDB && window.AcademicDB.setLocal) {
+      window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, staffList);
+    }
+
+    await this._syncStaffUsersRemote(staffList);
+    return { success: true, staffUsers: staffList };
+  },
+
+  async toggleStaffStatus(id, newStatus) {
+    const list = await this.getStaffUsersAsync();
+    const staffList = (Array.isArray(list) ? [...list] : []).map(s => {
+      if (s.id === id) {
+        return { ...s, status: newStatus, updatedAt: new Date().toISOString() };
+      }
+      return s;
+    });
+
+    if (window.AcademicDB && window.AcademicDB.setLocal) {
+      window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, staffList);
+    }
+
+    await this._syncStaffUsersRemote(staffList);
+    return { success: true, staffUsers: staffList };
+  },
+
+  // 7. PASSWORD RESET RECOVERY
+  async requestPasswordReset(email) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    if (!cleanEmail) {
+      return { success: false, error: "Please enter your email address." };
+    }
+
+    // Trigger Supabase native reset email as well (best-effort)
+    const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+    if (client && client.auth) {
+      try {
+        const redirectUrl = window.location.href.split("?")[0].split("#")[0];
+        client.auth.resetPasswordForEmail(cleanEmail, { redirectTo: redirectUrl }).catch(() => {});
+      } catch (_) {}
+    }
+
+    // Call server endpoint to dispatch branded 6-digit OTP email
+    try {
+      const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint)
+        ? window.AcademicDB.getEmailApiEndpoint()
+        : "https://www.academicexcellences.com/api/send-email";
+
+      const res = await fetch(emailApiBase, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "request_password_reset",
+          email: cleanEmail
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        return { success: false, error: data.error || "Failed to send verification code." };
+      }
+
+      return { success: true, message: data.message || `Verification code sent to ${cleanEmail}` };
+    } catch (e) {
+      return { success: false, error: "Network error connecting to reset service: " + e.message };
+    }
+  },
+
+  async verifyAndResetPassword(email, code, newPassword) {
+    const cleanEmail = (email || "").trim().toLowerCase();
+    const cleanCode = (code || "").trim();
+    const cleanPass = (newPassword || "").trim();
+
+    if (!cleanEmail || !cleanCode || !cleanPass) {
+      return { success: false, error: "Email, verification code, and new password are required." };
+    }
+
+    if (cleanPass.length < 6) {
+      return { success: false, error: "New password must be at least 6 characters long." };
+    }
+
+    try {
+      const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint)
+        ? window.AcademicDB.getEmailApiEndpoint()
+        : "https://www.academicexcellences.com/api/send-email";
+
+      const res = await fetch(emailApiBase, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "verify_and_reset_password",
+          email: cleanEmail,
+          code: cleanCode,
+          newPassword: cleanPass
+        })
+      });
+
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        return { success: false, error: data.error || "Failed to reset password." };
+      }
+
+      // Update local cache if this was a staff user
+      const staffList = this.getStaffUsers();
+      if (Array.isArray(staffList)) {
+        const updated = staffList.map(s => {
+          if (s.email && s.email.toLowerCase() === cleanEmail) {
+            return { ...s, password: cleanPass, updatedAt: new Date().toISOString() };
+          }
+          return s;
+        });
+        if (window.AcademicDB && window.AcademicDB.setLocal) {
+          window.AcademicDB.setLocal(window.AcademicDB.keys.STAFF_USERS, updated);
+        }
+      }
+
+      return { success: true, message: data.message || "Password successfully updated!" };
+    } catch (e) {
+      return { success: false, error: "Network error updating password: " + e.message };
+    }
+  },
+
+  async updateSupabasePassword(newPassword) {
+    const cleanPass = (newPassword || "").trim();
+    if (!cleanPass || cleanPass.length < 6) {
+      return { success: false, error: "Password must be at least 6 characters long." };
+    }
+    const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+    if (client && client.auth) {
+      try {
+        const { error } = await client.auth.updateUser({ password: cleanPass });
+        if (error) return { success: false, error: error.message };
+        return { success: true, message: "Password updated successfully!" };
+      } catch (err) {
+        return { success: false, error: err.message };
+      }
+    }
+    return { success: false, error: "Supabase client not initialized." };
   }
 };
