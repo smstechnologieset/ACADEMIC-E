@@ -55,8 +55,8 @@
           <span class="hero-badge-pill">Curriculum</span>
           <span class="hero-badge-text">Certified with University in New York</span>
         </div>
-        <h1 class="hero-title" style="font-size: 3.2rem;">Academic Programs</h1>
-        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;">
+        <h1 class="hero-title" style="font-size: 3.2rem;" data-cms-text="courses.hero_title">Academic Programs</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 820px; line-height: 1.8;" data-cms-text="courses.hero_subtitle">
           Job-Ready Global Learning Programs through our partnership with the University in New York, USA. Over 120 programs in high-demand fields, delivered via Skillsoft Percipio — providing students and professionals with affordable, career-focused learning opportunities.
         </p>
       </div>
@@ -103,9 +103,9 @@
 
         <!-- Right: Text Content Column -->
         <div class="program-video-text-col">
-          <span class="program-eyebrow">Curriculum Overview</span>
-          <h2 class="program-showcase-title">What Are Job-Ready Courses?</h2>
-          <p class="program-showcase-lead">
+          <span class="program-eyebrow" data-cms-text="courses.showcase_eyebrow">Curriculum Overview</span>
+          <h2 class="program-showcase-title" data-cms-text="courses.showcase_title">What Are Job-Ready Courses?</h2>
+          <p class="program-showcase-lead" data-cms-text="courses.showcase_lead">
             Job-Ready Courses are structured learning pathways designed to align education with industry requirements and workforce demands. Drawing from a library of nearly 10,000 learning resources, these programs help learners acquire practical skills that lead to employment, promotions, career advancement, and higher earning potential. Most programs can be completed within <strong>24 weeks</strong>, offering flexibility for both students and working professionals.
           </p>
 
@@ -157,14 +157,14 @@
         <!-- Certification & Merit Recognition Callout Banner -->
         <div style="margin-top: 48px; background: #0b1b3d; border-radius: 8px; padding: 36px 32px; color: #ffffff; border-left: 5px solid var(--accent-orange); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 24px;">
           <div style="max-width: 680px;">
-            <span style="background: var(--accent-orange); color: #ffffff; font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;">University Accreditation</span>
-            <h3 style="font-size: 1.45rem; color: #ffffff; margin: 12px 0 8px; font-family: var(--font-serif);">Dual-Certified U.S. University Credentials &amp; Merit Badges</h3>
-            <p style="color: #cce2eb; line-height: 1.7; margin: 0; font-size: 0.95rem;">
+            <span style="background: var(--accent-orange); color: #ffffff; font-size: 0.72rem; font-weight: 700; padding: 4px 12px; border-radius: 20px; letter-spacing: 1px; text-transform: uppercase;" data-cms-text="courses.cert_badge">University Accreditation</span>
+            <h3 style="font-size: 1.45rem; color: #ffffff; margin: 12px 0 8px; font-family: var(--font-serif);" data-cms-text="courses.cert_title">Dual-Certified U.S. University Credentials &amp; Merit Badges</h3>
+            <p style="color: #cce2eb; line-height: 1.7; margin: 0; font-size: 0.95rem;" data-cms-text="courses.cert_desc">
               All 24-week programs award credentials certified in collaboration with the University in New York, enterprise Skillsoft Percipio digital badges, and eligibility for the GPA 3.6+ Merit Badge recognition.
             </p>
           </div>
           <div>
-            <a href="credentials.html" class="btn" style="background: #ffffff; color: var(--primary-navy); font-weight: 700; text-decoration: none; border-radius: 4px; padding: 12px 24px; white-space: nowrap; display: inline-block;">
+            <a href="credentials.html" class="btn" style="background: #ffffff; color: var(--primary-navy); font-weight: 700; text-decoration: none; border-radius: 4px; padding: 12px 24px; white-space: nowrap; display: inline-block;" data-cms-text="courses.cert_btn">
               View Honors &amp; Badges &rarr;
             </a>
           </div>
@@ -223,6 +223,7 @@
   <!-- Scripts -->
   <script src="js/supabase-client.js"></script>
   <script src="js/courses-service.js"></script>
+  <script src="js/cms-loader.js"></script>
   <script src="js/main.js"></script>
   <script>
     document.addEventListener("DOMContentLoaded", () => {

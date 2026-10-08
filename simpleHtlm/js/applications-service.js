@@ -333,17 +333,19 @@ window.ApplicationsService = {
 
     // Send application received email via server API
     if (newApplication.email) {
-      fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "application_received",
-          to: newApplication.email,
-          name: newApplication.fullName || newApplication.firstName || "Applicant",
-          refId: applicationId,
-          course: newApplication.courseApplied || "Academic Program"
-        })
-      }).catch(err => console.info("Email notification queued:", err));
+      try {
+        if (window.AcademicDB && window.AcademicDB.sendNotificationEmail) {
+          await window.AcademicDB.sendNotificationEmail({
+            type: "application_received",
+            to: newApplication.email,
+            name: newApplication.fullName || newApplication.firstName || "Applicant",
+            refId: applicationId,
+            course: newApplication.courseApplied || "Academic Program"
+          });
+        }
+      } catch (emailErr) {
+        console.info("Email notification queued/handled:", emailErr);
+      }
     }
 
     return { success: true, applicationId };
@@ -643,18 +645,26 @@ window.ApplicationsService = {
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
     localStorage.removeItem("ae_pending_payment_ref");
 
+    // Ensure targetApp has email before triggering notification
+    if (!targetApp || !targetApp.email) {
+      const liveApp = await this.getApplicationAsync(cleanId);
+      if (liveApp) targetApp = liveApp;
+    }
+
     // Send payment proof received email via server API
     if (targetApp && targetApp.email) {
-      fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          type: "payment_received",
-          to: targetApp.email,
-          name: targetApp.fullName || targetApp.firstName || "Applicant",
-          refId: cleanId
-        })
-      }).catch(err => console.info("Email notification queued:", err));
+      try {
+        if (window.AcademicDB && window.AcademicDB.sendNotificationEmail) {
+          await window.AcademicDB.sendNotificationEmail({
+            type: "payment_received",
+            to: targetApp.email,
+            name: targetApp.fullName || targetApp.firstName || "Applicant",
+            refId: cleanId
+          });
+        }
+      } catch (emailErr) {
+        console.info("Payment proof email notification queued/handled:", emailErr);
+      }
     }
 
     return { success: true, application: targetApp };
@@ -714,7 +724,23 @@ window.ApplicationsService = {
       }
     }
 
-    // 3. Clear pending lock
+    // 3. Send cancellation confirmation email
+    if (appFound && appFound.email) {
+      try {
+        if (window.AcademicDB && window.AcademicDB.sendNotificationEmail) {
+          await window.AcademicDB.sendNotificationEmail({
+            type: "cancelled",
+            to: appFound.email,
+            name: appFound.fullName || appFound.firstName || "Applicant",
+            refId: cleanId
+          });
+        }
+      } catch (emailErr) {
+        console.info("Cancellation email queued/handled:", emailErr);
+      }
+    }
+
+    // 4. Clear pending lock
     localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
     localStorage.removeItem("ae_pending_payment_ref");
 

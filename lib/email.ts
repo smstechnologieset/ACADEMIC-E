@@ -20,10 +20,11 @@ async function sendEmail(
     return true;
   }
 
-  try {
-    const toArray = Array.isArray(to) ? to : [to];
-    const replyToArray = replyTo ? (Array.isArray(replyTo) ? replyTo : [replyTo]) : [REPLY_TO_ADDRESS];
+  const toArray = Array.isArray(to) ? to : [to];
+  const replyToArray = replyTo ? (Array.isArray(replyTo) ? replyTo : [replyTo]) : [REPLY_TO_ADDRESS];
 
+  try {
+    // 1. Primary send with official branded domain address
     const res = await fetch("https://api.resend.com/emails", {
       method: "POST",
       headers: {
@@ -39,13 +40,68 @@ async function sendEmail(
       }),
     });
 
-    if (!res.ok) {
-      const body = await res.text();
-      console.warn(`[EMAIL ERROR] Resend API returned ${res.status}: ${body}`);
-      return false;
+    if (res.ok) {
+      return true;
     }
 
-    return true;
+    const body = await res.text();
+    console.warn(`[EMAIL ERROR] Resend API returned ${res.status}: ${body}`);
+
+    // 2. Fallback: If custom domain is unverified (403), fallback to onboarding@resend.dev
+    if (res.status === 403 && body.includes("domain is not verified")) {
+      console.warn("[EMAIL FALLBACK] Attempting delivery via onboarding@resend.dev...");
+      const fallbackRes = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${apiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "Academic Excellence <onboarding@resend.dev>",
+          to: toArray,
+          reply_to: replyToArray,
+          subject,
+          html: htmlBody,
+        }),
+      });
+
+      if (fallbackRes.ok) {
+        return true;
+      }
+
+      const fbBody = await fallbackRes.text();
+      // 3. Fallback: If Resend sandbox restricts external recipient, send notification copy to admin (solhm1@yahoo.com)
+      if (fbBody.includes("only send testing emails to your own email address") || fbBody.includes("validation_error")) {
+        console.warn("[EMAIL FALLBACK] Forwarding admin copy to solhm1@yahoo.com...");
+        const adminRes = await fetch("https://api.resend.com/emails", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${apiKey}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            from: "Academic Excellence <onboarding@resend.dev>",
+            to: ["solhm1@yahoo.com"],
+            reply_to: replyToArray,
+            subject: `[Applicant Copy: ${toArray.join(", ")}] ${subject}`,
+            html: `
+              <div style="background:#fee2e2;border:1px solid #ef4444;padding:12px 16px;border-radius:8px;margin-bottom:16px;color:#991b1b;font-size:13px;">
+                <strong>⚠️ DNS Records Pending on academicexcellences.com:</strong><br/>
+                This notification was intended for: <strong>${toArray.join(", ")}</strong>.<br/>
+                Add the Resend DKIM and SPF records in your domain DNS to enable direct recipient delivery.
+              </div>
+              ${htmlBody}
+            `,
+          }),
+        });
+
+        if (adminRes.ok) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   } catch (err) {
     console.warn("[EMAIL ERROR] Failed to send email:", err);
     return false;

@@ -550,51 +550,125 @@ window.AdminService = {
       console.warn("Supabase live update error:", e);
     }
 
-    // If targetApp missing from cache, fetch from Supabase
-    if (!targetApp) {
+    // Ensure we have the applicant's real email, name, and course track
+    let applicantEmail = (targetApp && targetApp.email) ? targetApp.email.trim() : "";
+    let applicantName = (targetApp && (targetApp.fullName || targetApp.firstName)) ? (targetApp.fullName || targetApp.firstName) : "Applicant";
+    let applicantCourse = (targetApp && (targetApp.courseApplied || targetApp.course_applied)) ? (targetApp.courseApplied || targetApp.course_applied) : "Academic Program";
+
+    if (!applicantEmail) {
       try {
         const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
         const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
-        const res = await fetch(`${supabaseUrl}/rest/v1/applications?id=ilike.${encodeURIComponent(id)}&limit=1`, {
+        const cleanId = (id || "").trim();
+        const res = await fetch(`${supabaseUrl}/rest/v1/applications?id=ilike.${encodeURIComponent(cleanId)}&limit=1`, {
           headers: { apikey: supabaseKey, Authorization: `Bearer ${supabaseKey}` }
         });
         if (res.ok) {
           const rows = await res.json();
           if (rows && rows[0]) {
-            targetApp = {
-              id: rows[0].id,
-              email: rows[0].email,
-              fullName: rows[0].full_name,
-              firstName: rows[0].first_name,
-              lastName: rows[0].last_name,
-              courseApplied: rows[0].course_applied,
-              status: newStatus
-            };
+            applicantEmail = (rows[0].email || "").trim();
+            applicantName = (rows[0].full_name || rows[0].first_name || applicantName || "Applicant").trim();
+            applicantCourse = rows[0].course_applied || applicantCourse || "Academic Program";
+            if (!targetApp) targetApp = {};
+            targetApp.email = applicantEmail;
+            targetApp.fullName = applicantName;
+            targetApp.courseApplied = applicantCourse;
           }
         }
-      } catch (fetchErr) {}
-    }
-
-    // Trigger email notification via /api/send-email if applicant has an email
-    if (targetApp && targetApp.email) {
-      const emailType = newStatus === "approved" ? "status_approved" : (newStatus === "rejected" ? "status_rejected" : null);
-      if (emailType) {
-        fetch("/api/send-email", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            type: emailType,
-            to: targetApp.email,
-            name: targetApp.fullName || targetApp.firstName || "Applicant",
-            refId: targetApp.id,
-            course: targetApp.courseApplied || "Academic Program",
-            reason: rejectionReason
-          })
-        }).catch(err => console.info("Email notification queued/handled:", err));
+      } catch (fetchErr) {
+        console.warn("[AdminService] Supabase email lookup error:", fetchErr);
       }
     }
 
+    // Trigger email notification if applicant has an email
+    if (applicantEmail) {
+      const emailType = newStatus === "approved" 
+        ? "status_approved" 
+        : (newStatus === "rejected" 
+          ? "status_rejected" 
+          : (newStatus === "cancelled" ? "cancelled" : null));
+      if (emailType) {
+        try {
+          await this._dispatchEmailNotification({
+            type: emailType,
+            to: applicantEmail,
+            name: applicantName,
+            refId: (id || "").trim(),
+            course: applicantCourse,
+            reason: rejectionReason
+          });
+        } catch (emailErr) {
+          console.error("[AdminService] Status change email notification error:", emailErr);
+        }
+      }
+    } else {
+      console.warn("[AdminService] No recipient email found for application status change:", id);
+    }
+
     return { success: true, application: targetApp };
+  },
+
+  /**
+   * Standalone, resilient email notification dispatcher for admin operations
+   */
+  async _dispatchEmailNotification(payload) {
+    if (!payload || !payload.to) {
+      console.warn("[AdminService] Missing recipient email for notification:", payload);
+      return false;
+    }
+
+    // 1. Try unified AcademicDB helper if available
+    if (window.AcademicDB && typeof window.AcademicDB.sendNotificationEmail === "function") {
+      try {
+        const ok = await window.AcademicDB.sendNotificationEmail(payload);
+        if (ok) return true;
+      } catch (err) {
+        console.warn("[AdminService] AcademicDB.sendNotificationEmail warning:", err);
+      }
+    }
+
+    // 2. Direct fetch with endpoint resolution
+    const endpoint = (window.AcademicDB && typeof window.AcademicDB.getEmailApiEndpoint === "function")
+      ? window.AcademicDB.getEmailApiEndpoint()
+      : "https://www.academicexcellences.com/api/send-email";
+
+    const fetchWithTimeout = (url, timeoutMs = 8000) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        signal: controller.signal
+      }).finally(() => clearTimeout(timer));
+    };
+
+    try {
+      const res = await fetchWithTimeout(endpoint);
+      if (res.ok) {
+        console.log("[AdminService] Status update email delivered via endpoint:", payload.type, payload.to);
+        return true;
+      }
+      console.warn("[AdminService] Email endpoint responded with status:", res.status);
+    } catch (err) {
+      console.warn("[AdminService] Direct fetch error:", err.message);
+    }
+
+    // 3. Fallback directly to canonical production URL if primary failed
+    if (endpoint !== "https://www.academicexcellences.com/api/send-email") {
+      try {
+        const fbRes = await fetchWithTimeout("https://www.academicexcellences.com/api/send-email");
+        if (fbRes.ok) {
+          console.log("[AdminService] Status update email delivered via canonical fallback:", payload.type, payload.to);
+          return true;
+        }
+      } catch (fbErr) {
+        console.error("[AdminService] Fallback dispatch failed:", fbErr.message);
+      }
+    }
+
+    return false;
   },
 
   getFilteredApplications(filters = {}) {

@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "serve:html": "node simpleHtlm/server.js",
     "build": "next build",
     "start": "next start",
     "lint": "eslint"

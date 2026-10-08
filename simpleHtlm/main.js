@@ -142,8 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
         const SUPA_URL = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
         const SUPA_KEY = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
-        // 1. Send via /api/send-email (triggers admin email + visitor confirmation + server-side DB save with service role key)
-        const emailPromise = fetch('/api/send-email', {
+        // 1. Send via getEmailApiEndpoint() (triggers admin email + visitor confirmation + server-side DB save with service role key)
+        const emailEndpoint = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+        const emailPromise = fetch(emailEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({

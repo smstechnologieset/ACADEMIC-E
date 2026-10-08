@@ -248,6 +248,71 @@ window.AcademicDB = {
     }
   },
 
+  /**
+   * Resolve live email API endpoint
+   * If running directly on www.academicexcellences.com, relative /api/send-email works.
+   * Everywhere else (localhost, 127.0.0.1, file://, apex domain, etc.), routes directly to verified canonical API.
+   */
+  getEmailApiEndpoint() {
+    if (typeof window !== "undefined") {
+      if (window.location.hostname === "www.academicexcellences.com") {
+        return "/api/send-email";
+      }
+    }
+    return "https://www.academicexcellences.com/api/send-email";
+  },
+
+  /**
+   * Unified, resilient email dispatch helper with timeout, keepalive and automatic fallback
+   */
+  async sendNotificationEmail(payload) {
+    if (!payload || !payload.to) {
+      console.warn("[AcademicDB] sendNotificationEmail missing recipient:", payload);
+      return false;
+    }
+
+    const primaryUrl = this.getEmailApiEndpoint();
+    const canonicalUrl = "https://www.academicexcellences.com/api/send-email";
+
+    const fetchWithTimeout = (url, timeoutMs = 7000) => {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), timeoutMs);
+      return fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+        keepalive: true,
+        signal: controller.signal
+      }).finally(() => clearTimeout(timer));
+    };
+
+    try {
+      const res = await fetchWithTimeout(primaryUrl);
+      if (res.ok) {
+        console.log(`[AcademicDB] Email notification sent (${payload.type}) to ${payload.to}`);
+        return true;
+      }
+      console.warn(`[AcademicDB] Email endpoint ${primaryUrl} returned ${res.status}`);
+    } catch (err) {
+      console.warn(`[AcademicDB] Primary email dispatch failed on ${primaryUrl}:`, err.message);
+    }
+
+    // Safety net: try canonical URL if primary was relative and failed
+    if (primaryUrl !== canonicalUrl) {
+      try {
+        const fbRes = await fetchWithTimeout(canonicalUrl);
+        if (fbRes.ok) {
+          console.log(`[AcademicDB] Fallback email sent (${payload.type}) to ${payload.to}`);
+          return true;
+        }
+      } catch (fbErr) {
+        console.error("[AcademicDB] Fallback email dispatch failed:", fbErr.message);
+      }
+    }
+
+    return false;
+  },
+
   /** Helper to sanitize stale settings and ensure valid payment methods */
   _sanitizeSettings(s) {
     if (!s) return defaultSettings;

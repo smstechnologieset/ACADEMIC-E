@@ -254,6 +254,148 @@
     #executePdfDownloadBtn:hover {
       background: #1854a1 !important;
     }
+
+    /* PAGE CONTENT CMS STYLES */
+    .cms-switch {
+      position: relative;
+      display: inline-block;
+      width: 48px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+    .cms-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+    .cms-slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-color: #cbd5e1;
+      transition: .25s ease-in-out;
+      border-radius: 26px;
+    }
+    .cms-slider:before {
+      position: absolute;
+      content: "";
+      height: 20px;
+      width: 20px;
+      left: 3px;
+      bottom: 3px;
+      background-color: white;
+      transition: .25s ease-in-out;
+      border-radius: 50%;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.25);
+    }
+    .cms-switch input:checked + .cms-slider {
+      background-color: var(--accent-orange, #df6b26);
+    }
+    .cms-switch input:checked + .cms-slider:before {
+      transform: translateX(22px);
+    }
+    .cms-page-tabs {
+      display: flex;
+      gap: 6px;
+      border-bottom: 2px solid #e2e8f0;
+      margin-bottom: 24px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .cms-page-tab-btn {
+      background: transparent;
+      border: none;
+      padding: 10px 18px;
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: #64748b;
+      cursor: pointer;
+      border-bottom: 3px solid transparent;
+      margin-bottom: -2px;
+      transition: all 0.2s;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      white-space: nowrap;
+    }
+    .cms-page-tab-btn:hover {
+      color: #0b1b3d;
+      background: #f8fafc;
+      border-radius: 6px 6px 0 0;
+    }
+    .cms-page-tab-btn.active {
+      color: #0b1b3d;
+      border-bottom-color: var(--accent-orange, #df6b26);
+      font-weight: 700;
+      background: #ffffff;
+    }
+    .cms-sub-pane {
+      display: none;
+    }
+    .cms-sub-pane.active {
+      display: block;
+    }
+    .cms-card {
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+      padding: 24px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.02);
+    }
+    .cms-card-header {
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 14px;
+      margin-bottom: 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .cms-toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 18px;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      margin-bottom: 14px;
+      transition: background 0.15s;
+    }
+    .cms-toggle-row:hover {
+      background: #f1f5f9;
+    }
+    .cms-toggle-info {
+      max-width: 82%;
+    }
+    .cms-toggle-title {
+      font-weight: 700;
+      color: #0b1b3d;
+      font-size: 0.95rem;
+      margin-bottom: 3px;
+    }
+    .cms-toggle-desc {
+      font-size: 0.83rem;
+      color: #64748b;
+      line-height: 1.4;
+    }
+    .cms-img-preview-box {
+      width: 220px;
+      height: 130px;
+      border: 2px dashed #cbd5e1;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #f8fafc;
+      position: relative;
+    }
+    .cms-img-preview-box img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
   </style>
 </head>
 <body>
@@ -281,6 +423,7 @@
         </div>
         <div class="admin-nav-item" data-tab="tabCourses">&#127891; Programs &amp; Courses</div>
         <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Content CMS</div>
+        <div class="admin-nav-item" data-tab="tabContentCms">&#128472; Page Content CMS</div>
         <div class="admin-nav-item" data-tab="tabStats">&#128200; Homepage Stats</div>
         <div class="admin-nav-item" data-tab="tabFaqs">&#10067; FAQ Editor</div>
         <div class="admin-nav-item" data-tab="tabTestimonials">&#11088; Testimonials</div>
@@ -437,6 +580,865 @@
                 </thead>
                 <tbody id="coursesTableBody"></tbody>
               </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB: PAGE CONTENT CMS -->
+        <section id="tabContentCms" class="admin-tab-pane" style="display:none;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+            <div>
+              <h3 style="font-size:1.3rem;color:#0b1b3d;margin:0 0 4px;">Website Page Content CMS</h3>
+              <p style="color:#64748b;font-size:0.88rem;margin:0;">Edit titles, descriptions, hero banners, photos, and toggle section visibility across all pages.</p>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center;">
+              <button type="button" id="cmsResetBtn" class="btn-sm" style="background:#f1f5f9;color:#64748b;border:1px solid #cbd5e1;padding:9px 18px;border-radius:6px;font-weight:600;cursor:pointer;">↺ Reset Changes</button>
+              <button type="button" id="cmsSaveBtn" class="btn-dark-admin" style="background:#065f46 !important;border-color:#065f46 !important;padding:9px 22px;">💾 Save &amp; Publish</button>
+            </div>
+          </div>
+
+          <!-- Page Sub-Tabs -->
+          <div class="cms-page-tabs" id="cmsSubTabs">
+            <button type="button" class="cms-page-tab-btn active" data-pane="cmsPaneHome">🏠 Home Page</button>
+            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneAbout">📖 About Us</button>
+            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCourses">🎓 Programs Page</button>
+            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCredentials">🎖️ Certifications</button>
+            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneContact">✉️ Contact Page</button>
+          </div>
+
+          <!-- SUB-PANE: HOME -->
+          <div id="cmsPaneHome" class="cms-sub-pane active">
+            <!-- 1. Hero Section -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">1. Hero Banner &amp; Action Buttons</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Top banner on index.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Badge Pill</label>
+                <input type="text" id="cms_home_hero_badge" class="form-input" placeholder="e.g. The Pathway to Success" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Main Title (H1)</label>
+                <input type="text" id="cms_home_hero_title" class="form-input" placeholder="e.g. Academic Excellence" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Subtitle / Mission Lead</label>
+                <textarea id="cms_home_hero_subtitle" class="form-textarea" rows="3" placeholder="Hero description paragraph..."></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Primary Button Text</label>
+                  <input type="text" id="cms_home_hero_btn_explore" class="form-input" placeholder="Explore All Programs" />
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Secondary Button Text</label>
+                  <input type="text" id="cms_home_hero_btn_apply" class="form-input" placeholder="Apply For Intake →" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Editorial Statement & Photo Mosaic -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">2. Section 2: Editorial Statement &amp; Photo Mosaic</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Mosaic section with 2 overlapping images and core mission text</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Statement Headline (H2)</label>
+                <input type="text" id="cms_home_overview_headline" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Body Paragraph 1</label>
+                <textarea id="cms_home_overview_body_1" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Body Paragraph 2</label>
+                <textarea id="cms_home_overview_body_2" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group">
+                  <label class="form-label">Mosaic Main Campus Photo</label>
+                  <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                      <img id="cmsHomePhoto1Preview" src="../assets/campus.jpg" alt="Preview" />
+                    </div>
+                    <div style="flex:1;">
+                      <input type="file" id="cmsHomePhoto1File" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                      <input type="text" id="cms_home_overview_photo_1" class="form-input" placeholder="assets/campus.jpg" />
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Mosaic Student Collaboration Photo</label>
+                  <div style="display:flex;gap:14px;align-items:flex-start;">
+                    <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                      <img id="cmsHomePhoto2Preview" src="../assets/students.jpg" alt="Preview" />
+                    </div>
+                    <div style="flex:1;">
+                      <input type="file" id="cmsHomePhoto2File" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                      <input type="text" id="cms_home_overview_photo_2" class="form-input" placeholder="assets/students.jpg" />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Impact Numbers Strip -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">Impact Numbers Strip (Labels)</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">4 horizontal highlights below the mosaic section</span>
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Pillar 1</label>
+                  <input type="text" id="cms_home_stat_1" class="form-input" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Pillar 2</label>
+                  <input type="text" id="cms_home_stat_2" class="form-input" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Pillar 3</label>
+                  <input type="text" id="cms_home_stat_3" class="form-input" />
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Pillar 4</label>
+                  <input type="text" id="cms_home_stat_4" class="form-input" />
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Cityscape Panorama Card -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">3. Section 3: Panorama Dark Floating Card</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Overlay text in the cityscape panorama section</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Card Title</label>
+                <input type="text" id="cms_home_panorama_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Description Paragraph 1</label>
+                <textarea id="cms_home_panorama_desc_1" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Description Paragraph 2</label>
+                <textarea id="cms_home_panorama_desc_2" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <!-- 4. About & Mission / Vision Cards -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">4. Section 4: About, Mission &amp; Vision</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">About overview header and dual mission/vision cards</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Header Title</label>
+                <input type="text" id="cms_home_about_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Header Description</label>
+                <textarea id="cms_home_about_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div>
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">Mission Card Title</label>
+                    <input type="text" id="cms_home_mission_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">Mission Card Description</label>
+                    <textarea id="cms_home_mission_desc" class="form-textarea" rows="4"></textarea>
+                  </div>
+                </div>
+                <div>
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">Vision Card Title</label>
+                    <input type="text" id="cms_home_vision_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">Vision Card Description</label>
+                    <textarea id="cms_home_vision_desc" class="form-textarea" rows="4"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Qualification Requirements -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">5. Section 5: Qualification Requirements ("Who can apply ?")</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Interactive accordion eligibility cards</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_home_eligibility_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Description</label>
+                <textarea id="cms_home_eligibility_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Card 1 Title</label>
+                  <input type="text" id="cms_home_qual_1_title" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Card 1 Description</label>
+                  <textarea id="cms_home_qual_1_desc" class="form-textarea" rows="2"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Card 2 Title</label>
+                  <input type="text" id="cms_home_qual_2_title" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Card 2 Description</label>
+                  <textarea id="cms_home_qual_2_desc" class="form-textarea" rows="2"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Card 3 Title</label>
+                  <input type="text" id="cms_home_qual_3_title" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Card 3 Description</label>
+                  <textarea id="cms_home_qual_3_desc" class="form-textarea" rows="2"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:12px;">
+                  <label class="form-label">Card 4 Title</label>
+                  <input type="text" id="cms_home_qual_4_title" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Card 4 Description</label>
+                  <textarea id="cms_home_qual_4_desc" class="form-textarea" rows="2"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- 6. Featured Programs Header -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">6. Section 6: Featured Programs Header</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Heading for programs grid on index.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_home_programs_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Subtitle / Description</label>
+                <textarea id="cms_home_programs_subtitle" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <!-- 7. Core Values Section -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">7. Core Values Header</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Title &amp; description for 4 Pillars of Excellence</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_home_values_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Description</label>
+                <textarea id="cms_home_values_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <!-- 8. Bottom Admissions CTA -->
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">8. Bottom Admissions Call-to-Action (CTA)</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Split layout banner at the bottom of index.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Title</label>
+                <input type="text" id="cms_home_cta_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Description</label>
+                <textarea id="cms_home_cta_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CTA Photo</label>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                  <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                    <img id="cmsHomeCtaPhotoPreview" src="../assets/join-us.jpg" alt="Preview" />
+                  </div>
+                  <div style="flex:1;">
+                    <input type="file" id="cmsHomeCtaPhotoFile" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                    <input type="text" id="cms_home_cta_photo" class="form-input" placeholder="assets/join-us.jpg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PANE: ABOUT US -->
+          <div id="cmsPaneAbout" class="cms-sub-pane">
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">Section Visibility &amp; Toggles</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Control whether entire sections appear on about.html</span>
+                </div>
+              </div>
+              <div class="cms-toggle-row">
+                <div class="cms-toggle-info">
+                  <div class="cms-toggle-title">Leadership &amp; Academic Advisory Council Section</div>
+                  <div class="cms-toggle-desc">Toggle the entire 3-card leadership board (Director of Academic Affairs, Head of Digital Learning, Director of Workforce Partnerships) ON or OFF.</div>
+                </div>
+                <label class="cms-switch">
+                  <input type="checkbox" id="cms_about_show_advisory_section" />
+                  <span class="cms-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">1. Hero Banner</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Header section on about.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Badge Pill</label>
+                <input type="text" id="cms_about_hero_badge" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Title (H1)</label>
+                <textarea id="cms_about_hero_title" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Subtitle</label>
+                <textarea id="cms_about_hero_subtitle" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">2. Founding Purpose &amp; Subsidized Education</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Split section with photo and core institutional purpose</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Eyebrow</label>
+                <input type="text" id="cms_about_purpose_eyebrow" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Heading (H2)</label>
+                <input type="text" id="cms_about_purpose_heading" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Lead Paragraph</label>
+                <textarea id="cms_about_purpose_lead" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Body Text</label>
+                <textarea id="cms_about_purpose_body" class="form-textarea" rows="4"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Purpose Section Photo</label>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                  <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                    <img id="cmsAboutPurposePhotoPreview" src="../assets/campus.jpg" alt="Preview" />
+                  </div>
+                  <div style="flex:1;">
+                    <input type="file" id="cmsAboutPurposePhotoFile" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                    <input type="text" id="cms_about_purpose_photo" class="form-input" placeholder="assets/campus.jpg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">3. Mission &amp; Motto Cards</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Content for the balanced 2-card showcase</span>
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div>
+                  <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">Mission Card Heading</label>
+                    <input type="text" id="cms_about_mission_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">Mission Description</label>
+                    <textarea id="cms_about_mission_desc" class="form-textarea" rows="4"></textarea>
+                  </div>
+                </div>
+                <div>
+                  <div class="form-group" style="margin-bottom:12px;">
+                    <label class="form-label">Motto Card Heading</label>
+                    <input type="text" id="cms_about_motto_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">Motto Description</label>
+                    <textarea id="cms_about_motto_desc" class="form-textarea" rows="4"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">4. Strategic Delivery Ecosystem</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Partnership model and 5 career development pillars</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Ecosystem Heading</label>
+                <input type="text" id="cms_about_ecosystem_heading" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Ecosystem Description</label>
+                <textarea id="cms_about_ecosystem_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">5. Leadership &amp; Advisory Council (3 Members)</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Member cards on about.html (visible when toggle above is active)</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_about_advisory_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Description</label>
+                <textarea id="cms_about_advisory_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Advisor 1 Name</label>
+                  <input type="text" id="cms_about_advisor_1_name" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Advisor 1 Role</label>
+                  <input type="text" id="cms_about_advisor_1_role" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Advisor 1 Bio</label>
+                  <textarea id="cms_about_advisor_1_bio" class="form-textarea" rows="2"></textarea>
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Advisor 2 Name</label>
+                  <input type="text" id="cms_about_advisor_2_name" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Advisor 2 Role</label>
+                  <input type="text" id="cms_about_advisor_2_role" class="form-input" />
+                  <label class="form-label" style="margin-top:6px;">Advisor 2 Bio</label>
+                  <textarea id="cms_about_advisor_2_bio" class="form-textarea" rows="2"></textarea>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Advisor 3 Name</label>
+                <input type="text" id="cms_about_advisor_3_name" class="form-input" />
+                <label class="form-label" style="margin-top:6px;">Advisor 3 Role</label>
+                <input type="text" id="cms_about_advisor_3_role" class="form-input" />
+                <label class="form-label" style="margin-top:6px;">Advisor 3 Bio</label>
+                <textarea id="cms_about_advisor_3_bio" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">6. Join Our Academic Community (CTA)</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Bottom call-to-action banner with photo on about.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Heading</label>
+                <input type="text" id="cms_about_join_us_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Description</label>
+                <textarea id="cms_about_join_us_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CTA Photo</label>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                  <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                    <img id="cmsAboutPhotoPreview" src="../assets/join-us.jpg" alt="Preview" />
+                  </div>
+                  <div style="flex:1;">
+                    <input type="file" id="cmsAboutPhotoFile" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                    <input type="text" id="cms_about_join_us_photo" class="form-input" placeholder="assets/join-us.jpg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PANE: PROGRAMS / COURSES -->
+          <div id="cmsPaneCourses" class="cms-sub-pane">
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">1. Programs Page Hero Banner</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Top banner on courses.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Badge Pill</label>
+                <input type="text" id="cms_courses_hero_badge" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Title (H1)</label>
+                <input type="text" id="cms_courses_hero_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Description</label>
+                <textarea id="cms_courses_hero_subtitle" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">2. Video Showcase &amp; Methodology Section</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Interactive video overview section on courses.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Eyebrow</label>
+                <input type="text" id="cms_courses_showcase_eyebrow" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_courses_showcase_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Lead Description</label>
+                <textarea id="cms_courses_showcase_lead" class="form-textarea" rows="3"></textarea>
+              </div>
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">3. Accreditation Callout Banner</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Bottom callout banner on courses.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Badge Pill Text</label>
+                <input type="text" id="cms_courses_cert_badge" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Banner Title</label>
+                <input type="text" id="cms_courses_cert_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Banner Description</label>
+                <textarea id="cms_courses_cert_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">Button Text</label>
+                <input type="text" id="cms_courses_cert_btn" class="form-input" />
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PANE: CERTIFICATIONS & HONORS -->
+          <div id="cmsPaneCredentials" class="cms-sub-pane">
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">Section &amp; Card Visibility Toggles</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Turn individual cards or entire sections ON or OFF on credentials.html</span>
+                </div>
+              </div>
+              
+              <div class="cms-toggle-row">
+                <div class="cms-toggle-info">
+                  <div class="cms-toggle-title">Card 1: University in New York Diploma Card</div>
+                  <div class="cms-toggle-desc">Academic credential card highlighting North American higher education curriculum alignment.</div>
+                </div>
+                <label class="cms-switch">
+                  <input type="checkbox" id="cms_credentials_show_university_card" />
+                  <span class="cms-slider"></span>
+                </label>
+              </div>
+
+              <div class="cms-toggle-row">
+                <div class="cms-toggle-info">
+                  <div class="cms-toggle-title">Card 2: Skillsoft Percipio Digital Credential Card</div>
+                  <div class="cms-toggle-desc">Industry digital badge card highlighting LinkedIn integration and cryptographic verification.</div>
+                </div>
+                <label class="cms-switch">
+                  <input type="checkbox" id="cms_credentials_show_percipio_card" />
+                  <span class="cms-slider"></span>
+                </label>
+              </div>
+
+              <div class="cms-toggle-row">
+                <div class="cms-toggle-info">
+                  <div class="cms-toggle-title">Evaluation Section: 4-Module Assessment Highlight Box</div>
+                  <div class="cms-toggle-desc">Callout box describing Foundations, Technical Deep Dives, Applied Labs, and Capstone Exam.</div>
+                </div>
+                <label class="cms-switch">
+                  <input type="checkbox" id="cms_credentials_show_assessment_box" />
+                  <span class="cms-slider"></span>
+                </label>
+              </div>
+
+              <div class="cms-toggle-row">
+                <div class="cms-toggle-info">
+                  <div class="cms-toggle-title">Section 5: Verification &amp; Authenticity (4-Card Grid)</div>
+                  <div class="cms-toggle-desc">Cryptographic ID, FAYDA Authenticated, LinkedIn 1-Click, and Global Recognition cards.</div>
+                </div>
+                <label class="cms-switch">
+                  <input type="checkbox" id="cms_credentials_show_verification_grid" />
+                  <span class="cms-slider"></span>
+                </label>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">1. Hero Banner &amp; Pathway Header</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Header and introductory text on credentials.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Badge Pill</label>
+                <input type="text" id="cms_credentials_hero_badge" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Title (H1)</label>
+                <input type="text" id="cms_credentials_hero_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Subtitle</label>
+                <textarea id="cms_credentials_hero_subtitle" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Pathway Section Title</label>
+                <input type="text" id="cms_credentials_pathway_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Pathway Section Description</label>
+                <textarea id="cms_credentials_pathway_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">2. Dual Certification Cards Content</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">University diploma and Skillsoft Percipio badge texts</span>
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div>
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">University Card Title</label>
+                    <input type="text" id="cms_credentials_uni_card_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">University Card Description</label>
+                    <textarea id="cms_credentials_uni_card_desc" class="form-textarea" rows="3"></textarea>
+                  </div>
+                </div>
+                <div>
+                  <div class="form-group" style="margin-bottom:10px;">
+                    <label class="form-label">Skillsoft Card Title</label>
+                    <input type="text" id="cms_credentials_percipio_card_title" class="form-input" />
+                  </div>
+                  <div class="form-group" style="margin-bottom:14px;">
+                    <label class="form-label">Skillsoft Card Description</label>
+                    <textarea id="cms_credentials_percipio_card_desc" class="form-textarea" rows="3"></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">3. Performance Evaluation Standards</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Text for "How Your Performance Is Evaluated"</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Evaluation Title</label>
+                <input type="text" id="cms_credentials_eval_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Lead Description</label>
+                <textarea id="cms_credentials_eval_lead" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">4. The Merit Recognition System (Honors)</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Merit tiers 1, 2, and 3</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Merit Section Title</label>
+                <input type="text" id="cms_credentials_merit_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Merit Section Description</label>
+                <textarea id="cms_credentials_merit_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Tier 1: Certificate Title &amp; Description</label>
+                <input type="text" id="cms_credentials_tier1_title" class="form-input" style="margin-bottom:6px;" />
+                <textarea id="cms_credentials_tier1_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Tier 2: Merit Badge Title &amp; Description</label>
+                <input type="text" id="cms_credentials_tier2_title" class="form-input" style="margin-bottom:6px;" />
+                <textarea id="cms_credentials_tier2_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+              <div class="form-group" style="margin-bottom:12px;">
+                <label class="form-label">Tier 3: Medallion of Merit Title &amp; Description</label>
+                <input type="text" id="cms_credentials_tier3_title" class="form-input" style="margin-bottom:6px;" />
+                <textarea id="cms_credentials_tier3_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">5. Verification &amp; Authenticity</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Heading for verification grid on credentials.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Title</label>
+                <input type="text" id="cms_credentials_verify_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Section Description</label>
+                <textarea id="cms_credentials_verify_desc" class="form-textarea" rows="2"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">6. Bottom Credentials CTA</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Call-to-action banner on credentials.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Title</label>
+                <input type="text" id="cms_credentials_cta_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">CTA Description</label>
+                <textarea id="cms_credentials_cta_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-group">
+                <label class="form-label">CTA Photo</label>
+                <div style="display:flex;gap:14px;align-items:flex-start;">
+                  <div class="cms-img-preview-box" style="width:140px;height:90px;">
+                    <img id="cmsCredCtaPhotoPreview" src="../assets/join-us.jpg" alt="Preview" />
+                  </div>
+                  <div style="flex:1;">
+                    <input type="file" id="cmsCredCtaPhotoFile" accept="image/*" class="form-input" style="padding:4px 8px;margin-bottom:6px;font-size:0.8rem;" />
+                    <input type="text" id="cms_credentials_cta_photo" class="form-input" placeholder="assets/join-us.jpg" />
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- SUB-PANE: CONTACT -->
+          <div id="cmsPaneContact" class="cms-sub-pane">
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">1. Contact Page Hero Banner</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Top banner on contact.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Title (H1)</label>
+                <input type="text" id="cms_contact_hero_title" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Hero Subtitle / Message</label>
+                <textarea id="cms_contact_hero_subtitle" class="form-textarea" rows="3"></textarea>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">2. Contact Information Particulars</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Official contact details on contact.html</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Column Heading</label>
+                <input type="text" id="cms_contact_info_heading" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Column Description</label>
+                <textarea id="cms_contact_info_desc" class="form-textarea" rows="3"></textarea>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Official Email Address</label>
+                  <input type="email" id="cms_contact_email" class="form-input" />
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Phone Number</label>
+                  <input type="text" id="cms_contact_phone" class="form-input" />
+                </div>
+              </div>
+              <div class="form-grid-2">
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Physical Address / City</label>
+                  <input type="text" id="cms_contact_address" class="form-input" />
+                </div>
+                <div class="form-group" style="margin-bottom:14px;">
+                  <label class="form-label">Office Hours</label>
+                  <input type="text" id="cms_contact_hours" class="form-input" />
+                </div>
+              </div>
+            </div>
+
+            <div class="cms-card">
+              <div class="cms-card-header">
+                <div>
+                  <h4 style="font-size:1.1rem;color:#0b1b3d;margin:0 0 4px;">3. General Inquiries Form Header</h4>
+                  <span style="font-size:0.8rem;color:#64748b;">Heading for the contact inquiry form</span>
+                </div>
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Form Heading</label>
+                <input type="text" id="cms_contact_form_heading" class="form-input" />
+              </div>
+              <div class="form-group" style="margin-bottom:14px;">
+                <label class="form-label">Form Description</label>
+                <textarea id="cms_contact_form_desc" class="form-textarea" rows="2"></textarea>
+              </div>
             </div>
           </div>
         </section>
@@ -1007,10 +2009,11 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js"></script>
-  <script src="../js/courses-service.js"></script>
-  <script src="../js/applications-service.js"></script>
-  <script src="../js/admin-service.js"></script>
+  <script src="../js/supabase-client.js?v=20261008_5"></script>
+  <script src="../js/courses-service.js?v=20261008_5"></script>
+  <script src="../js/applications-service.js?v=20261008_5"></script>
+  <script src="../js/admin-service.js?v=20261008_5"></script>
+  <script src="../js/cms-loader.js?v=20261008_5"></script>
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -1046,6 +2049,7 @@
       tabOverview: "Admissions Overview & Financials",
       tabApplications: "Applications Management",
       tabCourses: "Academic Programs CMS",
+      tabContentCms: "Website Page Content CMS",
       tabStats: "Homepage Statistics Editor",
       tabFaqs: "FAQ Editor",
       tabTestimonials: "Testimonials Manager",
@@ -1064,6 +2068,7 @@
       panes.forEach(p => p.style.display = p.id === targetId ? "block" : "none");
       if (TAB_TITLES[targetId]) titleEl.textContent = TAB_TITLES[targetId];
       if (window.innerWidth < 992) closeSidebar();
+      if (targetId === "tabContentCms")                               { loadCmsEditor(); }
       if (targetId === "tabStats"        && !lazyLoaded.stats)        { lazyLoaded.stats = true;        renderStats(true); }
       if (targetId === "tabFaqs"         && !lazyLoaded.faqs)         { lazyLoaded.faqs = true;         loadFaqs(); }
       if (targetId === "tabTestimonials" && !lazyLoaded.testimonials) { lazyLoaded.testimonials = true; loadTestimonials(); }
@@ -1743,7 +2748,7 @@
         if (res && res.success) {
           logActivity(newStatus === "approved" ? "approved_application" : (newStatus === "rejected" ? "rejected_application" : "updated_application"), "application", currentViewingApp.id);
           closeAppModal(); loadOverview(); renderApplications();
-          showToast("Application " + currentViewingApp.id + " updated to " + newStatus.replace("_"," ").toUpperCase() + ".", "success");
+          showToast("Application " + currentViewingApp.id + " updated to " + newStatus.replace("_"," ").toUpperCase() + " (notification email dispatched).", "success");
         } else { showToast((res && res.error) || "Failed to update.", "error"); }
       } catch(e) { showToast("Error: " + (e.message || "Network issue"), "error"); }
       finally { btn.textContent = orig; btn.disabled = false; }
@@ -2170,7 +3175,8 @@
           rows = await supaFetch("contact_messages", { filter:"order=created_at.desc&limit=100" });
         } catch (fetchErr) {
           console.warn("Direct contact_messages fetch error, trying API fallback:", fetchErr);
-          const fallbackRes = await fetch("/api/send-email?action=get_inquiries");
+          const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+          const fallbackRes = await fetch(`${emailApiBase}?action=get_inquiries`);
           if (fallbackRes.ok) rows = await fallbackRes.json();
           else throw fetchErr;
         }
@@ -2178,7 +3184,8 @@
         // If direct fetch returned empty array, verify with API fallback
         if (!rows || !rows.length) {
           try {
-            const fallbackRes = await fetch("/api/send-email?action=get_inquiries");
+            const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+            const fallbackRes = await fetch(`${emailApiBase}?action=get_inquiries`);
             if (fallbackRes.ok) {
               const fallbackRows = await fallbackRes.json();
               if (fallbackRows && fallbackRows.length) rows = fallbackRows;
@@ -2236,7 +3243,8 @@
           rows = await supaFetch("admin_activity_log", { filter });
         } catch (fetchErr) {
           console.warn("Direct admin_activity_log fetch error, trying API fallback:", fetchErr);
-          const fallbackRes = await fetch("/api/send-email?action=get_activity_log");
+          const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+          const fallbackRes = await fetch(`${emailApiBase}?action=get_activity_log`);
           if (fallbackRes.ok) {
             rows = await fallbackRes.json();
             if (activityFilter !== "all" && Array.isArray(rows)) {
@@ -2248,7 +3256,8 @@
         // If direct fetch returned empty, verify with API fallback
         if (!rows || !rows.length) {
           try {
-            const fallbackRes = await fetch("/api/send-email?action=get_activity_log");
+            const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+            const fallbackRes = await fetch(`${emailApiBase}?action=get_activity_log`);
             if (fallbackRes.ok) {
               let fallbackRows = await fallbackRes.json();
               if (activityFilter !== "all" && Array.isArray(fallbackRows)) {
@@ -2423,6 +3432,461 @@
     });
 
     loadSettingsUI();
+
+    // ==========================================
+    // PAGE CONTENT CMS CONTROLLER
+    // ==========================================
+    function initCmsSubTabs() {
+      const subTabs = document.querySelectorAll(".cms-page-tab-btn[data-pane]");
+      const subPanes = document.querySelectorAll(".cms-sub-pane");
+      subTabs.forEach(btn => {
+        btn.addEventListener("click", () => {
+          subTabs.forEach(b => b.classList.remove("active"));
+          btn.classList.add("active");
+          const targetPane = btn.dataset.pane;
+          subPanes.forEach(pane => {
+            pane.classList.toggle("active", pane.id === targetPane);
+          });
+        });
+      });
+    }
+
+    function setPhotoPreview(previewImgId, photoUrl, fallback) {
+      const el = document.getElementById(previewImgId);
+      if (el) {
+        const src = photoUrl || fallback;
+        el.src = src.startsWith("http") || src.startsWith("data:") ? src : ("../" + src);
+      }
+    }
+
+    function bindPhotoField(fileInputId, textInputId, previewImgId) {
+      const fileInput = document.getElementById(fileInputId);
+      const textInput = document.getElementById(textInputId);
+      const previewImg = document.getElementById(previewImgId);
+
+      if (fileInput) {
+        fileInput.addEventListener("change", (e) => {
+          const file = e.target.files && e.target.files[0];
+          if (!file) return;
+          if (!file.type.startsWith("image/")) {
+            showToast("Please select a valid image file", "error");
+            return;
+          }
+          const reader = new FileReader();
+          reader.onload = (uploadEvt) => {
+            const dataUrl = uploadEvt.target.result;
+            if (previewImg) previewImg.src = dataUrl;
+            if (textInput) textInput.value = dataUrl;
+            showToast("Image loaded! Click 'Save & Publish' to apply.", "success");
+          };
+          reader.readAsDataURL(file);
+        });
+      }
+
+      if (textInput) {
+        textInput.addEventListener("input", (e) => {
+          const url = e.target.value.trim();
+          if (previewImg && url) {
+            previewImg.src = url.startsWith("http") || url.startsWith("data:") ? url : ("../" + url);
+          }
+        });
+      }
+    }
+
+    function setVal(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.value = val !== undefined && val !== null ? val : "";
+    }
+
+    function setCheck(id, val) {
+      const el = document.getElementById(id);
+      if (el) el.checked = !!val;
+    }
+
+    function getVal(id) {
+      const el = document.getElementById(id);
+      return el ? el.value.trim() : "";
+    }
+
+    function getCheck(id) {
+      const el = document.getElementById(id);
+      return el ? !!el.checked : false;
+    }
+
+    function populateCmsForm(data) {
+      if (!data) return;
+
+      // 1. Home Page
+      if (data.home) {
+        setVal("cms_home_hero_badge", data.home.hero_badge);
+        setVal("cms_home_hero_title", data.home.hero_title);
+        setVal("cms_home_hero_subtitle", data.home.hero_subtitle);
+        setVal("cms_home_hero_btn_explore", data.home.hero_btn_explore);
+        setVal("cms_home_hero_btn_apply", data.home.hero_btn_apply);
+
+        setVal("cms_home_overview_headline", data.home.overview_headline);
+        setVal("cms_home_overview_body_1", data.home.overview_body_1);
+        setVal("cms_home_overview_body_2", data.home.overview_body_2);
+        setVal("cms_home_overview_photo_1", data.home.overview_photo_1 || "assets/campus.jpg");
+        setVal("cms_home_overview_photo_2", data.home.overview_photo_2 || "assets/students.jpg");
+        setPhotoPreview("cmsHomePhoto1Preview", data.home.overview_photo_1, "assets/campus.jpg");
+        setPhotoPreview("cmsHomePhoto2Preview", data.home.overview_photo_2, "assets/students.jpg");
+
+        setVal("cms_home_stat_1", data.home.stat_1);
+        setVal("cms_home_stat_2", data.home.stat_2);
+        setVal("cms_home_stat_3", data.home.stat_3);
+        setVal("cms_home_stat_4", data.home.stat_4);
+
+        setVal("cms_home_panorama_title", data.home.panorama_title);
+        setVal("cms_home_panorama_desc_1", data.home.panorama_desc_1);
+        setVal("cms_home_panorama_desc_2", data.home.panorama_desc_2);
+
+        setVal("cms_home_about_title", data.home.about_title);
+        setVal("cms_home_about_desc", data.home.about_desc);
+        setVal("cms_home_mission_title", data.home.mission_title);
+        setVal("cms_home_mission_desc", data.home.mission_desc);
+        setVal("cms_home_vision_title", data.home.vision_title);
+        setVal("cms_home_vision_desc", data.home.vision_desc);
+
+        setVal("cms_home_eligibility_title", data.home.eligibility_title);
+        setVal("cms_home_eligibility_desc", data.home.eligibility_desc);
+        setVal("cms_home_qual_1_title", data.home.qual_1_title);
+        setVal("cms_home_qual_1_desc", data.home.qual_1_desc);
+        setVal("cms_home_qual_2_title", data.home.qual_2_title);
+        setVal("cms_home_qual_2_desc", data.home.qual_2_desc);
+        setVal("cms_home_qual_3_title", data.home.qual_3_title);
+        setVal("cms_home_qual_3_desc", data.home.qual_3_desc);
+        setVal("cms_home_qual_4_title", data.home.qual_4_title);
+        setVal("cms_home_qual_4_desc", data.home.qual_4_desc);
+
+        setVal("cms_home_programs_title", data.home.programs_title);
+        setVal("cms_home_programs_subtitle", data.home.programs_subtitle);
+
+        setVal("cms_home_values_title", data.home.values_title);
+        setVal("cms_home_values_desc", data.home.values_desc);
+
+        setVal("cms_home_cta_title", data.home.cta_title);
+        setVal("cms_home_cta_desc", data.home.cta_desc);
+        setVal("cms_home_cta_photo", data.home.cta_photo || "assets/join-us.jpg");
+        setPhotoPreview("cmsHomeCtaPhotoPreview", data.home.cta_photo, "assets/join-us.jpg");
+      }
+
+      // 2. About Us Page
+      if (data.about) {
+        setCheck("cms_about_show_advisory_section", data.about.show_advisory_section);
+        setVal("cms_about_hero_badge", data.about.hero_badge);
+        setVal("cms_about_hero_title", data.about.hero_title);
+        setVal("cms_about_hero_subtitle", data.about.hero_subtitle);
+
+        setVal("cms_about_purpose_eyebrow", data.about.purpose_eyebrow);
+        setVal("cms_about_purpose_heading", data.about.purpose_heading);
+        setVal("cms_about_purpose_lead", data.about.purpose_lead);
+        setVal("cms_about_purpose_body", data.about.purpose_body);
+        setVal("cms_about_purpose_photo", data.about.purpose_photo || "assets/campus.jpg");
+        setPhotoPreview("cmsAboutPurposePhotoPreview", data.about.purpose_photo, "assets/campus.jpg");
+
+        setVal("cms_about_mission_title", data.about.mission_title);
+        setVal("cms_about_mission_desc", data.about.mission_desc);
+        setVal("cms_about_motto_title", data.about.motto_title);
+        setVal("cms_about_motto_desc", data.about.motto_desc);
+
+        setVal("cms_about_ecosystem_heading", data.about.ecosystem_heading);
+        setVal("cms_about_ecosystem_desc", data.about.ecosystem_desc);
+
+        setVal("cms_about_advisory_title", data.about.advisory_title);
+        setVal("cms_about_advisory_desc", data.about.advisory_desc);
+        setVal("cms_about_advisor_1_name", data.about.advisor_1_name);
+        setVal("cms_about_advisor_1_role", data.about.advisor_1_role);
+        setVal("cms_about_advisor_1_bio", data.about.advisor_1_bio);
+        setVal("cms_about_advisor_2_name", data.about.advisor_2_name);
+        setVal("cms_about_advisor_2_role", data.about.advisor_2_role);
+        setVal("cms_about_advisor_2_bio", data.about.advisor_2_bio);
+        setVal("cms_about_advisor_3_name", data.about.advisor_3_name);
+        setVal("cms_about_advisor_3_role", data.about.advisor_3_role);
+        setVal("cms_about_advisor_3_bio", data.about.advisor_3_bio);
+
+        setVal("cms_about_join_us_title", data.about.join_us_title);
+        setVal("cms_about_join_us_desc", data.about.join_us_desc);
+        setVal("cms_about_join_us_photo", data.about.join_us_photo || "assets/join-us.jpg");
+        setPhotoPreview("cmsAboutPhotoPreview", data.about.join_us_photo, "assets/join-us.jpg");
+      }
+
+      // 3. Courses / Programs Page
+      if (data.courses) {
+        setVal("cms_courses_hero_badge", data.courses.hero_badge);
+        setVal("cms_courses_hero_title", data.courses.hero_title);
+        setVal("cms_courses_hero_subtitle", data.courses.hero_subtitle);
+        setVal("cms_courses_showcase_eyebrow", data.courses.showcase_eyebrow);
+        setVal("cms_courses_showcase_title", data.courses.showcase_title);
+        setVal("cms_courses_showcase_lead", data.courses.showcase_lead);
+        setVal("cms_courses_cert_badge", data.courses.cert_badge);
+        setVal("cms_courses_cert_title", data.courses.cert_title);
+        setVal("cms_courses_cert_desc", data.courses.cert_desc);
+        setVal("cms_courses_cert_btn", data.courses.cert_btn);
+      }
+
+      // 4. Certifications & Honors Page
+      if (data.credentials) {
+        setCheck("cms_credentials_show_university_card", data.credentials.show_university_card);
+        setCheck("cms_credentials_show_percipio_card", data.credentials.show_percipio_card);
+        setCheck("cms_credentials_show_assessment_box", data.credentials.show_assessment_box);
+        setCheck("cms_credentials_show_verification_grid", data.credentials.show_verification_grid);
+
+        setVal("cms_credentials_hero_badge", data.credentials.hero_badge);
+        setVal("cms_credentials_hero_title", data.credentials.hero_title);
+        setVal("cms_credentials_hero_subtitle", data.credentials.hero_subtitle);
+        setVal("cms_credentials_pathway_title", data.credentials.pathway_title);
+        setVal("cms_credentials_pathway_desc", data.credentials.pathway_desc);
+
+        setVal("cms_credentials_uni_card_title", data.credentials.uni_card_title);
+        setVal("cms_credentials_uni_card_desc", data.credentials.uni_card_desc);
+        setVal("cms_credentials_percipio_card_title", data.credentials.percipio_card_title);
+        setVal("cms_credentials_percipio_card_desc", data.credentials.percipio_card_desc);
+
+        setVal("cms_credentials_eval_title", data.credentials.eval_title);
+        setVal("cms_credentials_eval_lead", data.credentials.eval_lead);
+
+        setVal("cms_credentials_merit_title", data.credentials.merit_title);
+        setVal("cms_credentials_merit_desc", data.credentials.merit_desc);
+        setVal("cms_credentials_tier1_title", data.credentials.tier1_title);
+        setVal("cms_credentials_tier1_desc", data.credentials.tier1_desc);
+        setVal("cms_credentials_tier2_title", data.credentials.tier2_title);
+        setVal("cms_credentials_tier2_desc", data.credentials.tier2_desc);
+        setVal("cms_credentials_tier3_title", data.credentials.tier3_title);
+        setVal("cms_credentials_tier3_desc", data.credentials.tier3_desc);
+
+        setVal("cms_credentials_verify_title", data.credentials.verify_title);
+        setVal("cms_credentials_verify_desc", data.credentials.verify_desc);
+
+        setVal("cms_credentials_cta_title", data.credentials.cta_title);
+        setVal("cms_credentials_cta_desc", data.credentials.cta_desc);
+        setVal("cms_credentials_cta_photo", data.credentials.cta_photo || "assets/join-us.jpg");
+        setPhotoPreview("cmsCredCtaPhotoPreview", data.credentials.cta_photo, "assets/join-us.jpg");
+      }
+
+      // 5. Contact Page
+      if (data.contact) {
+        setVal("cms_contact_hero_title", data.contact.hero_title);
+        setVal("cms_contact_hero_subtitle", data.contact.hero_subtitle);
+        setVal("cms_contact_info_heading", data.contact.info_heading);
+        setVal("cms_contact_info_desc", data.contact.info_desc);
+        setVal("cms_contact_email", data.contact.email);
+        setVal("cms_contact_phone", data.contact.phone);
+        setVal("cms_contact_address", data.contact.address);
+        setVal("cms_contact_hours", data.contact.hours);
+        setVal("cms_contact_form_heading", data.contact.form_heading);
+        setVal("cms_contact_form_desc", data.contact.form_desc);
+      }
+    }
+
+    function collectCmsFormData() {
+      return {
+        home: {
+          hero_badge: getVal("cms_home_hero_badge"),
+          hero_title: getVal("cms_home_hero_title"),
+          hero_subtitle: getVal("cms_home_hero_subtitle"),
+          hero_btn_explore: getVal("cms_home_hero_btn_explore"),
+          hero_btn_apply: getVal("cms_home_hero_btn_apply"),
+
+          overview_headline: getVal("cms_home_overview_headline"),
+          overview_body_1: getVal("cms_home_overview_body_1"),
+          overview_body_2: getVal("cms_home_overview_body_2"),
+          overview_photo_1: getVal("cms_home_overview_photo_1") || "assets/campus.jpg",
+          overview_photo_2: getVal("cms_home_overview_photo_2") || "assets/students.jpg",
+
+          stat_1: getVal("cms_home_stat_1"),
+          stat_2: getVal("cms_home_stat_2"),
+          stat_3: getVal("cms_home_stat_3"),
+          stat_4: getVal("cms_home_stat_4"),
+
+          panorama_title: getVal("cms_home_panorama_title"),
+          panorama_desc_1: getVal("cms_home_panorama_desc_1"),
+          panorama_desc_2: getVal("cms_home_panorama_desc_2"),
+
+          about_title: getVal("cms_home_about_title"),
+          about_desc: getVal("cms_home_about_desc"),
+          mission_title: getVal("cms_home_mission_title"),
+          mission_desc: getVal("cms_home_mission_desc"),
+          vision_title: getVal("cms_home_vision_title"),
+          vision_desc: getVal("cms_home_vision_desc"),
+
+          eligibility_title: getVal("cms_home_eligibility_title"),
+          eligibility_desc: getVal("cms_home_eligibility_desc"),
+          qual_1_title: getVal("cms_home_qual_1_title"),
+          qual_1_desc: getVal("cms_home_qual_1_desc"),
+          qual_2_title: getVal("cms_home_qual_2_title"),
+          qual_2_desc: getVal("cms_home_qual_2_desc"),
+          qual_3_title: getVal("cms_home_qual_3_title"),
+          qual_3_desc: getVal("cms_home_qual_3_desc"),
+          qual_4_title: getVal("cms_home_qual_4_title"),
+          qual_4_desc: getVal("cms_home_qual_4_desc"),
+
+          programs_title: getVal("cms_home_programs_title"),
+          programs_subtitle: getVal("cms_home_programs_subtitle"),
+
+          values_title: getVal("cms_home_values_title"),
+          values_desc: getVal("cms_home_values_desc"),
+
+          cta_title: getVal("cms_home_cta_title"),
+          cta_desc: getVal("cms_home_cta_desc"),
+          cta_photo: getVal("cms_home_cta_photo") || "assets/join-us.jpg"
+        },
+        about: {
+          show_advisory_section: getCheck("cms_about_show_advisory_section"),
+          hero_badge: getVal("cms_about_hero_badge"),
+          hero_title: getVal("cms_about_hero_title"),
+          hero_subtitle: getVal("cms_about_hero_subtitle"),
+
+          purpose_eyebrow: getVal("cms_about_purpose_eyebrow"),
+          purpose_heading: getVal("cms_about_purpose_heading"),
+          purpose_lead: getVal("cms_about_purpose_lead"),
+          purpose_body: getVal("cms_about_purpose_body"),
+          purpose_photo: getVal("cms_about_purpose_photo") || "assets/campus.jpg",
+
+          mission_title: getVal("cms_about_mission_title"),
+          mission_desc: getVal("cms_about_mission_desc"),
+          motto_title: getVal("cms_about_motto_title"),
+          motto_desc: getVal("cms_about_motto_desc"),
+
+          ecosystem_heading: getVal("cms_about_ecosystem_heading"),
+          ecosystem_desc: getVal("cms_about_ecosystem_desc"),
+
+          advisory_title: getVal("cms_about_advisory_title"),
+          advisory_desc: getVal("cms_about_advisory_desc"),
+          advisor_1_name: getVal("cms_about_advisor_1_name"),
+          advisor_1_role: getVal("cms_about_advisor_1_role"),
+          advisor_1_bio: getVal("cms_about_advisor_1_bio"),
+          advisor_2_name: getVal("cms_about_advisor_2_name"),
+          advisor_2_role: getVal("cms_about_advisor_2_role"),
+          advisor_2_bio: getVal("cms_about_advisor_2_bio"),
+          advisor_3_name: getVal("cms_about_advisor_3_name"),
+          advisor_3_role: getVal("cms_about_advisor_3_role"),
+          advisor_3_bio: getVal("cms_about_advisor_3_bio"),
+
+          join_us_title: getVal("cms_about_join_us_title"),
+          join_us_desc: getVal("cms_about_join_us_desc"),
+          join_us_photo: getVal("cms_about_join_us_photo") || "assets/join-us.jpg"
+        },
+        courses: {
+          hero_badge: getVal("cms_courses_hero_badge"),
+          hero_title: getVal("cms_courses_hero_title"),
+          hero_subtitle: getVal("cms_courses_hero_subtitle"),
+          showcase_eyebrow: getVal("cms_courses_showcase_eyebrow"),
+          showcase_title: getVal("cms_courses_showcase_title"),
+          showcase_lead: getVal("cms_courses_showcase_lead"),
+          cert_badge: getVal("cms_courses_cert_badge"),
+          cert_title: getVal("cms_courses_cert_title"),
+          cert_desc: getVal("cms_courses_cert_desc"),
+          cert_btn: getVal("cms_courses_cert_btn")
+        },
+        credentials: {
+          show_university_card: getCheck("cms_credentials_show_university_card"),
+          show_percipio_card: getCheck("cms_credentials_show_percipio_card"),
+          show_assessment_box: getCheck("cms_credentials_show_assessment_box"),
+          show_verification_grid: getCheck("cms_credentials_show_verification_grid"),
+
+          hero_badge: getVal("cms_credentials_hero_badge"),
+          hero_title: getVal("cms_credentials_hero_title"),
+          hero_subtitle: getVal("cms_credentials_hero_subtitle"),
+          pathway_title: getVal("cms_credentials_pathway_title"),
+          pathway_desc: getVal("cms_credentials_pathway_desc"),
+
+          uni_card_title: getVal("cms_credentials_uni_card_title"),
+          uni_card_desc: getVal("cms_credentials_uni_card_desc"),
+          percipio_card_title: getVal("cms_credentials_percipio_card_title"),
+          percipio_card_desc: getVal("cms_credentials_percipio_card_desc"),
+
+          eval_title: getVal("cms_credentials_eval_title"),
+          eval_lead: getVal("cms_credentials_eval_lead"),
+
+          merit_title: getVal("cms_credentials_merit_title"),
+          merit_desc: getVal("cms_credentials_merit_desc"),
+          tier1_title: getVal("cms_credentials_tier1_title"),
+          tier1_desc: getVal("cms_credentials_tier1_desc"),
+          tier2_title: getVal("cms_credentials_tier2_title"),
+          tier2_desc: getVal("cms_credentials_tier2_desc"),
+          tier3_title: getVal("cms_credentials_tier3_title"),
+          tier3_desc: getVal("cms_credentials_tier3_desc"),
+
+          verify_title: getVal("cms_credentials_verify_title"),
+          verify_desc: getVal("cms_credentials_verify_desc"),
+
+          cta_title: getVal("cms_credentials_cta_title"),
+          cta_desc: getVal("cms_credentials_cta_desc"),
+          cta_photo: getVal("cms_credentials_cta_photo") || "assets/join-us.jpg"
+        },
+        contact: {
+          hero_title: getVal("cms_contact_hero_title"),
+          hero_subtitle: getVal("cms_contact_hero_subtitle"),
+          info_heading: getVal("cms_contact_info_heading"),
+          info_desc: getVal("cms_contact_info_desc"),
+          email: getVal("cms_contact_email"),
+          phone: getVal("cms_contact_phone"),
+          address: getVal("cms_contact_address"),
+          hours: getVal("cms_contact_hours"),
+          form_heading: getVal("cms_contact_form_heading"),
+          form_desc: getVal("cms_contact_form_desc")
+        }
+      };
+    }
+
+    function loadCmsEditor() {
+      if (window.AcademicCMS) {
+        const content = window.AcademicCMS.getContent();
+        populateCmsForm(content);
+      }
+    }
+
+    initCmsSubTabs();
+    loadCmsEditor();
+    window.addEventListener("ae_cms_synced", (e) => {
+      if (e.detail) populateCmsForm(e.detail);
+    });
+
+    // Bind all photo file uploaders and preview sync
+    bindPhotoField("cmsHomePhoto1File", "cms_home_overview_photo_1", "cmsHomePhoto1Preview");
+    bindPhotoField("cmsHomePhoto2File", "cms_home_overview_photo_2", "cmsHomePhoto2Preview");
+    bindPhotoField("cmsHomeCtaPhotoFile", "cms_home_cta_photo", "cmsHomeCtaPhotoPreview");
+    bindPhotoField("cmsAboutPurposePhotoFile", "cms_about_purpose_photo", "cmsAboutPurposePhotoPreview");
+    bindPhotoField("cmsAboutPhotoFile", "cms_about_join_us_photo", "cmsAboutPhotoPreview");
+    bindPhotoField("cmsCredCtaPhotoFile", "cms_credentials_cta_photo", "cmsCredCtaPhotoPreview");
+
+    // Save & Publish handler
+    const cmsSaveBtn = document.getElementById("cmsSaveBtn");
+    if (cmsSaveBtn) {
+      cmsSaveBtn.addEventListener("click", async () => {
+        cmsSaveBtn.disabled = true;
+        cmsSaveBtn.textContent = "Publishing...";
+        try {
+          const updatedContent = collectCmsFormData();
+          if (window.AcademicCMS) {
+            const res = await window.AcademicCMS.saveContent(updatedContent);
+            if (res && res.success === false) {
+              console.warn("CMS Remote save note:", res.error);
+            }
+          }
+          if (typeof logActivity === "function") {
+            logActivity("updated_page_cms", "settings", "Website Page Content & Toggles");
+          }
+          showToast("Page content and section visibility successfully published!", "success");
+        } catch (err) {
+          console.error("CMS save error:", err);
+          showToast("Failed to publish content changes: " + err.message, "error");
+        } finally {
+          cmsSaveBtn.disabled = false;
+          cmsSaveBtn.innerHTML = "💾 Save &amp; Publish";
+        }
+      });
+    }
+
+    // Reset button handler
+    const cmsResetBtn = document.getElementById("cmsResetBtn");
+    if (cmsResetBtn) {
+      cmsResetBtn.addEventListener("click", () => {
+        loadCmsEditor();
+        showToast("Form reset to saved content.", "success");
+      });
+    }
 
     // RESPONSIVE CHARTS
     const chartsRow = document.getElementById("chartsRow");

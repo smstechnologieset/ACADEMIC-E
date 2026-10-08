@@ -59,8 +59,8 @@
       <div class="hero-overlay" aria-hidden="true"></div>
 
       <div class="container hero-content">
-        <h1 class="hero-title">Contact Us</h1>
-        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 780px; line-height: 1.8;">
+        <h1 class="hero-title" data-cms-text="contact.hero_title">Contact Us</h1>
+        <p style="font-size: 1.15rem; color: #d8ebf4; max-width: 780px; line-height: 1.8;" data-cms-text="contact.hero_subtitle">
           Thank you for your interest in Academic Excellence. Whether you are seeking admission into our accredited diploma programs, have inquiries about our U.S. curriculum and Skillsoft platform, or wish to explore institutional partnerships, our team is here to assist you.
         </p>
       </div>
@@ -72,28 +72,38 @@
         
         <!-- Left Column: Partnerships, Media & Admissions -->
         <div class="contact-info-col">
-          <h3 class="contact-col-heading">Contact Academic Excellence</h3>
-          <p class="contact-desc">
+          <h3 class="contact-col-heading" data-cms-text="contact.info_heading">Contact Academic Excellence</h3>
+          <p class="contact-desc" data-cms-text="contact.info_desc">
             If you are interested in exploring academic partnership opportunities, corporate sponsorship, or collaborating with Academic Excellence to empower Ethiopian professionals with global credentials, please reach out to our team.
           </p>
 
           <div class="contact-detail-group">
             <div class="contact-detail-label">Email</div>
             <div class="contact-detail-value">
-              <a href="mailto:academicexcellenceco@gmail.com">academicexcellenceco@gmail.com</a>
+              <a href="mailto:academicexcellenceco@gmail.com" data-cms-text="contact.email">academicexcellenceco@gmail.com</a>
             </div>
           </div>
 
-          <!-- <div class="contact-detail-group">
+          <div class="contact-detail-group">
             <div class="contact-detail-label">Phone</div>
-            <div class="contact-detail-value">+251 11 555 2345 / +251 91 100 0000</div>
-          </div> -->
+            <div class="contact-detail-value" data-cms-text="contact.phone">+251 11 555 2345</div>
+          </div>
+
+          <div class="contact-detail-group">
+            <div class="contact-detail-label">Location</div>
+            <div class="contact-detail-value" data-cms-text="contact.address">Addis Ababa, Ethiopia</div>
+          </div>
+
+          <div class="contact-detail-group">
+            <div class="contact-detail-label">Office Hours</div>
+            <div class="contact-detail-value" data-cms-text="contact.hours">Monday – Friday: 8:30 AM – 5:30 PM (EAT)</div>
+          </div>
         </div>
 
         <!-- Right Column: General Inquiries Form (Matching BPG inputs) -->
         <div class="contact-form-col">
-          <h3 class="contact-col-heading">General Inquiries</h3>
-          <p class="contact-desc">
+          <h3 class="contact-col-heading" data-cms-text="contact.form_heading">General Inquiries</h3>
+          <p class="contact-desc" data-cms-text="contact.form_desc">
             For general inquiries please contact us using the form below:
           </p>
 
@@ -188,7 +198,8 @@
     </div>
   </footer>
 
-  <!-- Main JavaScript -->
+  <!-- Main JavaScript & CMS Hydrator -->
+  <script src="js/cms-loader.js"></script>
   <script src="main.js"></script>
 </body>
 </html>
