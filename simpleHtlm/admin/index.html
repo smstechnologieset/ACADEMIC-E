@@ -493,6 +493,109 @@
       margin-right: 4px;
       margin-bottom: 4px;
     }
+
+    /* FIT-SCREEN OPTIMIZED APPLICATIONS TABLE */
+    #tabApplications .table-responsive {
+      width: 100% !important;
+      max-width: 100% !important;
+      overflow-x: auto;
+    }
+    @media (min-width: 900px) {
+      #tabApplications .table-responsive {
+        overflow-x: hidden !important;
+      }
+    }
+    #tabApplications .admin-table {
+      width: 100% !important;
+      min-width: 0 !important;
+      table-layout: fixed !important;
+      border-collapse: collapse !important;
+    }
+    #tabApplications .admin-table th {
+      padding: 10px 6px !important;
+      font-size: 0.72rem !important;
+      letter-spacing: 0.3px !important;
+      white-space: nowrap !important;
+      background: #f8fafc !important;
+      color: #475569;
+      text-transform: uppercase;
+    }
+    #tabApplications .admin-table td {
+      padding: 8px 6px !important;
+      font-size: 0.8rem !important;
+      vertical-align: middle !important;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #tabApplications .app-cell-candidate {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #tabApplications .app-candidate-name {
+      font-weight: 700;
+      color: #0b1b3d;
+      font-size: 0.82rem;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #tabApplications .app-candidate-email {
+      font-size: 0.72rem;
+      color: #64748b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      display: block;
+    }
+    #tabApplications .app-cell-course {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--primary-blue, #1854a1);
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #tabApplications .app-cell-qual {
+      font-size: 0.78rem;
+      color: #475569;
+      line-height: 1.25;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    #tabApplications .app-cell-actions {
+      white-space: nowrap !important;
+      text-align: right;
+    }
+    #tabApplications .badge-status {
+      padding: 2px 6px !important;
+      font-size: 0.68rem !important;
+      font-weight: 700 !important;
+      white-space: nowrap !important;
+      letter-spacing: 0.3px !important;
+      display: inline-block;
+    }
+    @media (max-width: 1440px) {
+      .admin-content {
+        padding: 18px 20px !important;
+      }
+    }
+
+    /* INQUIRIES MULTI-SELECT STYLES */
+    .inquiry-chk {
+      width: 18px;
+      height: 18px;
+      cursor: pointer;
+      accent-color: #2563eb;
+      flex-shrink: 0;
+    }
+    .inquiry-card.is-selected {
+      border-color: #3b82f6 !important;
+      background: #eff6ff !important;
+    }
   </style>
 </head>
 <body>
@@ -521,7 +624,6 @@
         <div class="admin-nav-item" data-tab="tabCourses">&#127891; Programs &amp; Courses</div>
         <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Content CMS</div>
         <div class="admin-nav-item" data-tab="tabContentCms">&#128472; Page Content CMS</div>
-        <div class="admin-nav-item" data-tab="tabStats">&#128200; Homepage Stats</div>
         <div class="admin-nav-item" data-tab="tabFaqs">&#10067; FAQ Editor</div>
         <div class="admin-nav-item" data-tab="tabTestimonials">&#11088; Testimonials</div>
         <div style="padding:10px 14px 4px;font-size:0.68rem;text-transform:uppercase;letter-spacing:1.5px;color:#7ebec5;font-weight:700;">Communication</div>
@@ -642,20 +744,21 @@
               <strong id="bulkCountLabel">0 selected</strong>
               <button type="button" class="btn-sm" id="bulkApproveBtn" style="background:#065f46;color:#fff;border:none;">&#10003; Approve Selected</button>
               <button type="button" class="btn-sm" id="bulkRejectBtn" style="background:#991b1b;color:#fff;border:none;">&#10005; Reject Selected</button>
+              <button type="button" class="btn-sm" id="bulkDeleteBtn" style="background:#dc2626;color:#fff;border:none;font-weight:700;">&#128465; Delete Selected</button>
               <button type="button" class="btn-sm" id="bulkClearBtn" style="background:#f1f5f9;color:#64748b;border:1px solid #e2e8f0;">Clear</button>
             </div>
             <div class="table-responsive">
               <table class="admin-table">
                 <thead>
                   <tr>
-                    <th style="width:36px;"><input type="checkbox" id="selectAllApps" /></th>
-                    <th>Ref ID</th>
-                    <th>Candidate</th>
-                    <th>Course Applied</th>
-                    <th>Qualification</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th>Action</th>
+                    <th style="width:34px;text-align:center;"><input type="checkbox" id="selectAllApps" /></th>
+                    <th style="width:95px;">Ref ID</th>
+                    <th style="width:22%;">Candidate</th>
+                    <th style="width:25%;">Course Applied</th>
+                    <th style="width:16%;">Qualification</th>
+                    <th style="width:90px;text-align:center;">Status</th>
+                    <th style="width:85px;">Date</th>
+                    <th style="width:115px;text-align:right;">Actions</th>
                   </tr>
                 </thead>
                 <tbody id="applicationsTableBody"></tbody>
@@ -1541,22 +1644,6 @@
           </div>
         </section>
 
-        <!-- TAB: STATS -->
-        <section id="tabStats" class="admin-tab-pane" style="display:none;">
-          <div class="data-table-card">
-            <div class="table-toolbar">
-              <h3 style="font-size:1.15rem;color:#0b1b3d;">Homepage Statistics Editor</h3>
-              <button type="button" class="btn-dark-admin" id="btnAddStat">+ Add Stat Block</button>
-            </div>
-            <div class="table-responsive">
-              <table class="admin-table">
-                <thead><tr><th>Icon</th><th>Label</th><th>Value</th><th>Sort</th><th>Actions</th></tr></thead>
-                <tbody id="statsTableBody"></tbody>
-              </table>
-            </div>
-          </div>
-        </section>
-
         <!-- TAB: FAQS -->
         <section id="tabFaqs" class="admin-tab-pane" style="display:none;">
           <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
@@ -1596,11 +1683,31 @@
             </div>
           </div>
 
-          <!-- Filter Toolbar for Inquiries -->
-          <div style="display:flex;gap:8px;margin-bottom:18px;align-items:center;flex-wrap:wrap;" id="inquiryFilters">
-            <button type="button" class="btn-sm iq-filter-btn" data-filter="all" style="background:#0b1b3d;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">All (<span id="countAllInquiries">0</span>)</button>
-            <button type="button" class="btn-sm iq-filter-btn" data-filter="unread" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Unread (<span id="countUnreadInquiries">0</span>)</button>
-            <button type="button" class="btn-sm iq-filter-btn" data-filter="read" style="background:#f8fafc;color:#64748b;border:1px solid #cbd5e1;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Read (<span id="countReadInquiries">0</span>)</button>
+          <!-- Filter Toolbar for Inquiries with Select All Toggle -->
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:12px;" id="inquiryFilters">
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap;">
+              <button type="button" class="btn-sm iq-filter-btn" data-filter="all" style="background:#0b1b3d;color:#fff;border:none;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">All (<span id="countAllInquiries">0</span>)</button>
+              <button type="button" class="btn-sm iq-filter-btn" data-filter="unread" style="background:#eff6ff;color:#1e40af;border:1px solid #bfdbfe;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Unread (<span id="countUnreadInquiries">0</span>)</button>
+              <button type="button" class="btn-sm iq-filter-btn" data-filter="read" style="background:#f8fafc;color:#64748b;border:1px solid #cbd5e1;border-radius:6px;padding:6px 14px;font-weight:600;cursor:pointer;">Read (<span id="countReadInquiries">0</span>)</button>
+            </div>
+            <label style="display:inline-flex;align-items:center;gap:6px;font-size:0.85rem;font-weight:600;color:#334155;cursor:pointer;background:#ffffff;border:1px solid #cbd5e1;padding:6px 12px;border-radius:6px;user-select:none;">
+              <input type="checkbox" id="selectAllInquiries" style="cursor:pointer;width:16px;height:16px;accent-color:#2563eb;" />
+              <span>Select All Inquiries</span>
+            </label>
+          </div>
+
+          <!-- Multi-Select Bulk Actions Bar for Inquiries -->
+          <div class="bulk-bar" id="inquiryBulkBar" style="display:none;align-items:center;gap:12px;background:#fef2f2;border:1px solid #fecaca;padding:10px 18px;margin-bottom:16px;border-radius:8px;flex-wrap:wrap;">
+            <strong id="inquiryBulkCountLabel" style="color:#991b1b;font-size:0.9rem;">0 selected</strong>
+            <button type="button" class="btn-sm" id="bulkDeleteInquiriesBtn" style="background:#dc2626;color:#ffffff;border:none;padding:6px 14px;border-radius:6px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:5px;">
+              &#128465; Delete Selected
+            </button>
+            <button type="button" class="btn-sm" id="bulkMarkInquiriesReadBtn" style="background:#ffffff;color:#1e40af;border:1px solid #cbd5e1;padding:6px 12px;border-radius:6px;font-weight:600;cursor:pointer;">
+              &#10003; Mark Selected as Read
+            </button>
+            <button type="button" class="btn-sm" id="bulkClearInquiriesBtn" style="background:#ffffff;color:#64748b;border:1px solid #e2e8f0;padding:6px 12px;border-radius:6px;cursor:pointer;">
+              Clear Selection
+            </button>
           </div>
 
           <div id="inquiryList"><p style="color:#64748b;">Loading inquiries...</p></div>
@@ -1871,7 +1978,10 @@
           </div>
         </div>
       </div>
-      <div class="modal-footer">
+      <div class="modal-footer" style="display:flex;justify-content:space-between;align-items:center;background:#f8fafc;padding:14px 22px;border-top:1px solid #e2e8f0;">
+        <button type="button" class="btn-sm" id="modalDeleteAppBtn" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;padding:8px 16px;border-radius:6px;font-weight:700;cursor:pointer;display:inline-flex;align-items:center;gap:6px;">
+          &#128465; Delete Application
+        </button>
         <button type="button" class="btn btn-sm" id="closeAppModalFooterBtn">Close</button>
       </div>
     </div>
@@ -1979,28 +2089,6 @@
     </div>
   </div>
 
-  <!-- STAT MODAL -->
-  <div class="admin-modal" id="statModal">
-    <div class="modal-card" style="max-width:480px;">
-      <div class="modal-header">
-        <h3 style="font-size:1.15rem;color:#0b1b3d;" id="statModalTitle">Add Stat Block</h3>
-        <button type="button" class="btn-remove-file" id="closeStatModalBtn">&times;</button>
-      </div>
-      <div class="modal-body">
-        <form id="statForm">
-          <input type="hidden" id="editStatId" />
-          <div class="form-group"><label class="form-label">Icon / Emoji</label><input type="text" id="statInputIcon" class="form-input" value="&#127891;" /></div>
-          <div class="form-group"><label class="form-label">Label *</label><input type="text" id="statInputLabel" class="form-input" placeholder="e.g. Graduates" required /></div>
-          <div class="form-group"><label class="form-label">Value *</label><input type="text" id="statInputValue" class="form-input" placeholder="e.g. 1,200+" required /></div>
-          <div class="form-group"><label class="form-label">Sort Order</label><input type="number" id="statInputSort" class="form-input" value="1" min="1" /></div>
-          <div class="step-actions">
-            <button type="button" class="btn btn-sm" id="cancelStatBtn">Cancel</button>
-            <button type="submit" class="btn-dark-admin">Save Stat</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  </div>
 
   <!-- FAQ MODAL -->
   <div class="admin-modal" id="faqModal">
@@ -2316,7 +2404,6 @@
       { id: "applications", tabId: "tabApplications", label: "Applications Management", icon: "📝", desc: "View, approve, review, reject & export student applications" },
       { id: "courses", tabId: "tabCourses", label: "Programs & Courses", icon: "🎓", desc: "Create, edit, toggle visibility & manage degree curricula" },
       { id: "content_cms", tabId: "tabContentCms", label: "Page Content CMS", icon: "📑", desc: "Edit hero banners, program intros, contact info & page texts" },
-      { id: "stats", tabId: "tabStats", label: "Homepage Stats", icon: "📈", desc: "Modify stats counter numbers (students, acceptance rate, etc.)" },
       { id: "faqs", tabId: "tabFaqs", label: "FAQ Editor", icon: "❓", desc: "Add, edit, reorder & delete frequently asked questions" },
       { id: "testimonials", tabId: "tabTestimonials", label: "Testimonials Manager", icon: "⭐", desc: "Manage student & alumni reviews and ratings" },
       { id: "inquiries", tabId: "tabInquiries", label: "Contact Inquiries", icon: "💌", desc: "Read and respond to student inquiries & messages" },
@@ -2400,7 +2487,6 @@
       tabApplications: "Applications Management",
       tabCourses: "Academic Programs CMS",
       tabContentCms: "Website Page Content CMS",
-      tabStats: "Homepage Statistics Editor",
       tabFaqs: "FAQ Editor",
       tabTestimonials: "Testimonials Manager",
       tabInquiries: "Contact Inquiries",
@@ -2432,7 +2518,6 @@
       if (TAB_TITLES[targetId]) titleEl.textContent = TAB_TITLES[targetId];
       if (window.innerWidth < 992) closeSidebar();
       if (targetId === "tabContentCms")                               { loadCmsEditor(); }
-      if (targetId === "tabStats"        && !lazyLoaded.stats)        { lazyLoaded.stats = true;        renderStats(true); }
       if (targetId === "tabFaqs"         && !lazyLoaded.faqs)         { lazyLoaded.faqs = true;         loadFaqs(); }
       if (targetId === "tabTestimonials" && !lazyLoaded.testimonials) { lazyLoaded.testimonials = true; loadTestimonials(); }
       if (targetId === "tabInquiries"    && !lazyLoaded.inquiries)    { lazyLoaded.inquiries = true;    loadInquiries(); }
@@ -2631,17 +2716,30 @@
         return;
       }
       appsTableBody.innerHTML = list.map(app => {
-        const name = app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim();
+        const name = (app.fullName || ((app.firstName||"") + " " + (app.lastName||"")).trim()) || "Applicant";
+        const email = app.email || "";
         const chk  = selectedIds.has(app.id) ? "checked" : "";
+        const qual = app.qualification ? app.qualification.split("(")[0].trim() : "—";
+        const course = app.courseApplied || "—";
+        const safeName = name.replace(/"/g, "&quot;");
+        const safeEmail = email.replace(/"/g, "&quot;");
+        const safeCourse = course.replace(/"/g, "&quot;");
+        const safeQual = qual.replace(/"/g, "&quot;");
         return "<tr>" +
-          "<td><input type='checkbox' class='app-checkbox' data-id='" + app.id + "' " + chk + " /></td>" +
-          "<td><strong style='font-family:monospace;color:#0b1b3d;font-size:0.85rem;'>" + app.id + "</strong></td>" +
-          "<td><strong>" + name + "</strong><div style='font-size:0.78rem;color:#64748b;'>" + (app.email||"") + "</div></td>" +
-          "<td><span style='color:var(--primary-blue);font-weight:600;'>" + (app.courseApplied||"") + "</span></td>" +
-          "<td>" + (app.qualification ? app.qualification.split("(")[0].trim() : "—") + "</td>" +
-          "<td><span class='badge-status status-" + app.status + "'>" + app.status.replace("_"," ") + "</span></td>" +
-          "<td>" + window.AcademicDB.formatDate(app.created_at) + "</td>" +
-          "<td><button type='button' class='btn-sm btn-review-app' data-id='" + app.id + "' style='white-space:nowrap;'>Review</button></td>" +
+          "<td style='text-align:center;'><input type='checkbox' class='app-checkbox' data-id='" + app.id + "' " + chk + " /></td>" +
+          "<td><strong style='font-family:monospace;color:#0b1b3d;font-size:0.82rem;'>" + app.id + "</strong></td>" +
+          "<td class='app-cell-candidate' title='" + safeName + (email ? " (" + safeEmail + ")" : "") + "'>" +
+            "<div class='app-candidate-name'>" + safeName + "</div>" +
+            (email ? "<span class='app-candidate-email'>" + safeEmail + "</span>" : "") +
+          "</td>" +
+          "<td class='app-cell-course' title='" + safeCourse + "'>" + safeCourse + "</td>" +
+          "<td class='app-cell-qual' title='" + (app.qualification||"").replace(/"/g, "&quot;") + "'>" + safeQual + "</td>" +
+          "<td style='text-align:center;'><span class='badge-status status-" + app.status + "'>" + app.status.replace("_"," ") + "</span></td>" +
+          "<td><span style='font-size:0.75rem;color:#64748b;white-space:nowrap;'>" + window.AcademicDB.formatDate(app.created_at) + "</span></td>" +
+          "<td class='app-cell-actions'>" +
+            "<button type='button' class='btn-sm btn-review-app' data-id='" + app.id + "' title='Review Application' style='padding:4px 8px;font-size:0.75rem;background:var(--primary-blue,#1854a1);color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;'>Review</button>" +
+            "<button type='button' class='btn-sm btn-delete-app' data-id='" + app.id + "' title='Delete Application' style='padding:4px 7px;font-size:0.75rem;background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:4px;cursor:pointer;margin-left:4px;font-weight:700;'>&#128465;</button>" +
+          "</td>" +
           "</tr>";
       }).join("");
 
@@ -2654,6 +2752,38 @@
         });
       });
       document.querySelectorAll(".btn-review-app").forEach(btn => btn.addEventListener("click", () => openAppModal(btn.dataset.id)));
+      document.querySelectorAll(".btn-delete-app").forEach(btn => {
+        btn.addEventListener("click", async (e) => {
+          e.stopPropagation();
+          const id = btn.dataset.id;
+          if (!id) return;
+          const appsList = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+          const targetApp = appsList.find(a => a.id === id);
+          const candName = targetApp ? (targetApp.fullName || ((targetApp.firstName||"") + " " + (targetApp.lastName||"")).trim()) : id;
+          if (!confirm("Are you sure you want to permanently delete application " + id + " (" + candName + ")?\n\nThis action cannot be undone.")) {
+            return;
+          }
+          btn.disabled = true;
+          try {
+            const res = await window.AdminService.deleteApplication(id);
+            if (res && res.success) {
+              logActivity("deleted_application", "application", id);
+              selectedIds.delete(id);
+              updateBulkBar();
+              loadOverview();
+              renderApplications();
+              showToast("Application " + id + " deleted successfully.", "success");
+              await syncWithDatabase();
+            } else {
+              showToast((res && res.error) || "Failed to delete application.", "error");
+              btn.disabled = false;
+            }
+          } catch (err) {
+            showToast("Error: " + (err.message || err), "error");
+            btn.disabled = false;
+          }
+        });
+      });
     }
 
     document.getElementById("selectAllApps").addEventListener("change", e => {
@@ -2693,6 +2823,34 @@
     }
     document.getElementById("bulkApproveBtn").addEventListener("click", () => doBulkUpdate("approved"));
     document.getElementById("bulkRejectBtn").addEventListener("click",  () => doBulkUpdate("rejected"));
+    document.getElementById("bulkDeleteBtn")?.addEventListener("click", async () => {
+      if (!selectedIds.size) return;
+      const ids = Array.from(selectedIds);
+      if (!confirm("Are you sure you want to permanently delete " + ids.length + " selected application(s)?\n\nThis action cannot be undone.")) {
+        return;
+      }
+      const btn = document.getElementById("bulkDeleteBtn");
+      const orig = btn.innerHTML;
+      btn.textContent = "Deleting..."; btn.disabled = true;
+      try {
+        const res = await window.AdminService.bulkDeleteApplications(ids);
+        if (res && res.success) {
+          logActivity("bulk_deleted_applications", "application", null);
+          selectedIds.clear();
+          updateBulkBar();
+          loadOverview();
+          renderApplications();
+          showToast("Successfully deleted " + ids.length + " application(s).", "success");
+          await syncWithDatabase();
+        } else {
+          showToast("Failed to delete selected applications.", "error");
+        }
+      } catch (err) {
+        showToast("Error: " + (err.message || err), "error");
+      } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+      }
+    });
     document.getElementById("bulkClearBtn").addEventListener("click",   () => { selectedIds.clear(); updateBulkBar(); renderApplications(); });
     searchInput.addEventListener("input", renderApplications);
     statusSelect.addEventListener("change", renderApplications);
@@ -3082,6 +3240,36 @@
     const closeAppModal = () => appModal.classList.remove("open");
     document.getElementById("closeAppModalBtn").addEventListener("click", closeAppModal);
     document.getElementById("closeAppModalFooterBtn").addEventListener("click", closeAppModal);
+    document.getElementById("modalDeleteAppBtn")?.addEventListener("click", async () => {
+      if (!currentViewingApp || !currentViewingApp.id) return;
+      const appId = currentViewingApp.id;
+      const candName = currentViewingApp.fullName || ((currentViewingApp.firstName || "") + " " + (currentViewingApp.lastName || "")).trim() || appId;
+      if (!confirm("Are you sure you want to permanently delete application " + appId + " (" + candName + ")?\n\nThis action cannot be undone.")) {
+        return;
+      }
+      const btn = document.getElementById("modalDeleteAppBtn");
+      const orig = btn.innerHTML;
+      btn.textContent = "Deleting..."; btn.disabled = true;
+      try {
+        const res = await window.AdminService.deleteApplication(appId);
+        if (res && res.success) {
+          logActivity("deleted_application", "application", appId);
+          selectedIds.delete(appId);
+          updateBulkBar();
+          closeAppModal();
+          loadOverview();
+          renderApplications();
+          showToast("Application " + appId + " deleted successfully.", "success");
+          await syncWithDatabase();
+        } else {
+          showToast((res && res.error) || "Failed to delete application.", "error");
+        }
+      } catch (err) {
+        showToast("Error deleting application: " + (err.message || err), "error");
+      } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+      }
+    });
 
     // Dynamic rejection reason toggle & preset populator
     document.getElementById("modalStatusSelect").addEventListener("change", (e) => {
@@ -3193,62 +3381,6 @@
       window.AdminService.saveCourse(payload);
       logActivity(id ? "updated_course" : "created_course", "course", payload.title);
       closeCourseModal(); renderCourses(); showToast("Program saved!", "success");
-    });
-
-    // HOMEPAGE STATS
-    const STATS_KEY = "ae_db_stats";
-    const statsTableBody = document.getElementById("statsTableBody");
-    const statModal = document.getElementById("statModal");
-    function getStats() { return window.AcademicDB.getLocal(STATS_KEY, []); }
-    function saveStats(s) { window.AcademicDB.setLocal(STATS_KEY, s); }
-
-    function renderStats(firstLoad) {
-      if (firstLoad) {
-        supaFetch("cms_stats", { filter: "order=sort_order.asc" }).then(rows => { if (rows && rows.length) saveStats(rows); renderStats(); }).catch(() => renderStats());
-        return;
-      }
-      const stats = getStats();
-      if (!stats.length) { statsTableBody.innerHTML = "<tr><td colspan='5' style='text-align:center;color:#64748b;padding:32px;'>No stat blocks yet.</td></tr>"; return; }
-      statsTableBody.innerHTML = stats.map(s =>
-        "<tr><td style='font-size:1.4rem;text-align:center;'>" + (s.icon||"📊") + "</td><td><strong>" + (s.label||s.stat_label||"") + "</strong></td><td>" + (s.value||s.stat_value||"") + "</td><td>" + (s.sort_order||"—") + "</td>" +
-        "<td><button type='button' class='btn-sm btn-edit-stat' data-id='" + s.id + "'>Edit</button> <button type='button' class='btn-sm btn-delete-stat' data-id='" + s.id + "' style='color:#d93025;border-color:#fca5a5;'>Delete</button></td></tr>"
-      ).join("");
-      document.querySelectorAll(".btn-edit-stat").forEach(btn => btn.addEventListener("click", () => {
-        const s = getStats().find(x => x.id === btn.dataset.id); if (!s) return;
-        document.getElementById("editStatId").value = s.id;
-        document.getElementById("statModalTitle").textContent = "Edit Stat Block";
-        document.getElementById("statInputIcon").value = s.icon || "📊";
-        document.getElementById("statInputLabel").value = s.label || s.stat_label || "";
-        document.getElementById("statInputValue").value = s.value || s.stat_value || "";
-        document.getElementById("statInputSort").value = s.sort_order || 1;
-        statModal.classList.add("open");
-      }));
-      document.querySelectorAll(".btn-delete-stat").forEach(btn => btn.addEventListener("click", async () => {
-        if (!confirm("Delete this stat?")) return;
-        try { await supaFetch("cms_stats", { method:"DELETE", filter:"id=eq."+btn.dataset.id }); } catch(e) {}
-        saveStats(getStats().filter(s => s.id !== btn.dataset.id));
-        logActivity("deleted_stat", "stat", btn.dataset.id); renderStats(); showToast("Stat deleted.", "success");
-      }));
-    }
-    document.getElementById("btnAddStat").addEventListener("click", () => {
-      document.getElementById("statForm").reset(); document.getElementById("editStatId").value = "";
-      document.getElementById("statModalTitle").textContent = "Add Stat Block";
-      document.getElementById("statInputSort").value = getStats().length + 1; statModal.classList.add("open");
-    });
-    const closeStatModal = () => statModal.classList.remove("open");
-    document.getElementById("closeStatModalBtn").addEventListener("click", closeStatModal);
-    document.getElementById("cancelStatBtn").addEventListener("click", closeStatModal);
-    document.getElementById("statForm").addEventListener("submit", async e => {
-      e.preventDefault();
-      const id = document.getElementById("editStatId").value;
-      const label = document.getElementById("statInputLabel").value.trim();
-      const value = document.getElementById("statInputValue").value.trim();
-      const payload = { id: id || ("stat-" + Date.now()), icon: document.getElementById("statInputIcon").value.trim(), label, stat_label: label, value, stat_value: value, sort_order: parseInt(document.getElementById("statInputSort").value,10)||1 };
-      try { await supaFetch("cms_stats", { method:"POST", body:payload, upsert:true }); } catch(e) {}
-      const stats = getStats(); const idx = stats.findIndex(s => s.id === payload.id);
-      if (idx >= 0) stats[idx] = payload; else stats.push(payload);
-      saveStats(stats); logActivity(id ? "updated_stat" : "created_stat", "stat", payload.id);
-      closeStatModal(); renderStats(); showToast("Stat saved!", "success");
     });
 
     // FAQ EDITOR
@@ -3390,6 +3522,7 @@
     const inquiryListEl = document.getElementById("inquiryList");
     let allInquiries = [];
     let currentInquiryFilter = "all";
+    let selectedInquiryIds = new Set();
 
     function getReadInquiryIds() {
       try {
@@ -3430,6 +3563,29 @@
       } catch (e) {}
     }
 
+    function getFilteredInquiries() {
+      const readSet = getReadInquiryIds();
+      if (currentInquiryFilter === "unread") {
+        return allInquiries.filter(r => !readSet.has(r.id));
+      } else if (currentInquiryFilter === "read") {
+        return allInquiries.filter(r => readSet.has(r.id));
+      }
+      return allInquiries;
+    }
+
+    function updateInquiryBulkBar() {
+      const n = selectedInquiryIds.size;
+      const bar = document.getElementById("inquiryBulkBar");
+      if (bar) bar.style.display = n > 0 ? "flex" : "none";
+      const lbl = document.getElementById("inquiryBulkCountLabel");
+      if (lbl) lbl.textContent = n + " selected";
+      const saInq = document.getElementById("selectAllInquiries");
+      if (saInq) {
+        const curFiltered = getFilteredInquiries();
+        saInq.checked = curFiltered.length > 0 && curFiltered.every(r => selectedInquiryIds.has(r.id));
+      }
+    }
+
     function toggleInquiryRead(id) {
       const readSet = getReadInquiryIds();
       const isNowRead = !readSet.has(id);
@@ -3452,10 +3608,39 @@
       showToast("All inquiries marked as read", "success");
     }
 
+    window.deleteSingleInquiry = async function(id) {
+      if (!id) return;
+      const inq = allInquiries.find(r => r.id === id);
+      const name = inq ? (inq.name || inq.email || "this inquiry") : "this inquiry";
+      if (!confirm("Are you sure you want to permanently delete the inquiry from " + name + "?\n\nThis action cannot be undone.")) {
+        return;
+      }
+      try {
+        try {
+          await supaFetch("contact_messages", { method: "DELETE", filter: "id=eq." + encodeURIComponent(id) });
+        } catch (dbErr) {
+          console.warn("Delete inquiry remote note:", dbErr);
+        }
+        allInquiries = allInquiries.filter(r => r.id !== id);
+        selectedInquiryIds.delete(id);
+        const readSet = getReadInquiryIds();
+        readSet.delete(id);
+        saveReadInquiryIds(readSet);
+
+        updateInquiryBulkBar();
+        renderInquiries();
+        logActivity("deleted_inquiry", "inquiry", id);
+        showToast("Inquiry deleted successfully.", "success");
+      } catch (err) {
+        showToast("Error deleting inquiry: " + (err.message || err), "error");
+      }
+    };
+
     function renderInquiries() {
       if (!allInquiries || !allInquiries.length) {
         inquiryListEl.innerHTML = "<p style='color:#64748b;'>No contact inquiries yet.</p>";
         updateInquiryCounts(0, 0, 0);
+        updateInquiryBulkBar();
         return;
       }
 
@@ -3472,22 +3657,19 @@
       updateInquiryCounts(totalCount, unreadCount, readCount);
 
       // Filter inquiries according to current filter
-      let filtered = allInquiries;
-      if (currentInquiryFilter === "unread") {
-        filtered = allInquiries.filter(r => !readSet.has(r.id));
-      } else if (currentInquiryFilter === "read") {
-        filtered = allInquiries.filter(r => readSet.has(r.id));
-      }
+      const filtered = getFilteredInquiries();
 
       if (!filtered.length) {
         inquiryListEl.innerHTML = `<div style="background:#fff;padding:32px;border:1px solid #e2e8f0;border-radius:10px;text-align:center;color:#64748b;">
           No ${currentInquiryFilter === "unread" ? "unread" : currentInquiryFilter === "read" ? "read" : ""} inquiries found.
         </div>`;
+        updateInquiryBulkBar();
         return;
       }
 
       inquiryListEl.innerHTML = filtered.map(r => {
         const isRead = readSet.has(r.id);
+        const isSelected = selectedInquiryIds.has(r.id);
         const cardClass = isRead ? "inquiry-card is-read" : "inquiry-card is-unread";
         const badgeHtml = isRead 
           ? `<span class="iq-badge-read">&#10003; Read</span>` 
@@ -3502,8 +3684,9 @@
         const safePhone = r.phone || "";
 
         return `
-          <div class="${cardClass}" id="inquiryCard_${r.id}">
+          <div class="${cardClass} ${isSelected ? 'is-selected' : ''}" id="inquiryCard_${r.id}">
             <div class="iq-meta" style="display:flex;align-items:center;gap:12px;margin-bottom:12px;flex-wrap:wrap;">
+              <input type="checkbox" class="inquiry-chk" data-id="${r.id}" ${isSelected ? "checked" : ""} title="Select inquiry" />
               <strong style="color:${isRead ? '#475569' : '#0b1b3d'};font-size:1.05rem;">${safeName}</strong>
               ${badgeHtml}
               <span style="color:#64748b;">✉ <a href="mailto:${safeEmail}" style="color:${isRead ? '#64748b' : '#1d4ed8'};text-decoration:none;font-weight:600;">${safeEmail}</a></span>
@@ -3525,10 +3708,27 @@
               <button type="button" class="btn-toggle-read" onclick="navigator.clipboard.writeText('${safeEmail}'); showToast('Email copied to clipboard', 'success');">
                 📋 Copy Email
               </button>
+              <button type="button" class="btn-sm" onclick="window.deleteSingleInquiry('${r.id}')" style="background:#fee2e2;color:#dc2626;border:1px solid #fecaca;border-radius:6px;padding:6px 12px;font-weight:600;cursor:pointer;margin-left:auto;display:inline-flex;align-items:center;gap:4px;">
+                &#128465; Delete
+              </button>
             </div>
           </div>
         `;
       }).join("");
+
+      document.querySelectorAll(".inquiry-chk").forEach(chk => {
+        chk.addEventListener("change", (e) => {
+          e.stopPropagation();
+          const id = chk.dataset.id;
+          if (chk.checked) selectedInquiryIds.add(id);
+          else selectedInquiryIds.delete(id);
+          const card = document.getElementById("inquiryCard_" + id);
+          if (card) card.classList.toggle("is-selected", chk.checked);
+          updateInquiryBulkBar();
+        });
+      });
+
+      updateInquiryBulkBar();
     }
 
     function updateInquiryCounts(total, unread, read) {
@@ -3587,6 +3787,68 @@
 
     document.getElementById("refreshInquiriesBtn").addEventListener("click", loadInquiries);
     document.getElementById("markAllReadBtn")?.addEventListener("click", markAllInquiriesRead);
+
+    document.getElementById("selectAllInquiries")?.addEventListener("change", (e) => {
+      const curFiltered = getFilteredInquiries();
+      if (e.target.checked) {
+        curFiltered.forEach(r => { if (r.id) selectedInquiryIds.add(r.id); });
+      } else {
+        curFiltered.forEach(r => { if (r.id) selectedInquiryIds.delete(r.id); });
+      }
+      updateInquiryBulkBar();
+      renderInquiries();
+    });
+
+    document.getElementById("bulkClearInquiriesBtn")?.addEventListener("click", () => {
+      selectedInquiryIds.clear();
+      updateInquiryBulkBar();
+      renderInquiries();
+    });
+
+    document.getElementById("bulkMarkInquiriesReadBtn")?.addEventListener("click", () => {
+      if (!selectedInquiryIds.size) return;
+      const readSet = getReadInquiryIds();
+      selectedInquiryIds.forEach(id => readSet.add(id));
+      saveReadInquiryIds(readSet);
+      selectedInquiryIds.clear();
+      updateInquiryBulkBar();
+      renderInquiries();
+      showToast("Selected inquiries marked as read", "success");
+    });
+
+    document.getElementById("bulkDeleteInquiriesBtn")?.addEventListener("click", async () => {
+      if (!selectedInquiryIds.size) return;
+      const ids = Array.from(selectedInquiryIds);
+      if (!confirm("Are you sure you want to permanently delete " + ids.length + " selected inquiry/inquiries?\n\nThis cannot be undone.")) {
+        return;
+      }
+      const btn = document.getElementById("bulkDeleteInquiriesBtn");
+      const orig = btn.innerHTML;
+      btn.textContent = "Deleting..."; btn.disabled = true;
+      try {
+        const filterStr = "id=in.(" + ids.map(x => `"${encodeURIComponent(x)}"`).join(",") + ")";
+        try {
+          await supaFetch("contact_messages", { method: "DELETE", filter: filterStr });
+        } catch (dbErr) {
+          console.warn("Bulk delete inquiries remote note:", dbErr);
+        }
+        const delSet = new Set(ids);
+        allInquiries = allInquiries.filter(r => !delSet.has(r.id));
+        const readSet = getReadInquiryIds();
+        ids.forEach(id => readSet.delete(id));
+        saveReadInquiryIds(readSet);
+
+        selectedInquiryIds.clear();
+        updateInquiryBulkBar();
+        renderInquiries();
+        logActivity("bulk_deleted_inquiries", "inquiry", null);
+        showToast("Deleted " + ids.length + " inquiry/inquiries.", "success");
+      } catch (err) {
+        showToast("Error deleting inquiries: " + (err.message || err), "error");
+      } finally {
+        btn.innerHTML = orig; btn.disabled = false;
+      }
+    });
 
     document.getElementById("inquiryFilters")?.querySelectorAll(".iq-filter-btn")?.forEach(btn => {
       btn.addEventListener("click", () => {

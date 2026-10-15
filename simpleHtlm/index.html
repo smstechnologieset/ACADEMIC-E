@@ -478,6 +478,48 @@ To expand access to affordable internationally recognized education and workforc
       </div>
     </section>
 
+    <!-- TESTIMONIALS CAROUSEL SECTION (Dynamic from Supabase & Admin CMS) -->
+    <section class="testimonials-carousel-section" id="testimonialsSection" aria-label="Student & Professional Testimonials" style="display: none;">
+      <div class="container">
+        <div class="section-header text-center" style="max-width: 760px; margin: 0 auto 42px auto;">
+          <!-- <div class="section-tag" style="display: inline-flex; align-items: center; gap: 6px;">
+            <span>★</span> Success Stories &amp; Impact
+          </div> -->
+          <h2 class="section-title" style="font-size: 2.3rem; margin-top: 10px;">What Our Students Say</h2>
+          <p class="section-desc" style="font-size: 1.05rem; color: #475569; margin: 0 auto;">
+            Hear from students whose careers and opportunities have been accelerated through our programs.
+          </p>
+        </div>
+
+        <!-- Carousel Container -->
+        <div class="t-carousel-container" id="tCarouselContainer">
+          <!-- Navigation Arrows -->
+          <button class="t-nav-btn t-prev-btn" id="tPrevBtn" aria-label="Previous Testimonials" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+          </button>
+          
+          <div class="t-viewport" id="tViewport">
+            <div class="t-track" id="tTrack">
+              <!-- Dynamically populated testimonial slide cards -->
+            </div>
+          </div>
+
+          <button class="t-nav-btn t-next-btn" id="tNextBtn" aria-label="Next Testimonials" type="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="9 18 15 12 9 6"></polyline>
+            </svg>
+          </button>
+        </div>
+
+        <!-- Carousel Indicators / Dots -->
+        <div class="t-dots" id="tDots" role="tablist" aria-label="Testimonials pagination">
+          <!-- Dynamically populated dots -->
+        </div>
+      </div>
+    </section>
+
     <!-- 7. SECTION 7: ADMISSIONS CALL-TO-ACTION (BPG-Style Split Layout) -->
     <section class="cta-section">
       <!-- Split photo + text grid -->
