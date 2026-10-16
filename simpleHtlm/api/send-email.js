@@ -167,6 +167,27 @@ module.exports = async function handler(req, res) {
         const r = await fetch(`${supabaseUrl}/rest/v1/admin_activity_log?order=created_at.desc&limit=100`, {
           headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
         });
+    if (actionParam === "get_page_content") {
+      try {
+        const r = await fetch(`${supabaseUrl}/rest/v1/site_settings?key=eq.page_content&select=key,value,updated_at`, {
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        });
+        const rows = await r.json();
+        if (Array.isArray(rows) && rows.length > 0 && rows[0].value) {
+          const parsed = typeof rows[0].value === "string" ? JSON.parse(rows[0].value) : rows[0].value;
+          return res.status(200).json(parsed);
+        }
+        return res.status(200).json(null);
+      } catch (err) {
+        return res.status(500).json({ error: err.message });
+      }
+    }
+
+    if (actionParam === "get_faqs") {
+      try {
+        const r = await fetch(`${supabaseUrl}/rest/v1/cms_faqs?order=sort_order.asc`, {
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        });
         const rows = await r.json();
         return res.status(200).json(Array.isArray(rows) ? rows : []);
       } catch (err) {
@@ -183,7 +204,36 @@ module.exports = async function handler(req, res) {
     const body = typeof req.body === "string" ? JSON.parse(req.body) : (req.body || {});
     const { type, to, name, refId, course, reason, rejectionReason } = body;
 
-    if (!to && type !== "contact_inquiry") {
+    if (type === "save_page_content") {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const srvKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!srvKey) {
+        return res.status(500).json({ error: "Server service key missing" });
+      }
+      const contentPayload = body.content || body.page_content || {};
+      const payloadStr = typeof contentPayload === "string" ? contentPayload : JSON.stringify(contentPayload);
+      const r = await fetch(`${supabaseUrl}/rest/v1/site_settings`, {
+        method: "POST",
+        headers: {
+          "apikey": srvKey,
+          "Authorization": `Bearer ${srvKey}`,
+          "Content-Type": "application/json",
+          "Prefer": "resolution=merge-duplicates,return=representation"
+        },
+        body: JSON.stringify({
+          key: "page_content",
+          value: payloadStr,
+          updated_at: new Date().toISOString()
+        })
+      });
+      if (!r.ok) {
+        const errTxt = await r.text();
+        return res.status(500).json({ error: "Failed to persist page content: " + errTxt });
+      }
+      return res.status(200).json({ success: true });
+    }
+
+    if (!to && type !== "contact_inquiry" && type !== "save_page_content" && type !== "save_staff_users") {
       return res.status(400).json({ error: "Recipient email 'to' is required." });
     }
 

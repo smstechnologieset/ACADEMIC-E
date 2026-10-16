@@ -231,6 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 5. Dynamic Testimonials Carousel (Homepage after Our Values)
   initTestimonialsCarousel();
+
+  // 6. Dynamic FAQs Accordion (Homepage & Contact Page)
+  initWebsiteFaqs();
 });
 
 /**
@@ -578,6 +581,214 @@ function initTestimonialsCarousel() {
 
   // Expose global refresh function
   window.refreshTestimonialsCarousel = () => {
+    loadFromLocal();
+    syncFromSupabase();
+  };
+}
+
+/**
+ * Dynamic Website FAQs Controller (Homepage & Contact Page)
+ * Features 0ms cached hydration from localStorage ('ae_db_faqs'),
+ * background sync from Supabase 'cms_faqs' / server API,
+ * accessible interactive accordion with smooth open/close animations,
+ * and live cross-tab storage syncing.
+ */
+function initWebsiteFaqs() {
+  const faqListContainer = document.getElementById('faqAccordionList');
+  if (!faqListContainer) return; // Exit if current page does not have the FAQ section
+
+  const FAQ_KEY = 'ae_db_faqs';
+  let faqs = [];
+
+  const DEFAULT_FAQS = [
+    {
+      id: 'default-faq-1',
+      question: 'Are the diplomas and certificates recognized internationally?',
+      answer: 'Yes. Upon successful completion, learners receive a verified digital diploma endorsed by University in New York and Skillsoft Percipio. Each certificate includes a cryptographic identifier and 1-click LinkedIn credential verification.',
+      sort_order: 1
+    },
+    {
+      id: 'default-faq-2',
+      question: 'What are the technical requirements to participate?',
+      answer: 'You will need a desktop computer or laptop with a stable broadband internet connection and a modern web browser. The Skillsoft Percipio platform is cloud-hosted and accessible 24/7 for self-paced learning.',
+      sort_order: 2
+    },
+    {
+      id: 'default-faq-3',
+      question: 'How do I pay the application fee from Ethiopia?',
+      answer: 'Payment is accepted in Ethiopian Birr (ETB) through Telebirr merchant payment or direct local bank transfer (Commercial Bank of Ethiopia, Awash Bank, Bank of Abyssinia). You can upload your payment receipt directly on the tracking portal.',
+      sort_order: 3
+    },
+    {
+      id: 'default-faq-4',
+      question: 'Can I study while working full-time?',
+      answer: 'Absolutely. All our programs are structured for working professionals with asynchronous video lectures, hands-on lab projects, and flexible weekend review sessions designed to fit your busy schedule.',
+      sort_order: 4
+    },
+    {
+      id: 'default-faq-5',
+      question: 'How long does the application review process take?',
+      answer: 'Once your application and verification documents (FAYDA National ID and educational credentials) are submitted, our admissions board typically completes the review and issues an admission status update within 3 to 5 business days.',
+      sort_order: 5
+    }
+  ];
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
+  function renderFaqs() {
+    if (!faqListContainer) return;
+    if (!faqs || !faqs.length) {
+      faqs = DEFAULT_FAQS;
+    }
+
+    faqListContainer.innerHTML = faqs.map((f, idx) => {
+      const q = escapeHtml(f.question || '');
+      const a = escapeHtml(f.answer || '').replace(/\n/g, '<br />');
+      const isFirst = idx === 0;
+
+      return `
+        <div class="faq-accordion-item ${isFirst ? 'active' : ''}" data-faq-id="${f.id || idx}">
+          <button type="button" class="faq-accordion-trigger" aria-expanded="${isFirst ? 'true' : 'false'}" aria-controls="faq-answer-${idx}">
+            <span>${q}</span>
+            <span class="faq-accordion-icon" aria-hidden="true">&#9662;</span>
+          </button>
+          <div class="faq-accordion-content" id="faq-answer-${idx}" role="region">
+            <div class="faq-accordion-body">
+              <p>${a}</p>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Attach click listeners to accordion triggers
+    faqListContainer.querySelectorAll('.faq-accordion-trigger').forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const item = btn.closest('.faq-accordion-item');
+        if (!item) return;
+        const isCurrentlyActive = item.classList.contains('active');
+
+        // Close other items for clean single-accordion UX
+        faqListContainer.querySelectorAll('.faq-accordion-item.active').forEach(other => {
+          if (other !== item) {
+            other.classList.remove('active');
+            const otherBtn = other.querySelector('.faq-accordion-trigger');
+            if (otherBtn) otherBtn.setAttribute('aria-expanded', 'false');
+          }
+        });
+
+        // Toggle clicked item
+        if (isCurrentlyActive) {
+          item.classList.remove('active');
+          btn.setAttribute('aria-expanded', 'false');
+        } else {
+          item.classList.add('active');
+          btn.setAttribute('aria-expanded', 'true');
+        }
+      });
+    });
+  }
+
+  function loadFromLocal() {
+    try {
+      const raw = localStorage.getItem(FAQ_KEY);
+      if (raw) {
+        const parsed = JSON.parse(raw);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          faqs = parsed.filter(f => f.is_published !== false);
+          if (faqs.length) {
+            faqs.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+            renderFaqs();
+            return true;
+          }
+        }
+      }
+    } catch (e) {
+      console.warn('[FAQs] localStorage read warning:', e);
+    }
+    return false;
+  }
+
+  async function syncFromSupabase() {
+    try {
+      const SUPA_URL = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const SUPA_KEY = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+
+      let rows = null;
+      try {
+        const res = await fetch(`${SUPA_URL}/rest/v1/cms_faqs?order=sort_order.asc`, {
+          headers: {
+            'apikey': SUPA_KEY,
+            'Authorization': `Bearer ${SUPA_KEY}`
+          }
+        });
+        if (res.ok) {
+          rows = await res.json();
+        }
+      } catch (netErr) {
+        console.warn('[FAQs] Direct fetch note, attempting server API:', netErr);
+      }
+
+      // Fallback to server API if needed
+      if (!rows || !rows.length) {
+        try {
+          const emailApiBase = (window.AcademicDB && window.AcademicDB.getEmailApiEndpoint) ? window.AcademicDB.getEmailApiEndpoint() : "https://www.academicexcellences.com/api/send-email";
+          const fallbackRes = await fetch(`${emailApiBase}?action=get_faqs`);
+          if (fallbackRes.ok) {
+            rows = await fallbackRes.json();
+          }
+        } catch (apiErr) {}
+      }
+
+      if (Array.isArray(rows) && rows.length > 0) {
+        const publishedRows = rows.filter(f => f.is_published !== false);
+        publishedRows.sort((a, b) => (a.sort_order || 0) - (b.sort_order || 0));
+        faqs = publishedRows;
+        try {
+          localStorage.setItem(FAQ_KEY, JSON.stringify(rows));
+        } catch (e) {}
+        renderFaqs();
+      } else if (!faqs || !faqs.length) {
+        faqs = DEFAULT_FAQS;
+        renderFaqs();
+      }
+    } catch (err) {
+      console.warn('[FAQs] Sync warning:', err);
+      if (!faqs || !faqs.length) {
+        faqs = DEFAULT_FAQS;
+        renderFaqs();
+      }
+    }
+  }
+
+  // 1. Instant 0ms render from localStorage
+  const hasLocal = loadFromLocal();
+  if (!hasLocal) {
+    faqs = DEFAULT_FAQS;
+    renderFaqs();
+  }
+
+  // 2. Fetch fresh from remote
+  syncFromSupabase();
+
+  // 3. Real-time cross-tab storage listener
+  window.addEventListener('storage', (e) => {
+    if (e.key === FAQ_KEY) {
+      loadFromLocal();
+    }
+  });
+
+  // Global refresh
+  window.refreshWebsiteFaqs = () => {
     loadFromLocal();
     syncFromSupabase();
   };

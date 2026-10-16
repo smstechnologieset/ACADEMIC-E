@@ -48,6 +48,30 @@ export async function GET(req: NextRequest) {
       return NextResponse.json([]);
     }
 
+    if (action === "get_page_content") {
+      const res = await fetch(`${supabaseUrl}/rest/v1/site_settings?key=eq.page_content&select=key,value,updated_at`, {
+        headers: { apikey: srvKey, Authorization: `Bearer ${srvKey}` },
+      });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0 && data[0].value) {
+        try {
+          const parsed = typeof data[0].value === "string" ? JSON.parse(data[0].value) : data[0].value;
+          return NextResponse.json(parsed);
+        } catch (_) {
+          return NextResponse.json(data[0].value);
+        }
+      }
+      return NextResponse.json(null);
+    }
+
+    if (action === "get_faqs") {
+      const res = await fetch(`${supabaseUrl}/rest/v1/cms_faqs?order=sort_order.asc`, {
+        headers: { apikey: srvKey, Authorization: `Bearer ${srvKey}` },
+      });
+      const data = await res.json();
+      return NextResponse.json(Array.isArray(data) ? data : []);
+    }
+
     return NextResponse.json({ message: "Academic Excellence Email API Active" });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });
@@ -82,6 +106,33 @@ export async function POST(req: NextRequest) {
         if (!res.ok) {
           const errTxt = await res.text();
           return NextResponse.json({ error: "Failed to persist staff users: " + errTxt }, { status: 500 });
+        }
+        return NextResponse.json({ success: true });
+      }
+      return NextResponse.json({ error: "Server service key missing" }, { status: 500 });
+    }
+
+    if (type === "save_page_content") {
+      const contentPayload = body.content || body.page_content || {};
+      const payloadStr = typeof contentPayload === "string" ? contentPayload : JSON.stringify(contentPayload);
+      if (srvKey) {
+        const res = await fetch(`${supabaseUrl}/rest/v1/site_settings`, {
+          method: "POST",
+          headers: {
+            apikey: srvKey,
+            Authorization: `Bearer ${srvKey}`,
+            "Content-Type": "application/json",
+            Prefer: "resolution=merge-duplicates,return=representation",
+          },
+          body: JSON.stringify({
+            key: "page_content",
+            value: payloadStr,
+            updated_at: new Date().toISOString(),
+          }),
+        });
+        if (!res.ok) {
+          const errTxt = await res.text();
+          return NextResponse.json({ error: "Failed to persist page content: " + errTxt }, { status: 500 });
         }
         return NextResponse.json({ success: true });
       }

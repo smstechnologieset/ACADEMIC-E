@@ -798,13 +798,15 @@
             </div>
           </div>
 
-          <!-- Page Sub-Tabs -->
-          <div class="cms-page-tabs" id="cmsSubTabs">
-            <button type="button" class="cms-page-tab-btn active" data-pane="cmsPaneHome">🏠 Home Page</button>
-            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneAbout">📖 About Us</button>
-            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCourses">🎓 Programs Page</button>
-            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCredentials">🎖️ Certifications</button>
-            <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneContact">✉️ Contact Page</button>
+          <!-- CMS Page Sub-Tabs -->
+          <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:10px;padding:10px 18px;margin-bottom:20px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+            <div class="cms-page-tabs" id="cmsSubTabs" style="margin-bottom:0;border-bottom:none;padding-bottom:0;">
+              <button type="button" class="cms-page-tab-btn active" data-pane="cmsPaneHome">🏠 Home</button>
+              <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneAbout">📖 About</button>
+              <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCourses">🎓 Programs</button>
+              <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneCredentials">🎖️ Certifications</button>
+              <button type="button" class="cms-page-tab-btn" data-pane="cmsPaneContact">✉️ Contact Page</button>
+            </div>
           </div>
 
           <!-- SUB-PANE: HOME -->
@@ -1332,6 +1334,8 @@
                 <label class="form-label">Lead Description</label>
                 <textarea id="cms_courses_showcase_lead" class="form-textarea" rows="3"></textarea>
               </div>
+            </div>
+
             <div class="cms-card">
               <div class="cms-card-header">
                 <div>
@@ -1681,6 +1685,13 @@
               <button type="button" class="btn-sm" id="markAllReadBtn" style="background:#ffffff;color:#1e40af;border:1px solid #bfdbfe;font-weight:600;padding:8px 14px;border-radius:6px;cursor:pointer;">&#10003; Mark All as Read</button>
               <button type="button" class="btn-sm btn-sync-db" id="refreshInquiriesBtn" style="background:#f8fafc;color:#0b1b3d;border:1px solid #cbd5e1;padding:8px 14px;border-radius:6px;cursor:pointer;">&#8635; Refresh</button>
             </div>
+          </div>
+
+          <!-- Search Bar for Inquiries -->
+          <div style="background:#ffffff;border:1px solid #cbd5e1;padding:10px 16px;border-radius:8px;margin-bottom:14px;display:flex;align-items:center;gap:12px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
+            <span style="color:#64748b;font-size:1.1rem;user-select:none;">🔍</span>
+            <input type="text" id="inquirySearchInput" placeholder="Search inquiries by email, candidate name, subject, or message..." class="form-input" style="flex:1;border:none;outline:none;padding:6px 4px;font-size:0.9rem;background:transparent;" />
+            <button type="button" id="inquirySearchClearBtn" style="display:none;background:#f1f5f9;border:1px solid #cbd5e1;color:#64748b;border-radius:50%;width:24px;height:24px;align-items:center;justify-content:center;font-size:0.85rem;cursor:pointer;line-height:1;" title="Clear search">&times;</button>
           </div>
 
           <!-- Filter Toolbar for Inquiries with Select All Toggle -->
@@ -2524,7 +2535,12 @@
       if (targetId === "tabActivity"     && !lazyLoaded.activity)     { lazyLoaded.activity = true;     loadActivityLog(); }
       if (targetId === "tabUsers")                                    { loadStaffUsers(); }
     }
-    tabs.forEach(t => t.addEventListener("click", () => switchTab(t.dataset.tab)));
+    tabs.forEach(t => t.addEventListener("click", () => {
+      switchTab(t.dataset.tab);
+      if (t.dataset.cmsTarget && typeof window.activateCmsPane === "function") {
+        window.activateCmsPane(t.dataset.cmsTarget);
+      }
+    }));
 
     // Auto-switch to first allowed tab if staff member cannot access Overview
     if (isStaffUser) {
@@ -3565,12 +3581,27 @@
 
     function getFilteredInquiries() {
       const readSet = getReadInquiryIds();
-      if (currentInquiryFilter === "unread") {
-        return allInquiries.filter(r => !readSet.has(r.id));
-      } else if (currentInquiryFilter === "read") {
-        return allInquiries.filter(r => readSet.has(r.id));
-      }
-      return allInquiries;
+      const searchInput = document.getElementById("inquirySearchInput");
+      const query = searchInput ? searchInput.value.trim().toLowerCase() : "";
+
+      return allInquiries.filter(r => {
+        // 1. Status Filter
+        if (currentInquiryFilter === "unread" && readSet.has(r.id)) return false;
+        if (currentInquiryFilter === "read" && !readSet.has(r.id)) return false;
+
+        // 2. Search query filter (Email, Name, Subject, Message, Phone)
+        if (query) {
+          const email = (r.email || "").toLowerCase();
+          const name = (r.name || "").toLowerCase();
+          const subject = (r.subject || "").toLowerCase();
+          const message = (r.message || "").toLowerCase();
+          const phone = (r.phone || "").toLowerCase();
+          if (!email.includes(query) && !name.includes(query) && !subject.includes(query) && !message.includes(query) && !phone.includes(query)) {
+            return false;
+          }
+        }
+        return true;
+      });
     }
 
     function updateInquiryBulkBar() {
@@ -3656,12 +3687,18 @@
 
       updateInquiryCounts(totalCount, unreadCount, readCount);
 
-      // Filter inquiries according to current filter
+      // Filter inquiries according to current filter & search query
       const filtered = getFilteredInquiries();
 
       if (!filtered.length) {
+        const searchInput = document.getElementById("inquirySearchInput");
+        const query = searchInput ? searchInput.value.trim() : "";
+        let emptyMsg = `No ${currentInquiryFilter === "unread" ? "unread" : currentInquiryFilter === "read" ? "read" : ""} inquiries found.`;
+        if (query) {
+          emptyMsg = `No inquiries found matching "<strong>${query.replace(/</g, "&lt;").replace(/>/g, "&gt;")}</strong>".`;
+        }
         inquiryListEl.innerHTML = `<div style="background:#fff;padding:32px;border:1px solid #e2e8f0;border-radius:10px;text-align:center;color:#64748b;">
-          No ${currentInquiryFilter === "unread" ? "unread" : currentInquiryFilter === "read" ? "read" : ""} inquiries found.
+          ${emptyMsg}
         </div>`;
         updateInquiryBulkBar();
         return;
@@ -3864,6 +3901,27 @@
         renderInquiries();
       });
     });
+
+    // Inquiry Search Input Listener
+    const inqSearchInput = document.getElementById("inquirySearchInput");
+    const inqClearBtn = document.getElementById("inquirySearchClearBtn");
+    if (inqSearchInput) {
+      inqSearchInput.addEventListener("input", () => {
+        const val = inqSearchInput.value.trim();
+        if (inqClearBtn) inqClearBtn.style.display = val ? "inline-flex" : "none";
+        renderInquiries();
+      });
+    }
+    if (inqClearBtn) {
+      inqClearBtn.addEventListener("click", () => {
+        if (inqSearchInput) {
+          inqSearchInput.value = "";
+          inqSearchInput.focus();
+        }
+        inqClearBtn.style.display = "none";
+        renderInquiries();
+      });
+    }
 
     // ACTIVITY LOG
     const activityContainer = document.getElementById("activityLogContainer");
@@ -4079,19 +4137,49 @@
     // ==========================================
     // PAGE CONTENT CMS CONTROLLER
     // ==========================================
-    function initCmsSubTabs() {
+    function activateCmsPane(targetPane) {
+      if (!targetPane) return;
       const subTabs = document.querySelectorAll(".cms-page-tab-btn[data-pane]");
       const subPanes = document.querySelectorAll(".cms-sub-pane");
+
+      subTabs.forEach(b => {
+        b.classList.toggle("active", b.dataset.pane === targetPane);
+      });
+      subPanes.forEach(pane => {
+        pane.classList.toggle("active", pane.id === targetPane);
+      });
+    }
+    window.activateCmsPane = activateCmsPane;
+
+    function initCmsSubTabs() {
+      const subTabs = document.querySelectorAll(".cms-page-tab-btn[data-pane]");
+
       subTabs.forEach(btn => {
         btn.addEventListener("click", () => {
-          subTabs.forEach(b => b.classList.remove("active"));
-          btn.classList.add("active");
-          const targetPane = btn.dataset.pane;
-          subPanes.forEach(pane => {
-            pane.classList.toggle("active", pane.id === targetPane);
-          });
+          activateCmsPane(btn.dataset.pane);
         });
       });
+
+      // Check URL query parameters for direct tab/page linking
+      try {
+        const urlParams = new URLSearchParams(window.location.search);
+        const reqTab = urlParams.get("tab");
+        const reqPage = urlParams.get("page") || urlParams.get("cmsPage");
+        if (reqTab && typeof switchTab === "function") {
+          switchTab(reqTab);
+        }
+        if (reqPage) {
+          const map = {
+            "credentials": "cmsPaneCredentials",
+            "contact": "cmsPaneContact",
+            "about": "cmsPaneAbout",
+            "courses": "cmsPaneCourses",
+            "home": "cmsPaneHome"
+          };
+          const paneId = map[reqPage.toLowerCase()] || reqPage;
+          activateCmsPane(paneId);
+        }
+      } catch (e) {}
     }
 
     function setPhotoPreview(previewImgId, photoUrl, fallback) {
@@ -4477,6 +4565,14 @@
       if (window.AcademicCMS) {
         const content = window.AcademicCMS.getContent();
         populateCmsForm(content);
+      } else {
+        // AcademicCMS might not be ready yet — retry after a short delay
+        setTimeout(() => {
+          if (window.AcademicCMS) {
+            const content = window.AcademicCMS.getContent();
+            populateCmsForm(content);
+          }
+        }, 800);
       }
     }
 

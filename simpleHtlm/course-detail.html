@@ -98,15 +98,9 @@
           <!-- Prerequisites & Accreditation -->
           <div style="background: #ffffff; padding: 40px; border: 1px solid var(--border-light);">
             <h2 style="font-size: 1.85rem; color: #0b1b3d; margin-bottom: 16px;">Entry Prerequisites</h2>
-            <p id="coursePrereqText" style="font-size: 1.02rem; line-height: 1.8; color: #3b4b59; margin-bottom: 20px;">
+            <p id="coursePrereqText" style="font-size: 1.02rem; line-height: 1.8; color: #3b4b59; margin-bottom: 0;">
               Open to Ethiopian nationals and residents. Prior education credentials (Degree, Diploma, or Transcripts) must be verified during application.
             </p>
-            <div style="background: #e8f4fa; border-left: 4px solid var(--accent-orange); padding: 18px 22px;">
-              <strong style="color: #0b1b3d;">Accreditation Note:</strong>
-              <p style="font-size: 0.92rem; color: #334e68; margin-top: 6px; margin-bottom: 0;">
-                Upon successful completion, students receive a verified digital diploma endorsed by University in New York and Skillsoft Percipio. High-achieving learners (GPA 3.6+) are eligible for the Academic Excellence Medallion of Merit.
-              </p>
-            </div>
           </div>
 
         </div>
@@ -142,10 +136,6 @@
             <div style="margin-top: 25px;">
               <a href="#" id="applyNowBtn" class="btn btn-orange" style="width: 100%; text-align: center; margin-bottom: 12px;">Apply For This Program</a>
               <a href="contact.html" class="btn btn-black" style="width: 100%; text-align: center;">Inquire With Advisor</a>
-            </div>
-
-            <div id="courseFeeNotice" style="margin-top: 20px; font-size: 0.85rem; font-weight: 600; color: var(--primary-navy); text-align: center; padding: 10px 14px; background: #f0f7fc; border: 1px solid #d0e4f2; border-radius: 6px;">
-              Application fee: 15,000 ETB — payable via Telebirr or Bank Transfer.
             </div>
           </div>
         </aside>
@@ -229,18 +219,6 @@
       const feeEl = document.getElementById("courseFeeText");
       if (feeEl) feeEl.textContent = course.tuitionFee || "Subsidized Intake";
       document.getElementById("coursePrereqText").textContent = course.prerequisites || "Bachelor's, Diploma, or secondary credential required.";
-
-      // Load fee from admin settings (async — checks Supabase then localStorage)
-      window.AcademicDB.getSettings().then(settings => {
-        const feeNoticeEl = document.getElementById("courseFeeNotice");
-        if (feeNoticeEl) {
-          const fee = settings.applicationFee || (settings.applicationFeeAmount ? `${Number(settings.applicationFeeAmount).toLocaleString()} ETB` : "15,000 ETB");
-          feeNoticeEl.textContent = `Application fee: ${fee} — payable via Telebirr or Bank Transfer.`;
-        }
-      }).catch(() => {
-        const el = document.getElementById("courseFeeNotice");
-        if (el) el.textContent = "Application fee: 15,000 ETB — payable via Telebirr or Bank Transfer.";
-      });
 
       // Apply button pre-fill
       document.getElementById("applyNowBtn").href = `apply.html?course=${encodeURIComponent(course.title)}`;
