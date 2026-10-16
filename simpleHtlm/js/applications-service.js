@@ -200,7 +200,7 @@ window.ApplicationsService = {
       educationDocUrl: educationDocData && educationDocData.length < 200000 ? educationDocData : "assets/campus.jpg",
       
       signature: signatureText,
-      status: "pending",
+      status: "pending_review",
       submission_date: todayDate,
       paymentMethod: "",
       paymentRef: "",
@@ -214,7 +214,7 @@ window.ApplicationsService = {
           type: "submitted",
           title: "Application Submitted",
           time: new Date().toISOString(),
-          note: `Application registered for ${appData.courseApplied}. Pending application fee payment.`
+          note: `Application registered for ${appData.courseApplied}. Academic transcripts & FAYDA ID submitted for admissions review.`
         }
       ]
     };
@@ -230,7 +230,9 @@ window.ApplicationsService = {
     }
 
     try {
-      localStorage.setItem(window.AcademicDB.keys.PENDING_REF, applicationId);
+      localStorage.setItem("ae_last_submitted_ref", applicationId);
+      localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
+      localStorage.removeItem("ae_pending_payment_ref");
       sessionStorage.setItem("ae_current_app_" + applicationId, JSON.stringify(newApplication));
     } catch (e) {}
 
@@ -255,7 +257,7 @@ window.ApplicationsService = {
         qualification: newApplication.qualification,
         course_applied: newApplication.courseApplied,
         signature: newApplication.signature,
-        status: "pending",
+        status: "pending_review",
         submission_date: todayDate
       };
 
@@ -416,9 +418,25 @@ window.ApplicationsService = {
         let rejectionReason = row.rejection_reason || "";
         const rawNotes = row.internal_notes || "";
         if (!rejectionReason && rawNotes.includes("[Rejection Reason]:")) {
-          const match = rawNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:)))*)/i);
+          const match = rawNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:|\[Payment Deadline\]:|\[Payment Unsuccessful Reason\]:)))*)/i);
           if (match && match[1]) {
             rejectionReason = match[1].trim();
+          }
+        }
+
+        let paymentDeadline = row.payment_deadline || "";
+        if (!paymentDeadline && rawNotes.includes("[Payment Deadline]:")) {
+          const match = rawNotes.match(/\[Payment Deadline\]:\s*([^\n]+)/i);
+          if (match && match[1]) {
+            paymentDeadline = match[1].trim();
+          }
+        }
+
+        let paymentRejectionReason = row.payment_rejection_reason || "";
+        if (!paymentRejectionReason && rawNotes.includes("[Payment Unsuccessful Reason]:")) {
+          const match = rawNotes.match(/\[Payment Unsuccessful Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:|\[Payment Deadline\]:|\[Rejection Reason\]:)))*)/i);
+          if (match && match[1]) {
+            paymentRejectionReason = match[1].trim();
           }
         }
 
@@ -435,11 +453,13 @@ window.ApplicationsService = {
           place: row.place || "Addis Ababa",
           courseApplied: row.course_applied || "General Track",
           qualification: row.qualification || "",
-          status: row.status || "pending",
+          status: row.status || "pending_review",
           paymentMethod: row.payment_method || "",
           paymentRef: row.transaction_ref || "",
           internalNotes: rawNotes,
           rejectionReason: rejectionReason,
+          payment_deadline: paymentDeadline,
+          payment_rejection_reason: paymentRejectionReason,
           created_at: row.created_at || new Date().toISOString(),
           updated_at: row.updated_at || new Date().toISOString()
         };
@@ -463,12 +483,33 @@ window.ApplicationsService = {
           });
         }
 
-        if (mapped.status === "approved") {
+        if (mapped.status === "approved_for_payment") {
           mapped.events.push({
-            type: "approved",
-            title: "Application Approved",
+            type: "approved_for_payment",
+            title: "Academic Qualifications Approved",
             time: mapped.updated_at,
-            note: "Admissions verification completed successfully. Placement confirmed."
+            note: "Academic credentials and FAYDA ID approved. Candidate invited to finalize tuition payment."
+          });
+        } else if (mapped.status === "payment_verification_needed") {
+          mapped.events.push({
+            type: "payment_verification_needed",
+            title: "Payment Slip Submitted",
+            time: mapped.updated_at,
+            note: `Payment receipt submitted (Ref: ${mapped.paymentRef || "Pending"}). Final verification in progress.`
+          });
+        } else if (mapped.status === "accepted_paid" || mapped.status === "approved") {
+          mapped.events.push({
+            type: "accepted_paid",
+            title: "Accepted & Paid in Full",
+            time: mapped.updated_at,
+            note: "Tuition payment verified and admission confirmed. Welcome to Academic Excellence!"
+          });
+        } else if (mapped.status === "payment_unsuccessful") {
+          mapped.events.push({
+            type: "payment_unsuccessful",
+            title: "Payment Verification Notice",
+            time: mapped.updated_at,
+            note: rejectionReason ? `Payment issue: ${rejectionReason}` : "Payment verification unsuccessful. Please review and re-upload proof."
           });
         } else if (mapped.status === "rejected") {
           mapped.events.push({
@@ -533,15 +574,15 @@ window.ApplicationsService = {
       app.paymentRef = transactionRef.trim();
       app.paymentSlipName = slipFile ? slipFile.name : "";
       app.paymentSlipUrl = slipDataUrl && slipDataUrl.length < 200000 ? slipDataUrl : "assets/campus.jpg";
-      app.status = "under_review";
+      app.status = "payment_verification_needed";
       app.updated_at = new Date().toISOString();
 
       if (!app.events) app.events = [];
       app.events.push({
         type: "payment_uploaded",
-        title: "Payment Slip Uploaded",
+        title: "Payment Proof Submitted",
         time: new Date().toISOString(),
-        note: `Payment receipt submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}). Admissions team notified.`
+        note: `Payment receipt submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}). Awaiting final finance verification.`
       });
 
       apps[idx] = app;
@@ -571,7 +612,7 @@ window.ApplicationsService = {
       const patchPayload = {
         payment_method: paymentMethod,
         transaction_ref: transactionRef.trim(),
-        status: "under_review",
+        status: "payment_verification_needed",
         updated_at: new Date().toISOString()
       };
 
@@ -614,7 +655,7 @@ window.ApplicationsService = {
           qualification: targetApp.qualification || "Completed Degree",
           course_applied: targetApp.courseApplied || "Selected Intake Track",
           signature: targetApp.signature || targetApp.fullName || "Applicant",
-          status: "under_review",
+          status: "payment_verification_needed",
           payment_method: paymentMethod,
           transaction_ref: transactionRef.trim(),
           submission_date: targetApp.submission_date || new Date().toISOString().split("T")[0],

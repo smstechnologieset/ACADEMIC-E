@@ -499,13 +499,24 @@ window.AdminService = {
     return apps.find(a => a.id.toLowerCase() === id.toLowerCase().trim()) || null;
   },
 
-  async updateApplicationStatus(id, newStatus, internalNotes = "", rejectionReason = "") {
+  async updateApplicationStatus(id, newStatus, internalNotes = "", rejectionReason = "", options = {}) {
     let apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
     const idx = apps.findIndex(a => a.id && a.id.toLowerCase() === id.toLowerCase().trim());
     let targetApp = null;
 
     let finalNotes = internalNotes;
-    if (newStatus === "rejected" && rejectionReason) {
+    let paymentDeadline = options.deadline || null;
+    let paymentUnsuccessfulReason = options.paymentRejectionReason || "";
+
+    if (newStatus === "approved_for_payment") {
+      if (!paymentDeadline) {
+        paymentDeadline = new Date(Date.now() + 72 * 3600 * 1000).toISOString();
+      }
+      finalNotes = `[Payment Deadline]: ${paymentDeadline}${internalNotes ? '\n[Internal Notes]: ' + internalNotes : ''}`;
+    } else if (newStatus === "payment_unsuccessful") {
+      paymentUnsuccessfulReason = rejectionReason || options.paymentRejectionReason || "Payment receipt slip or transaction reference was invalid, illegible, or not found in CBE/Telebirr records.";
+      finalNotes = `[Payment Unsuccessful Reason]: ${paymentUnsuccessfulReason}${internalNotes ? '\n[Internal Notes]: ' + internalNotes : ''}`;
+    } else if (newStatus === "rejected" && rejectionReason) {
       finalNotes = `[Rejection Reason]: ${rejectionReason}${internalNotes ? '\n[Internal Notes]: ' + internalNotes : ''}`;
     }
 
@@ -513,16 +524,37 @@ window.AdminService = {
       const prevStatus = apps[idx].status;
       apps[idx].status = newStatus;
       apps[idx].internalNotes = finalNotes;
-      apps[idx].rejectionReason = rejectionReason;
+      if (paymentDeadline) apps[idx].payment_deadline = paymentDeadline;
+      if (paymentUnsuccessfulReason) apps[idx].payment_rejection_reason = paymentUnsuccessfulReason;
+      if (rejectionReason) apps[idx].rejectionReason = rejectionReason;
       apps[idx].updated_at = new Date().toISOString();
       if (!apps[idx].events) apps[idx].events = [];
+
+      let eventTitle = `Status Changed: ${newStatus.toUpperCase().replace(/_/g, " ")}`;
+      let eventNote = `Application transitioned from ${prevStatus} to ${newStatus}. ${internalNotes ? "Admin Note: " + internalNotes : ""}`;
+
+      if (newStatus === "approved_for_payment") {
+        eventTitle = "Academic Qualifications Approved";
+        eventNote = "Academic documents & FAYDA ID evaluated and approved. 72-hour seat reservation opened for tuition fee payment.";
+      } else if (newStatus === "payment_verification_needed") {
+        eventTitle = "Payment Slip Under Audit";
+        eventNote = "Payment proof uploaded. Finance department verification in progress.";
+      } else if (newStatus === "accepted_paid" || newStatus === "approved") {
+        eventTitle = "Accepted & Paid in Full";
+        eventNote = "Tuition payment verified and admission confirmed. Welcome to Academic Excellence!";
+      } else if (newStatus === "payment_unsuccessful") {
+        eventTitle = "Payment Verification Unsuccessful";
+        eventNote = `Payment receipt could not be verified. Reason: ${paymentUnsuccessfulReason}`;
+      } else if (newStatus === "rejected") {
+        eventTitle = "Application Not Accepted";
+        eventNote = `Academic prerequisites or verification criteria not met. Reason: ${rejectionReason}`;
+      }
+
       apps[idx].events.push({
         type: newStatus === "rejected" ? "rejected" : "status_changed",
-        title: `Status Changed: ${newStatus.toUpperCase().replace("_", " ")}`,
+        title: eventTitle,
         time: new Date().toISOString(),
-        note: newStatus === "rejected" && rejectionReason
-          ? `Application rejected. Reason: ${rejectionReason}`
-          : `Application transitioned from ${prevStatus} to ${newStatus}. ${internalNotes ? "Admin Note: " + internalNotes : ""}`
+        note: eventNote
       });
       targetApp = apps[idx];
       this._cachedApps = apps;
@@ -614,21 +646,43 @@ window.AdminService = {
 
     // Trigger email notification if applicant has an email
     if (applicantEmail) {
-      const emailType = newStatus === "approved" 
-        ? "status_approved" 
-        : (newStatus === "rejected" 
-          ? "status_rejected" 
-          : (newStatus === "cancelled" ? "cancelled" : null));
+      let emailType = null;
+      const cleanRef = (id || "").trim();
+      const origin = (typeof window !== "undefined" && window.location && window.location.origin) ? window.location.origin : "https://www.academicexcellences.com";
+      const payLink = `${origin}/payment-instructions.html?ref=${encodeURIComponent(cleanRef)}`;
+
+      let emailPayload = {
+        to: applicantEmail,
+        name: applicantName,
+        refId: cleanRef,
+        course: applicantCourse
+      };
+
+      if (newStatus === "approved_for_payment") {
+        emailType = "approved_for_payment";
+        emailPayload.type = "approved_for_payment";
+        emailPayload.deadline = paymentDeadline;
+        emailPayload.paymentLink = payLink;
+      } else if (newStatus === "accepted_paid" || newStatus === "approved") {
+        emailType = "accepted_paid";
+        emailPayload.type = "accepted_paid";
+      } else if (newStatus === "payment_unsuccessful") {
+        emailType = "payment_unsuccessful";
+        emailPayload.type = "payment_unsuccessful";
+        emailPayload.reason = paymentUnsuccessfulReason;
+        emailPayload.paymentLink = payLink;
+      } else if (newStatus === "rejected") {
+        emailType = "status_rejected";
+        emailPayload.type = "status_rejected";
+        emailPayload.reason = rejectionReason;
+      } else if (newStatus === "cancelled") {
+        emailType = "cancelled";
+        emailPayload.type = "cancelled";
+      }
+
       if (emailType) {
         try {
-          await this._dispatchEmailNotification({
-            type: emailType,
-            to: applicantEmail,
-            name: applicantName,
-            refId: (id || "").trim(),
-            course: applicantCourse,
-            reason: rejectionReason
-          });
+          await this._dispatchEmailNotification(emailPayload);
         } catch (emailErr) {
           console.error("[AdminService] Status change email notification error:", emailErr);
         }
@@ -736,7 +790,7 @@ window.AdminService = {
     // 2. Direct fetch with endpoint resolution
     const endpoint = (window.AcademicDB && typeof window.AcademicDB.getEmailApiEndpoint === "function")
       ? window.AcademicDB.getEmailApiEndpoint()
-      : "https://www.academicexcellences.com/api/send-email";
+      : "/api/send-email";
 
     const fetchWithTimeout = (url, timeoutMs = 8000) => {
       const controller = new AbortController();

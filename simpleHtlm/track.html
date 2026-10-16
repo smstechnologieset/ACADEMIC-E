@@ -103,25 +103,25 @@
             <div class="status-timeline" id="trackStepper">
               <div class="status-node completed" id="stepNode1">
                 <div class="status-icon">&check;</div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #0b1b3d; margin-top: 6px;">Submitted</div>
-                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep1">Aug 28</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #0b1b3d; margin-top: 6px;">1. Submitted</div>
+                <div style="font-size: 0.75rem; color: #64748b;" id="timeStep1">Submitted</div>
               </div>
 
               <div class="status-node" id="stepNode2">
                 <div class="status-icon">2</div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Payment Verification</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;" id="stepNode2Title">2. Document Review</div>
                 <div style="font-size: 0.75rem; color: #64748b;" id="timeStep2">&mdash;</div>
               </div>
 
               <div class="status-node" id="stepNode3">
                 <div class="status-icon">3</div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Admissions Review</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;" id="stepNode3Title">3. Tuition Payment</div>
                 <div style="font-size: 0.75rem; color: #64748b;" id="timeStep3">&mdash;</div>
               </div>
 
               <div class="status-node" id="stepNode4">
                 <div class="status-icon">4</div>
-                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;">Enrolled / Accepted</div>
+                <div style="font-size: 0.85rem; font-weight: 700; color: #64748b; margin-top: 6px;" id="stepNode4Title">4. Final Enrollment</div>
                 <div style="font-size: 0.75rem; color: #64748b;" id="timeStep4">&mdash;</div>
               </div>
             </div>
@@ -132,38 +132,124 @@
               <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 18px; font-size: 0.92rem;">
                 <div>
                   <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Full Name</div>
-                  <strong id="trackFullName" style="color: #0b1b3d;">Dawit Haile Tadesse</strong>
+                  <strong id="trackFullName" style="color: #0b1b3d;">&mdash;</strong>
                 </div>
                 <div>
                   <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Enrolled Track</div>
-                  <strong id="trackCourse" style="color: #0b1b3d;">Artificial Intelligence (AI)</strong>
+                  <strong id="trackCourse" style="color: #0b1b3d;">&mdash;</strong>
                 </div>
                 <div>
                   <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Registered Email</div>
-                  <span id="trackEmail">dawit.tadesse@aau.edu.et</span>
+                  <span id="trackEmail">&mdash;</span>
                 </div>
                 <div>
                   <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">FAYDA ID / FIN</div>
-                  <span id="trackFayda">FIN-ET-8923-0192</span>
+                  <span id="trackFayda">&mdash;</span>
                 </div>
                 <div>
                   <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Prior Qualification</div>
-                  <span id="trackQualification">Bachelor's Degree</span>
+                  <span id="trackQualification">&mdash;</span>
                 </div>
                 <div>
-                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Payment Status</div>
-                  <span id="trackPaymentSummary">Completed (CBE)</span>
+                  <div style="color: #64748b; font-size: 0.8rem; text-transform: uppercase; font-weight: 700;">Application &amp; Payment Status</div>
+                  <span id="trackPaymentSummary">&mdash;</span>
                 </div>
               </div>
             </div>
 
-            <!-- Action Prompt Banner (If pending payment) -->
-            <div id="pendingPaymentBanner" style="display: none; background: #fffaf0; border-left: 4px solid #dd6b20; padding: 20px; margin-bottom: 30px;">
-              <h4 style="color: #9c4221; font-size: 1.15rem; margin-bottom: 6px;">Payment Required to Finalize Review</h4>
-              <p style="font-size: 0.95rem; color: #7b341e; margin-bottom: 14px;">
-                Your application has been received, but the intake processing fee has not yet been verified. Please transfer the fee and upload your payment receipt.
-              </p>
-              <a href="#" id="completePaymentBtn" class="btn btn-orange">Upload Payment Slip Now &rarr;</a>
+            <!-- 1. Document Review Pending Banner -->
+            <div id="pendingReviewBanner" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-left: 5px solid #3b82f6; padding: 22px; margin-bottom: 30px; border-radius: 6px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background: #dbeafe; color: #1d4ed8; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                  &#128196;
+                </div>
+                <div>
+                  <span style="display: inline-block; background: #dbeafe; color: #1e40af; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;">Admissions Stage 1 of 2</span>
+                  <h4 style="color: #1e40af; font-size: 1.2rem; margin: 0 0 6px 0;">Academic Documents &amp; FAYDA ID Under Review</h4>
+                  <p style="font-size: 0.95rem; color: #1e3a8a; margin: 0 0 8px 0; line-height: 1.6;">
+                    Your application, academic transcripts, and FAYDA ID credentials have been safely received and are undergoing review by our admissions panel.
+                  </p>
+                  <p style="font-size: 0.88rem; color: #2563eb; margin: 0; font-weight: 600;">
+                    &bull; No tuition payment is required at this stage. Once your academic documents are evaluated and approved, you will receive an acceptance email with payment instructions to confirm your enrollment within a 72-hour seat reservation window.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Approved for Payment Banner (72-hour window) -->
+            <div id="approvedForPaymentBanner" style="display: none; background: linear-gradient(135deg, #f0fdf4 0%, #ecfdf5 100%); border: 1px solid #86efac; border-left: 5px solid #10b981; padding: 24px; margin-bottom: 30px; border-radius: 6px; box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);">
+              <div style="display: flex; align-items: flex-start; gap: 16px;">
+                <div style="width: 46px; height: 46px; border-radius: 50%; background: #d1fae5; color: #047857; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; flex-shrink: 0;">
+                  &#127881;
+                </div>
+                <div style="flex: 1;">
+                  <span style="display: inline-block; background: #bbf7d0; color: #166534; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;">Action Required &bull; 72-Hour Seat Reservation Window</span>
+                  <h4 style="color: #065f46; font-size: 1.3rem; margin: 0 0 8px 0;">Congratulations! You Have Been Accepted</h4>
+                  <p style="font-size: 0.95rem; color: #064e3b; margin: 0 0 12px 0; line-height: 1.6;">
+                    Your academic qualifications and FAYDA credentials have been evaluated and approved! Your program seat is now reserved for <strong>72 hours</strong>. Complete your tuition payment via Telebirr or CBE Bank Transfer and upload your receipt slip before the reservation window expires to guarantee your placement.
+                  </p>
+                  
+                  <div style="display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 14px;">
+                    <a href="#" id="trackProceedPaymentBtn" class="btn btn-orange" style="font-weight: 700; padding: 12px 24px; font-size: 0.95rem;">Proceed to Payment &amp; Upload Slip &rarr;</a>
+                    <span id="trackReservationCountdown" style="font-size: 0.88rem; font-weight: 700; color: #b45309; background: #fef3c7; border: 1px solid #fde68a; padding: 8px 16px; border-radius: 4px;">
+                      ⏱ 72-Hour Seat Window Active
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Payment Verification Needed Banner -->
+            <div id="paymentVerificationNeededBanner" style="display: none; background: #fffaf0; border: 1px solid #fed7aa; border-left: 5px solid #f97316; padding: 22px; margin-bottom: 30px; border-radius: 6px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background: #ffedd5; color: #c2410c; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; flex-shrink: 0;">
+                  &#9203;
+                </div>
+                <div>
+                  <span style="display: inline-block; background: #fed7aa; color: #9a3412; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;">Finance Audit</span>
+                  <h4 style="color: #9a3412; font-size: 1.2rem; margin: 0 0 6px 0;">Payment Slip Under Finance Audit</h4>
+                  <p style="font-size: 0.95rem; color: #7c2d12; margin: 0 0 6px 0; line-height: 1.6;">
+                    We have received your payment proof slip. Our finance team is currently cross-checking the transaction reference against bank and Telebirr records. Once validated, your official acceptance letter and LMS access credentials will be delivered.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Payment Unsuccessful Banner -->
+            <div id="paymentUnsuccessfulBanner" style="display: none; background: #fff5f5; border: 1px solid #fecaca; border-left: 5px solid #dc2626; padding: 22px; margin-bottom: 30px; border-radius: 6px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 42px; height: 42px; border-radius: 50%; background: #fee2e2; color: #b91c1c; display: flex; align-items: center; justify-content: center; font-size: 1.3rem; font-weight: 800; flex-shrink: 0;">
+                  &#9888;
+                </div>
+                <div style="flex: 1;">
+                  <span style="display: inline-block; background: #fecaca; color: #991b1b; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;">Action Required</span>
+                  <h4 style="color: #991b1b; font-size: 1.2rem; margin: 0 0 6px 0;">Payment Verification Unsuccessful</h4>
+                  <p style="font-size: 0.95rem; color: #7f1d1d; margin: 0 0 10px 0; line-height: 1.6;">
+                    The finance desk was unable to verify your previous payment submission.
+                  </p>
+                  <div style="background: #ffffff; border: 1px solid #fca5a5; padding: 12px 16px; border-radius: 6px; margin-bottom: 14px;">
+                    <div style="font-size: 0.78rem; text-transform: uppercase; font-weight: 700; color: #991b1b; letter-spacing: 0.5px;">Finance Desk Reason:</div>
+                    <div id="trackPaymentFailReason" style="margin-top: 4px; font-size: 0.95rem; color: #1e293b; font-weight: 600;">Slip was illegible or transaction not found.</div>
+                  </div>
+                  <a href="#" id="trackReuploadPaymentBtn" class="btn btn-orange" style="font-weight: 700; padding: 10px 22px;">Re-upload Correct Payment Proof &rarr;</a>
+                </div>
+              </div>
+            </div>
+
+            <!-- 5. Officially Enrolled / Accepted Banner -->
+            <div id="acceptedPaidBanner" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-left: 5px solid #059669; padding: 24px; margin-bottom: 30px; border-radius: 6px;">
+              <div style="display: flex; align-items: flex-start; gap: 14px;">
+                <div style="width: 44px; height: 44px; border-radius: 50%; background: #d1fae5; color: #047857; display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 800; flex-shrink: 0;">
+                  &#10003;
+                </div>
+                <div>
+                  <span style="display: inline-block; background: #bbf7d0; color: #166534; font-size: 0.75rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.6px; padding: 3px 8px; border-radius: 4px; margin-bottom: 6px;">Officially Enrolled</span>
+                  <h4 style="color: #065f46; font-size: 1.25rem; margin: 0 0 6px 0;">Congratulations! Enrollment Confirmed</h4>
+                  <p style="font-size: 0.95rem; color: #064e3b; margin: 0; line-height: 1.6;">
+                    Your tuition payment has been verified by the finance department, and your enrollment is complete. Welcome to Academic Excellence! Check your email for orientation details and LMS access credentials.
+                  </p>
+                </div>
+              </div>
             </div>
 
             <!-- Rejection Notice Banner (If rejected) -->
@@ -256,6 +342,7 @@
       const queryInput = document.getElementById("trackQueryInput");
       const errNotice = document.getElementById("searchErrorNotice");
       const resultWrap = document.getElementById("trackingResultWrapper");
+      let countdownTimerInterval = null;
 
       // Auto-search if ref param present
       const urlParams = new URLSearchParams(window.location.search);
@@ -303,23 +390,46 @@
       }
 
       function renderAppDetails(app) {
+        if (countdownTimerInterval) {
+          clearInterval(countdownTimerInterval);
+          countdownTimerInterval = null;
+        }
+
         resultWrap.style.display = "block";
         document.getElementById("trackAppId").textContent = app.id;
         document.getElementById("trackFullName").textContent = app.fullName || `${app.firstName} ${app.lastName}`;
         document.getElementById("trackCourse").textContent = app.courseApplied;
         document.getElementById("trackEmail").textContent = app.email;
-        document.getElementById("trackFayda").textContent = app.faydaFileName ? "Uploaded & Verified" : (app.faydaIdNumber || "Verified");
+        document.getElementById("trackFayda").textContent = app.faydaFileName ? "Uploaded & Attached" : (app.faydaIdNumber || "Verified");
         document.getElementById("trackQualification").textContent = app.fieldOfStudy ? `${app.qualification} (${app.fieldOfStudy})` : (app.qualification || "Completed");
+
+        // Format nice status label
+        const statusDisplayNames = {
+          "pending_review": "Documents Under Review",
+          "approved_for_payment": "Approved - 72h Payment Window",
+          "payment_verification_needed": "Payment Slip Under Audit",
+          "payment_unsuccessful": "Payment Unsuccessful",
+          "accepted_paid": "Officially Enrolled",
+          "approved": "Officially Enrolled",
+          "under_review": "Under Review",
+          "pending": "Documents Under Review",
+          "rejected": "Rejected",
+          "cancelled": "Cancelled"
+        };
 
         // Badge & Stepper Status
         const badge = document.getElementById("trackStatusBadge");
         badge.className = `badge-status status-${app.status}`;
-        badge.textContent = app.status.replace("_", " ").toUpperCase();
+        badge.textContent = statusDisplayNames[app.status] || app.status.replace("_", " ").toUpperCase();
 
         const node1 = document.getElementById("stepNode1");
         const node2 = document.getElementById("stepNode2");
         const node3 = document.getElementById("stepNode3");
         const node4 = document.getElementById("stepNode4");
+
+        const node2Title = document.getElementById("stepNode2Title");
+        const node3Title = document.getElementById("stepNode3Title");
+        const node4Title = document.getElementById("stepNode4Title");
 
         // Reset stepper nodes
         [node1, node2, node3, node4].forEach(n => {
@@ -329,41 +439,143 @@
         node2.querySelector(".status-icon").innerHTML = "2";
         node3.querySelector(".status-icon").innerHTML = "3";
         node4.querySelector(".status-icon").innerHTML = "4";
-        const step3Label = node3.querySelector("div[style*='font-weight: 700']");
-        if (step3Label) step3Label.textContent = "Admissions Review";
 
-        const pendingBanner = document.getElementById("pendingPaymentBanner");
+        node2Title.textContent = "2. Document Review";
+        node3Title.textContent = "3. Tuition Payment";
+        node4Title.textContent = "4. Final Enrollment";
+
+        // Banners
+        const pendingReviewBanner = document.getElementById("pendingReviewBanner");
+        const approvedForPaymentBanner = document.getElementById("approvedForPaymentBanner");
+        const paymentVerificationNeededBanner = document.getElementById("paymentVerificationNeededBanner");
+        const paymentUnsuccessfulBanner = document.getElementById("paymentUnsuccessfulBanner");
+        const acceptedPaidBanner = document.getElementById("acceptedPaidBanner");
         const rejectedBanner = document.getElementById("rejectedStatusBanner");
-        if (rejectedBanner) rejectedBanner.style.display = "none";
 
-        if (app.status === "pending") {
+        // Hide all banners first
+        [pendingReviewBanner, approvedForPaymentBanner, paymentVerificationNeededBanner, paymentUnsuccessfulBanner, acceptedPaidBanner, rejectedBanner].forEach(b => {
+          if (b) b.style.display = "none";
+        });
+
+        // Set Step 1 date
+        const dateSubmittedStr = app.created_at ? new Date(app.created_at).toLocaleDateString() : (app.dateSubmitted || "Completed");
+        document.getElementById("timeStep1").textContent = dateSubmittedStr;
+
+        // Route by status
+        if (app.status === "pending_review" || (app.status === "pending" && !app.paymentProofPath && !app.paymentSlipFileName)) {
+          // Stage 1: Document Review
           node1.className = "status-node completed";
           node2.className = "status-node active";
-          pendingBanner.style.display = "block";
-          document.getElementById("completePaymentBtn").href = `payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
-          document.getElementById("trackPaymentSummary").textContent = "Pending Payment Slip Upload";
-        } else if (app.status === "under_review") {
+          node2Title.textContent = "2. Documents Under Review";
+          document.getElementById("timeStep2").textContent = "In Progress";
+          document.getElementById("timeStep3").textContent = "Locked";
+          document.getElementById("timeStep4").textContent = "Pending";
+
+          if (pendingReviewBanner) pendingReviewBanner.style.display = "block";
+          document.getElementById("trackPaymentSummary").textContent = "Stage 1: Transcripts & FAYDA Reviewing (Free)";
+
+        } else if (app.status === "approved_for_payment") {
+          // Stage 2: 72-Hour Payment Window
           node1.className = "status-node completed";
           node2.className = "status-node completed";
+          node2.querySelector(".status-icon").innerHTML = "&check;";
           node3.className = "status-node active";
-          pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = `Slip Uploaded (${app.paymentMethod || "Bank / Mobile"})`;
-        } else if (app.status === "approved") {
+          node3Title.textContent = "3. Payment (72h Window)";
+          document.getElementById("timeStep2").textContent = "Approved \u2713";
+          document.getElementById("timeStep3").textContent = "Window Open";
+          document.getElementById("timeStep4").textContent = "Pending";
+
+          if (approvedForPaymentBanner) approvedForPaymentBanner.style.display = "block";
+          const proceedBtn = document.getElementById("trackProceedPaymentBtn");
+          if (proceedBtn) proceedBtn.href = `payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+
+          // 72-hour countdown calculation
+          const countdownEl = document.getElementById("trackReservationCountdown");
+          const baseTime = app.payment_deadline ? new Date(app.payment_deadline).getTime() : 
+                           (app.updated_at ? new Date(app.updated_at).getTime() + (72 * 3600 * 1000) : (Date.now() + 72 * 3600 * 1000));
+          
+          function updateTrackCountdown() {
+            const now = Date.now();
+            const diff = baseTime - now;
+            if (diff <= 0) {
+              if (countdownEl) countdownEl.textContent = "⚠️ Seat Window Expired - Contact Admissions";
+              return;
+            }
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            if (countdownEl) {
+              countdownEl.textContent = `⏱ Seat Reserved: ${hours}h ${mins}m ${secs}s Remaining`;
+            }
+          }
+          updateTrackCountdown();
+          countdownTimerInterval = setInterval(updateTrackCountdown, 1000);
+
+          document.getElementById("trackPaymentSummary").textContent = "Approved for Admission \u2014 Tuition Payment Due (72h Window)";
+
+        } else if (app.status === "payment_verification_needed" || (app.status === "under_review" && (app.paymentProofPath || app.paymentSlipFileName))) {
+          // Stage 3: Payment Proof Submitted, In Audit
           node1.className = "status-node completed";
           node2.className = "status-node completed";
-          node3.className = "status-node completed";
-          node4.className = "status-node completed";
-          pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = `Verified & Confirmed (${app.paymentMethod || "Bank / Mobile"})`;
-        } else if (app.status === "rejected") {
+          node2.querySelector(".status-icon").innerHTML = "&check;";
+          node3.className = "status-node active";
+          node3Title.textContent = "3. Payment Verification";
+          document.getElementById("timeStep2").textContent = "Approved \u2713";
+          document.getElementById("timeStep3").textContent = "Auditing Slip";
+          document.getElementById("timeStep4").textContent = "Pending";
+
+          if (paymentVerificationNeededBanner) paymentVerificationNeededBanner.style.display = "block";
+          document.getElementById("trackPaymentSummary").textContent = `Slip Uploaded (${app.paymentMethod || "Bank / Mobile"}) \u2014 In Audit`;
+
+        } else if (app.status === "payment_unsuccessful") {
+          // Payment verification failed
           node1.className = "status-node completed";
-          node2.className = (app.paymentMethod || app.paymentRef) ? "status-node completed" : "status-node";
+          node2.className = "status-node completed";
+          node2.querySelector(".status-icon").innerHTML = "&check;";
           node3.className = "status-node rejected";
           node3.querySelector(".status-icon").innerHTML = "&#10005;";
-          if (step3Label) step3Label.textContent = "Decision: Rejected";
-          node4.className = "status-node";
-          pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = "Decision: Rejected";
+          node3Title.textContent = "3. Payment Unsuccessful";
+          document.getElementById("timeStep2").textContent = "Approved \u2713";
+          document.getElementById("timeStep3").textContent = "Action Needed";
+          document.getElementById("timeStep4").textContent = "Pending";
+
+          if (paymentUnsuccessfulBanner) {
+            paymentUnsuccessfulBanner.style.display = "block";
+            const reasonText = document.getElementById("trackPaymentFailReason");
+            if (reasonText) {
+              reasonText.textContent = app.payment_rejection_reason || app.rejectionReason || "Payment proof slip was invalid, illegible, or transaction not matching CBE/Telebirr records.";
+            }
+          }
+          const reuploadBtn = document.getElementById("trackReuploadPaymentBtn");
+          if (reuploadBtn) reuploadBtn.href = `payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+          document.getElementById("trackPaymentSummary").textContent = "Payment Verification Unsuccessful \u2014 Re-upload Required";
+
+        } else if (app.status === "accepted_paid" || app.status === "approved") {
+          // Final Acceptance & Enrollment
+          node1.className = "status-node completed";
+          node2.className = "status-node completed";
+          node2.querySelector(".status-icon").innerHTML = "&check;";
+          node3.className = "status-node completed";
+          node3.querySelector(".status-icon").innerHTML = "&check;";
+          node4.className = "status-node completed";
+          node4.querySelector(".status-icon").innerHTML = "&check;";
+          node4Title.textContent = "4. Officially Enrolled";
+          document.getElementById("timeStep2").textContent = "Approved \u2713";
+          document.getElementById("timeStep3").textContent = "Verified \u2713";
+          document.getElementById("timeStep4").textContent = "Enrolled \u2713";
+
+          if (acceptedPaidBanner) acceptedPaidBanner.style.display = "block";
+          document.getElementById("trackPaymentSummary").textContent = `Confirmed & Enrolled (${app.paymentMethod || "Bank / Mobile"})`;
+
+        } else if (app.status === "rejected") {
+          // Academic Document Rejection
+          node1.className = "status-node completed";
+          node2.className = "status-node rejected";
+          node2.querySelector(".status-icon").innerHTML = "&#10005;";
+          node2Title.textContent = "2. Decision: Rejected";
+          document.getElementById("timeStep2").textContent = "Not Accepted";
+          document.getElementById("timeStep3").textContent = "&mdash;";
+          document.getElementById("timeStep4").textContent = "&mdash;";
 
           if (rejectedBanner) {
             rejectedBanner.style.display = "block";
@@ -377,11 +589,12 @@
               reasonWrap.style.display = "none";
             }
           }
+          document.getElementById("trackPaymentSummary").textContent = "Academic Decision: Not Accepted";
+
         } else {
           // Cancelled
           node1.className = "status-node completed";
-          pendingBanner.style.display = "none";
-          document.getElementById("trackPaymentSummary").textContent = app.status.toUpperCase();
+          document.getElementById("trackPaymentSummary").textContent = (app.status || "UNKNOWN").toUpperCase();
         }
 
         // Timeline events
@@ -389,7 +602,7 @@
         if (app.events && app.events.length > 0) {
           eventsContainer.innerHTML = app.events.map(ev => `
             <div class="event-item">
-              <div class="event-time">${window.AcademicDB.formatDate(ev.time)}</div>
+              <div class="event-time">${window.AcademicDB ? window.AcademicDB.formatDate(ev.time) : new Date(ev.time).toLocaleDateString()}</div>
               <div class="event-title">${ev.title}</div>
               <div style="font-size: 0.88rem; color: #475569; margin-top: 4px;">${ev.note || ""}</div>
             </div>

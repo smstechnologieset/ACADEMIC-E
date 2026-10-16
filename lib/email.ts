@@ -136,22 +136,62 @@ export async function sendApplicationReceivedEmail(
   refId: string,
   course: string
 ): Promise<boolean> {
-  const subject = `Application Received — Reference ${refId}`;
+  const subject = `Application Received — Reference ${refId} (Under Document Review)`;
   const html = baseWrapper(`
     <p>Dear <strong>${name}</strong>,</p>
-    <p>Thank you for submitting your application to Academic Excellence. We have received your dossier and it is now being processed.</p>
-    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-      <p style="margin: 0; font-size: 13px;"><strong>Reference ID:</strong> <code style="background: #dbeafe; padding: 2px 8px; border-radius: 4px; font-size: 15px; font-weight: 700; color: #1e40af;">${refId}</code></p>
-      <p style="margin: 8px 0 0 0; font-size: 13px;"><strong>Program:</strong> ${course}</p>
+    <p>Thank you for applying to Academic Excellence. Your application and uploaded credentials (FAYDA ID and Academic Transcripts) have been securely received and registered in our admissions system.</p>
+    <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+      <p style="margin: 0; font-size: 13px; color: #1e3a8a;"><strong>YOUR APPLICATION REFERENCE ID:</strong></p>
+      <p style="margin: 6px 0 0 0; font-size: 22px; font-weight: 800; font-family: monospace; color: #1d4ed8; letter-spacing: 1px;">${refId}</p>
+      <p style="margin: 10px 0 0 0; font-size: 14px; color: #334155;"><strong>Program Track:</strong> ${course}</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #0369a1;"><strong>Current Stage:</strong> Stage 1 — Academic Document Verification</p>
     </div>
-    <p style="font-size: 13px;">📌 <strong>Save your Reference ID.</strong> You will need it to track your application status and complete payment verification.</p>
-    <p style="font-size: 13px;">Next steps:</p>
-    <ol style="font-size: 13px; padding-left: 20px;">
-      <li>Complete your payment following the instructions on our website</li>
-      <li>Upload your payment receipt/screenshot</li>
-      <li>Track your status at <strong>academicexcellences.com/track</strong></li>
-    </ol>
-    <p style="font-size: 13px; color: #64748b;">If you have questions, reply to this email or contact our admissions desk.</p>
+    <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px;">
+      <p style="margin: 0; font-size: 14px; color: #0f172a; font-weight: 600;">ℹ️ Important: No Payment is Required at This Stage</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #475569; line-height: 1.6;">Our admissions committee verifies educational transcripts and national identity before accepting any fees. If your qualifications meet our curriculum standards, you will receive an official approval email with a payment invitation to finalize your enrollment.</p>
+    </div>
+    <p style="font-size: 14px;">You can check your real-time application status anytime at: <br />
+      <a href="https://www.academicexcellences.com/track.html?ref=${encodeURIComponent(refId)}" style="display: inline-block; margin-top: 8px; background: #0b1b3d; color: #ffffff; padding: 10px 20px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 13px;">Track Your Application Status →</a>
+    </p>
+    <p style="font-size: 13px; color: #64748b; margin-top: 25px;">If you have any questions, reply directly to this email or contact admissions desk.</p>
+  `);
+
+  return sendEmail(to, subject, html);
+}
+
+export async function sendApprovedForPaymentEmail(
+  to: string,
+  name: string,
+  refId: string,
+  course: string
+): Promise<boolean> {
+  const subject = `🎉 Congratulations! Your Application is Approved — Complete Your Enrollment (${refId})`;
+  const html = baseWrapper(`
+    <p>Dear <strong>${name}</strong>,</p>
+    <p>Congratulations! We are delighted to inform you that your academic documents and FAYDA ID have been reviewed and <strong>Approved for Admission</strong> into <strong>${course}</strong>.</p>
+    
+    <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+      <p style="margin: 0; font-size: 14px; font-weight: 700; color: #065f46;">ACADEMIC QUALIFICATIONS APPROVED</p>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #334155;"><strong>Reference:</strong> ${refId} • <strong>Program:</strong> ${course}</p>
+    </div>
+
+    <div style="background: #fefce8; border: 1px solid #fef08a; border-left: 4px solid #eab308; padding: 16px 20px; border-radius: 0 8px 8px 0; margin-bottom: 24px;">
+      <p style="margin: 0; font-size: 14px; font-weight: 700; color: #854d0e;">⏱️ 72-Hour Seat Reservation Notice</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #713f12; line-height: 1.6;">
+        Your seat in this upcoming intake is temporarily reserved for <strong>72 hours</strong>. To secure your enrollment and unlock your Skillsoft Percipio student access, please finalize your subsidized tuition fee payment within this window.
+      </p>
+    </div>
+
+    <p style="text-align: center; margin: 30px 0;">
+      <a href="https://www.academicexcellences.com/payment-instructions.html?ref=${encodeURIComponent(refId)}" style="background: #16a34a; color: #ffffff; padding: 14px 28px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 15px; display: inline-block; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.3);">
+        Complete Your Payment &amp; Confirm Seat →
+      </a>
+    </p>
+
+    <p style="font-size: 13px; color: #475569;">
+      We accept local payment via <strong>Telebirr</strong>, <strong>Commercial Bank of Ethiopia (CBE)</strong>, <strong>Awash Bank</strong>, and <strong>Bank of Abyssinia</strong>. After transferring, simply upload your transaction slip screenshot on the payment page.
+    </p>
+    <p style="font-size: 13px; color: #64748b; margin-top: 25px;">Welcome to the Academic Excellence community!</p>
   `);
 
   return sendEmail(to, subject, html);
@@ -162,15 +202,16 @@ export async function sendPaymentReceivedEmail(
   name: string,
   refId: string
 ): Promise<boolean> {
-  const subject = `Payment Received — Application ${refId} Under Review`;
+  const subject = `Payment Slip Received — Final Verification in Progress (${refId})`;
   const html = baseWrapper(`
     <p>Dear <strong>${name}</strong>,</p>
-    <p>We have received your payment submission for application <strong>${refId}</strong>. Your application is now <strong>Under Review</strong> by our Admissions Committee.</p>
-    <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-      <p style="margin: 0; font-size: 13px;">⏳ <strong>Status:</strong> Under Review</p>
-      <p style="margin: 8px 0 0 0; font-size: 13px;">Our team will verify your payment and review your academic credentials. This typically takes 2-5 business days.</p>
+    <p>We have successfully received your payment proof submission for Application <strong>${refId}</strong>. Your payment receipt is now undergoing final audit with our finance records.</p>
+    <div style="background: #fefce8; border-left: 4px solid #eab308; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+      <p style="margin: 0; font-size: 13px; color: #854d0e;"><strong>Application Reference:</strong> ${refId}</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #854d0e;"><strong>Stage:</strong> Final Payment Verification in progress</p>
     </div>
-    <p style="font-size: 13px;">You can track your application status anytime at <strong>academicexcellences.com/track</strong> using your Reference ID.</p>
+    <p style="font-size: 14px;">Once your bank or Telebirr transaction confirmation is verified, your status will update to <strong>Accepted and Paid in Full</strong>, and your student onboarding package will be sent.</p>
+    <p style="font-size: 14px;">You can monitor your live status at: <a href="https://www.academicexcellences.com/track.html?ref=${encodeURIComponent(refId)}" style="color: #2563eb; font-weight: 600;">Track Application</a>.</p>
   `);
 
   return sendEmail(to, subject, html);
@@ -182,22 +223,59 @@ export async function sendStatusApprovedEmail(
   refId: string,
   course: string
 ): Promise<boolean> {
-  const subject = `🎉 Congratulations! Application ${refId} Approved`;
+  const subject = `🎓 Welcome to Academic Excellence! Enrollment Confirmed & Paid in Full (${refId})`;
   const html = baseWrapper(`
     <p>Dear <strong>${name}</strong>,</p>
-    <p>We are delighted to inform you that following careful review by the Admissions Committee, your application has been <strong style="color: #16a34a;">APPROVED</strong>.</p>
-    <div style="background: #f0fdf4; border-left: 4px solid #16a34a; padding: 16px 20px; border-radius: 0 8px 8px 0; margin: 20px 0;">
-      <p style="margin: 0; font-size: 13px;">✅ <strong>Reference:</strong> ${refId}</p>
-      <p style="margin: 8px 0 0 0; font-size: 13px;">📚 <strong>Program:</strong> ${course}</p>
-      <p style="margin: 8px 0 0 0; font-size: 13px;">🎓 <strong>Status:</strong> Approved — Enrollment Confirmed</p>
+    <p>Congratulations! Your payment has been verified successfully, and your admission is officially <strong>Accepted and Paid in Full</strong>.</p>
+    <div style="background: #ecfdf5; border-left: 4px solid #10b981; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+      <p style="margin: 0; font-size: 14px; font-weight: 700; color: #065f46;">ADMISSION &amp; PAYMENT CONFIRMED</p>
+      <p style="margin: 8px 0 0 0; font-size: 13px; color: #334155;"><strong>Reference:</strong> ${refId} • <strong>Program:</strong> ${course}</p>
+      <p style="margin: 6px 0 0 0; font-size: 13px; color: #047857;"><strong>Status:</strong> Enrolled Candidate</p>
     </div>
-    <p style="font-size: 13px;">Our academic advisors will contact you shortly with:</p>
-    <ul style="font-size: 13px; padding-left: 20px;">
-      <li>Enrollment onboarding details</li>
-      <li>Skillsoft Percipio platform credentials</li>
-      <li>Timetable and study schedule</li>
-    </ul>
-    <p style="font-size: 13px; color: #64748b;">Welcome to Academic Excellence! We look forward to supporting your educational journey.</p>
+    <p style="font-size: 14px;">Our student success team will contact you shortly with your official credentials for the Skillsoft Percipio learning platform, curriculum syllabus, and orientation timetable.</p>
+    <p style="font-size: 13px; color: #64748b; margin-top: 25px;">Welcome to Academic Excellence! We look forward to supporting your educational journey.</p>
+  `);
+
+  return sendEmail(to, subject, html);
+}
+
+export async function sendPaymentUnsuccessfulEmail(
+  to: string,
+  name: string,
+  refId: string,
+  course?: string,
+  reason?: string
+): Promise<boolean> {
+  const rawReason = (reason || "The submitted transaction reference could not be matched with bank deposit records.").trim();
+  const safeReason = rawReason
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+  const subject = `Action Required: Payment Verification Unsuccessful (${refId})`;
+  const html = baseWrapper(`
+    <p>Dear <strong>${name}</strong>,</p>
+    <p>Thank you for submitting your payment receipt for application <strong>${refId}</strong> (${course || "Academic Program"}).</p>
+    <p>Our finance department reviewed your deposit slip but was <strong>unable to verify your payment</strong> at this time.</p>
+    
+    <div style="background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #ea580c; padding: 18px 22px; border-radius: 0 8px 8px 0; margin: 24px 0;">
+      <p style="margin: 0 0 6px 0; font-size: 12px; font-weight: 700; color: #c2410c; text-transform: uppercase;">Finance Department Feedback:</p>
+      <p style="margin: 0; font-size: 14px; color: #9a3412; font-weight: 500; white-space: pre-wrap;">${safeReason}</p>
+    </div>
+
+    <p style="font-size: 14px; font-weight: 600;">What you should do next:</p>
+    <p style="font-size: 13px; color: #334155; line-height: 1.6;">
+      Please double-check your bank SMS or Telebirr transaction ID, make sure your slip photo clearly shows the transaction reference number and date, and re-upload your valid receipt:
+    </p>
+
+    <p style="text-align: center; margin: 26px 0;">
+      <a href="https://www.academicexcellences.com/payment-instructions.html?ref=${encodeURIComponent(refId)}" style="background: #ea580c; color: #ffffff; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 700; font-size: 14px; display: inline-block;">
+        Re-upload Valid Payment Proof →
+      </a>
+    </p>
+
+    <p style="font-size: 13px; color: #64748b;">If you need assistance, simply reply to this email with your transaction screenshot.</p>
   `);
 
   return sendEmail(to, subject, html);

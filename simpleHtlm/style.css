@@ -1887,7 +1887,12 @@ p:last-child {
 }
 
 .status-pending { background: #fef3c7; color: #92400e; }
+.status-pending_review { background: #e0e7ff; color: #3730a3; }
 .status-under_review { background: #dbeafe; color: #1e40af; }
+.status-approved_for_payment { background: #fef3c7; color: #b45309; border: 1px solid #fde68a; }
+.status-payment_verification_needed { background: #ffedd5; color: #c2410c; }
+.status-payment_unsuccessful { background: #fee2e2; color: #991b1b; border: 1px solid #fecaca; }
+.status-accepted_paid { background: #d1fae5; color: #065f46; }
 .status-approved { background: #d1fae5; color: #065f46; }
 .status-rejected { background: #fee2e2; color: #991b1b; }
 .status-cancelled { background: #f1f5f9; color: #475569; }

@@ -251,16 +251,19 @@ window.AcademicDB = {
 
   /**
    * Resolve live email API endpoint
-   * If running directly on www.academicexcellences.com, relative /api/send-email works.
-   * Everywhere else (localhost, 127.0.0.1, file://, apex domain, etc.), routes directly to verified canonical API.
+   * If running in browser over HTTP/HTTPS, always uses the current host's relative /api/send-email.
+   * If on file://, attempts localhost:3300 then falls back to production.
    */
   getEmailApiEndpoint() {
-    if (typeof window !== "undefined") {
-      if (window.location.hostname === "www.academicexcellences.com") {
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.protocol === "http:" || window.location.protocol === "https:") {
         return "/api/send-email";
       }
+      if (window.location.protocol === "file:") {
+        return "http://localhost:3300/api/send-email";
+      }
     }
-    return "https://www.academicexcellences.com/api/send-email";
+    return "/api/send-email";
   },
 
   /**
@@ -272,10 +275,7 @@ window.AcademicDB = {
       return false;
     }
 
-    const primaryUrl = this.getEmailApiEndpoint();
-    const canonicalUrl = "https://www.academicexcellences.com/api/send-email";
-
-    const fetchWithTimeout = (url, timeoutMs = 7000) => {
+    const fetchWithTimeout = (url, timeoutMs = 8000) => {
       const controller = new AbortController();
       const timer = setTimeout(() => controller.abort(), timeoutMs);
       return fetch(url, {
@@ -287,27 +287,39 @@ window.AcademicDB = {
       }).finally(() => clearTimeout(timer));
     };
 
-    try {
-      const res = await fetchWithTimeout(primaryUrl);
-      if (res.ok) {
-        console.log(`[AcademicDB] Email notification sent (${payload.type}) to ${payload.to}`);
-        return true;
+    const endpointsToTry = [];
+    const primary = this.getEmailApiEndpoint();
+    endpointsToTry.push(primary);
+
+    // If on localhost or 127.0.0.1, ensure absolute localhost:3300 is also in queue
+    if (typeof window !== "undefined" && window.location) {
+      if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+        const localPortUrl = `${window.location.protocol}//${window.location.host}/api/send-email`;
+        if (!endpointsToTry.includes(localPortUrl)) {
+          endpointsToTry.unshift(localPortUrl);
+        }
+        if (!endpointsToTry.includes("http://localhost:3300/api/send-email")) {
+          endpointsToTry.push("http://localhost:3300/api/send-email");
+        }
       }
-      console.warn(`[AcademicDB] Email endpoint ${primaryUrl} returned ${res.status}`);
-    } catch (err) {
-      console.warn(`[AcademicDB] Primary email dispatch failed on ${primaryUrl}:`, err.message);
     }
 
-    // Safety net: try canonical URL if primary was relative and failed
-    if (primaryUrl !== canonicalUrl) {
+    // Finally try canonical production if all local routes failed
+    const canonical = "https://www.academicexcellences.com/api/send-email";
+    if (!endpointsToTry.includes(canonical)) {
+      endpointsToTry.push(canonical);
+    }
+
+    for (const ep of endpointsToTry) {
       try {
-        const fbRes = await fetchWithTimeout(canonicalUrl);
-        if (fbRes.ok) {
-          console.log(`[AcademicDB] Fallback email sent (${payload.type}) to ${payload.to}`);
+        const res = await fetchWithTimeout(ep);
+        if (res.ok) {
+          console.log(`[AcademicDB] Email notification sent (${payload.type}) to ${payload.to} via ${ep}`);
           return true;
         }
-      } catch (fbErr) {
-        console.error("[AcademicDB] Fallback email dispatch failed:", fbErr.message);
+        console.warn(`[AcademicDB] Email endpoint ${ep} returned ${res.status}`);
+      } catch (err) {
+        console.warn(`[AcademicDB] Email dispatch failed on ${ep}:`, err.message);
       }
     }
 

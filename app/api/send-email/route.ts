@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   sendApplicationReceivedEmail,
+  sendApprovedForPaymentEmail,
   sendPaymentReceivedEmail,
   sendStatusApprovedEmail,
+  sendPaymentUnsuccessfulEmail,
   sendStatusRejectedEmail,
   sendCancellationEmail,
   sendContactInquiryEmail,
@@ -349,12 +351,21 @@ export async function POST(req: NextRequest) {
         success = await sendApplicationReceivedEmail(targetEmail, name || "Applicant", refId, course || "Academic Program");
         break;
 
+      case "approved_for_payment":
+        success = await sendApprovedForPaymentEmail(targetEmail, name || "Applicant", refId, course || "Academic Program");
+        break;
+
       case "payment_received":
         success = await sendPaymentReceivedEmail(targetEmail, name || "Applicant", refId);
         break;
 
+      case "accepted_paid":
       case "status_approved":
         success = await sendStatusApprovedEmail(targetEmail, name || "Applicant", refId, course || "Academic Program");
+        break;
+
+      case "payment_unsuccessful":
+        success = await sendPaymentUnsuccessfulEmail(targetEmail, name || "Applicant", refId, course || "Academic Program", reason || rejectionReason);
         break;
 
       case "status_rejected":

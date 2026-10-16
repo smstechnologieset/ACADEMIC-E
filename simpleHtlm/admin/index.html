@@ -725,11 +725,13 @@
             <div class="table-toolbar">
               <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
                 <input type="text" id="appFilterSearch" class="form-input" placeholder="Search name, email, ref..." style="width:240px;" />
-                <select id="appFilterStatus" class="form-select" style="width:165px;">
+                <select id="appFilterStatus" class="form-select" style="width:210px;">
                   <option value="all">All Statuses</option>
-                  <option value="pending">Pending Payment</option>
-                  <option value="under_review">Under Review</option>
-                  <option value="approved">Approved</option>
+                  <option value="pending_review">1. Pending Review (Stage 1)</option>
+                  <option value="approved_for_payment">2. Approved for Payment (72h)</option>
+                  <option value="payment_verification_needed">3. Slip Audit Needed</option>
+                  <option value="accepted_paid">4. Officially Enrolled</option>
+                  <option value="payment_unsuccessful">Payment Issue</option>
                   <option value="rejected">Rejected</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
@@ -1945,14 +1947,45 @@
 
         <div style="background:#fdfaf6;border:1px solid #fde6d2;padding:22px;border-radius:8px;">
           <h4 style="font-size:1.1rem;color:#0b1b3d;margin-bottom:14px;">Admissions Decision &amp; Internal Notes</h4>
+
+          <!-- Stage-Gated Quick Actions Bar -->
+          <div id="modalQuickActionsBar" style="background:#ffffff;border:1px solid #e2e8f0;border-left:4px solid #1854a1;border-radius:8px;padding:14px 18px;margin-bottom:18px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+            <div id="modalQuickActionDescription" style="flex:1;min-width:240px;">
+              <div style="font-size:0.75rem;text-transform:uppercase;font-weight:800;color:#64748b;letter-spacing:0.5px;">Recommended Quick Action</div>
+              <div id="modalQuickActionLabel" style="font-size:0.95rem;font-weight:700;color:#0b1b3d;margin-top:2px;">Reviewing Documents</div>
+            </div>
+            <div id="modalQuickActionButtons" style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;">
+              <!-- Dynamically populated buttons -->
+            </div>
+          </div>
+
+          <!-- 72-Hour Seat Window Active Info Card -->
+          <div id="modal72hWindowInfo" style="display:none;background:#f0fdf4;border:1px solid #86efac;border-radius:6px;padding:12px 16px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+              <div>
+                <strong style="color:#166534;font-size:0.92rem;display:flex;align-items:center;gap:6px;">
+                  <span>⏱</span> 72-Hour Seat Reservation Active
+                </strong>
+                <div style="font-size:0.82rem;color:#15803d;margin-top:3px;" id="modal72hCountdownText">
+                  Student has been emailed payment instructions.
+                </div>
+              </div>
+              <button type="button" id="modalCopyPayLinkBtn" class="btn-sm" style="background:#ffffff;border:1px solid #86efac;color:#166534;font-weight:700;padding:6px 14px;border-radius:4px;cursor:pointer;">
+                📋 Copy Direct Payment Link
+              </button>
+            </div>
+          </div>
+
           <div class="form-grid-2">
             <div class="form-group">
               <label class="form-label">Application Status</label>
               <select id="modalStatusSelect" class="form-select">
-                <option value="pending">Pending Payment</option>
-                <option value="under_review">Under Review (Payment Received)</option>
-                <option value="approved">Approved / Admitted</option>
-                <option value="rejected">Rejected</option>
+                <option value="pending_review">1. Pending Review (Evaluating Transcripts &amp; Fayda)</option>
+                <option value="approved_for_payment">2. Approved for Payment (Opens 72h Window &amp; Sends Link)</option>
+                <option value="payment_verification_needed">3. Payment Slip Uploaded (Finance Audit Needed)</option>
+                <option value="accepted_paid">4. Confirmed &amp; Paid in Full (Officially Enrolled)</option>
+                <option value="payment_unsuccessful">Payment Unsuccessful (Invalid Slip / Transaction Issue)</option>
+                <option value="rejected">Application Rejected (Academic Criteria Not Met)</option>
                 <option value="cancelled">Cancelled</option>
               </select>
             </div>
@@ -1962,17 +1995,36 @@
             </div>
           </div>
 
+          <!-- Payment Unsuccessful Reason Section (Mandatory when payment_unsuccessful is selected) -->
+          <div id="paymentUnsuccessfulSection" style="display: none; background: #fffaf0; border: 1px solid #fed7aa; border-left: 4px solid #f97316; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
+              <label class="form-label" style="color: #9a3412; font-weight: 700; margin: 0;">
+                Payment Issue Feedback * <span style="font-size: 0.8rem; font-weight: 400; color: #c2410c;">(Mandatory &mdash; emailed to student with re-upload link)</span>
+              </label>
+              <select id="quickPaymentFailReasonSelect" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #fdba74; border-radius: 4px; background: #fff; color: #9a3412; cursor: pointer;">
+                <option value="">-- Quick Payment Issue Reasons --</option>
+                <option value="Transaction reference number not found in bank / Telebirr statements.">Reference not found in bank statement</option>
+                <option value="Uploaded payment receipt slip is blurry, cropped, or illegible.">Receipt blurry or illegible</option>
+                <option value="Transferred amount does not match required program tuition.">Incorrect transfer amount</option>
+                <option value="Deposit slip date or beneficiary account does not match official account.">Wrong beneficiary or outdated slip</option>
+              </select>
+            </div>
+            <textarea id="modalPaymentFailReason" class="form-textarea" style="border-color: #fdba74; min-height: 70px;" placeholder="Describe what went wrong with the payment slip. The student will receive this feedback along with a direct re-upload link."></textarea>
+            <div id="modalPaymentFailError" style="display: none; color: #dc2626; font-size: 0.82rem; margin-top: 6px; font-weight: 600;">
+              &#9888; A specific reason is required before flagging payment as unsuccessful.
+            </div>
+          </div>
+
           <!-- Rejection Reason Section (Mandatory when Rejected is selected) -->
           <div id="rejectionReasonSection" style="display: none; background: #fff5f5; border: 1px solid #fed7d7; padding: 16px; border-radius: 6px; margin-bottom: 16px;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 8px;">
               <label class="form-label" style="color: #991b1b; font-weight: 700; margin: 0;">
-                Reason for Rejection * <span style="font-size: 0.8rem; font-weight: 400; color: #b91c1c;">(Mandatory &mdash; emailed to applicant)</span>
+                Reason for Academic Rejection * <span style="font-size: 0.8rem; font-weight: 400; color: #b91c1c;">(Mandatory &mdash; emailed to applicant)</span>
               </label>
               <select id="quickRejectionReasonSelect" style="font-size: 0.8rem; padding: 4px 8px; border: 1px solid #fca5a5; border-radius: 4px; background: #fff; color: #7f1d1d; cursor: pointer;">
                 <option value="">-- Quick Pre-set Reasons --</option>
                 <option value="Academic prerequisites not met for this specific program level.">Academic prerequisites not met</option>
                 <option value="Unclear or unverified National ID / FAYDA identification document.">Invalid / Unclear FAYDA ID</option>
-                <option value="Payment deposit slip could not be verified with the bank transaction records.">Payment slip could not be verified</option>
                 <option value="Incomplete academic transcripts or graduation proof submitted.">Incomplete academic credentials</option>
                 <option value="Program intake capacity reached for this cycle.">Intake capacity full</option>
               </select>
@@ -2401,11 +2453,11 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js?v=20261008_5"></script>
-  <script src="../js/courses-service.js?v=20261008_5"></script>
-  <script src="../js/applications-service.js?v=20261008_5"></script>
-  <script src="../js/admin-service.js?v=20261008_5"></script>
-  <script src="../js/cms-loader.js?v=20261008_5"></script>
+  <script src="../js/supabase-client.js?v=20261016_gated_1"></script>
+  <script src="../js/courses-service.js?v=20261016_gated_1"></script>
+  <script src="../js/applications-service.js?v=20261016_gated_1"></script>
+  <script src="../js/admin-service.js?v=20261016_gated_1"></script>
+  <script src="../js/cms-loader.js?v=20261016_gated_1"></script>
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -2634,25 +2686,27 @@
       const apps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
       const settings = window.AcademicDB.getLocal(window.AcademicDB.keys.SETTINGS, {});
       const feeETB = parseInt(String(settings.applicationFeeAmount || settings.feeNumeric || "15000").replace(/[^0-9]/g, ""), 10) || 15000;
-      const total      = apps.length;
-      const pending    = apps.filter(a => a.status === "pending").length;
-      const underRev   = apps.filter(a => a.status === "under_review").length;
-      const approved   = apps.filter(a => a.status === "approved").length;
-      const rejected   = apps.filter(a => a.status === "rejected").length;
-      const cancelled  = apps.filter(a => a.status === "cancelled").length;
-      const revETB     = approved * feeETB;
-      const pendRevETB = underRev * feeETB;
+      const total          = apps.length;
+      const pendingDocRev  = apps.filter(a => a.status === "pending_review" || a.status === "pending").length;
+      const approvedForPay = apps.filter(a => a.status === "approved_for_payment").length;
+      const paymentAudit   = apps.filter(a => a.status === "payment_verification_needed" || a.status === "under_review").length;
+      const acceptedPaid   = apps.filter(a => a.status === "accepted_paid" || a.status === "approved").length;
+      const paymentIssue   = apps.filter(a => a.status === "payment_unsuccessful").length;
+      const rejected       = apps.filter(a => a.status === "rejected").length;
+      const cancelled      = apps.filter(a => a.status === "cancelled").length;
+      const revETB         = acceptedPaid * feeETB;
+      const pendRevETB     = (approvedForPay + paymentAudit) * feeETB;
 
       document.getElementById("kpiTotalApps").textContent     = total;
-      document.getElementById("kpiPendingApps").textContent   = pending;
-      document.getElementById("kpiReviewApps").textContent    = underRev;
-      document.getElementById("kpiApprovedApps").textContent  = approved;
+      document.getElementById("kpiPendingApps").textContent   = pendingDocRev;
+      document.getElementById("kpiReviewApps").textContent    = approvedForPay + paymentAudit;
+      document.getElementById("kpiApprovedApps").textContent  = acceptedPaid;
       document.getElementById("kpiRevenueETB").textContent    = revETB.toLocaleString() + " ETB";
       document.getElementById("kpiRevenueUSD").textContent    = "approx $" + Math.round(revETB / 58).toLocaleString() + " USD";
       document.getElementById("kpiPendingRevenue").textContent = pendRevETB.toLocaleString() + " ETB";
 
       const badge = document.getElementById("navBadgePending");
-      if (badge) { const n = pending + underRev; badge.textContent = n; badge.style.display = n > 0 ? "inline-block" : "none"; }
+      if (badge) { const n = pendingDocRev + paymentAudit; badge.textContent = n; badge.style.display = n > 0 ? "inline-block" : "none"; }
 
       // Course breakdown
       const courseCounts = {};
@@ -2667,11 +2721,12 @@
 
       // Status distribution
       const sd = [
-        { label:"Pending", count:pending, color:"#f59e0b" },
-        { label:"Under Review", count:underRev, color:"#6366f1" },
-        { label:"Approved", count:approved, color:"#10b981" },
-        { label:"Rejected", count:rejected, color:"#ef4444" },
-        { label:"Cancelled", count:cancelled, color:"#94a3b8" }
+        { label:"Pending Review", count:pendingDocRev, color:"#3b82f6" },
+        { label:"Approved (72h)", count:approvedForPay, color:"#b45309" },
+        { label:"Audit Needed", count:paymentAudit, color:"#f97316" },
+        { label:"Enrolled", count:acceptedPaid, color:"#10b981" },
+        { label:"Payment Issue", count:paymentIssue, color:"#ea580c" },
+        { label:"Rejected", count:rejected, color:"#ef4444" }
       ];
       document.getElementById("statusDistGrid").innerHTML = sd.map(s =>
         "<div style='text-align:center;padding:16px;background:#fff;border:1px solid #e2e8f0;border-radius:8px;border-top:3px solid " + s.color + ";'><div style='font-size:1.6rem;font-weight:800;color:" + s.color + ";'>" + s.count + "</div><div style='font-size:0.78rem;color:#64748b;margin-top:4px;font-weight:600;'>" + s.label + "</div></div>"
@@ -2704,6 +2759,22 @@
     const bulkBar       = document.getElementById("bulkBar");
     let selectedIds     = new Set();
 
+    function formatStatusLabel(st) {
+      switch (st) {
+        case "pending_review": return "Pending Review";
+        case "approved_for_payment": return "Approved (72h)";
+        case "payment_verification_needed": return "Audit Needed";
+        case "payment_unsuccessful": return "Payment Issue";
+        case "accepted_paid": return "Enrolled";
+        case "approved": return "Enrolled";
+        case "under_review": return "Under Review";
+        case "pending": return "Pending Review";
+        case "rejected": return "Rejected";
+        case "cancelled": return "Cancelled";
+        default: return (st || "Unknown").replace(/_/g, " ");
+      }
+    }
+
     // Populate course filter
     window.CoursesService.getAllCourses().forEach(c => {
       const opt = document.createElement("option");
@@ -2725,7 +2796,14 @@
       const list = apps.filter(app => {
         const name = (app.fullName || ((app.firstName||"") + " " + (app.lastName||""))).toLowerCase();
         const ms = !query || name.includes(query) || (app.email||"").toLowerCase().includes(query) || (app.id||"").toLowerCase().includes(query) || (app.courseApplied||"").toLowerCase().includes(query);
-        return ms && (st === "all" || app.status === st) && (cs === "all" || app.courseApplied === cs);
+        let matchStatus = false;
+        if (st === "all") matchStatus = true;
+        else if (st === "pending_review") matchStatus = (app.status === "pending_review" || app.status === "pending");
+        else if (st === "approved_for_payment") matchStatus = (app.status === "approved_for_payment");
+        else if (st === "payment_verification_needed") matchStatus = (app.status === "payment_verification_needed" || app.status === "under_review");
+        else if (st === "accepted_paid") matchStatus = (app.status === "accepted_paid" || app.status === "approved");
+        else matchStatus = (app.status === st);
+        return ms && matchStatus && (cs === "all" || app.courseApplied === cs);
       });
       if (!list.length) {
         appsTableBody.innerHTML = "<tr><td colspan='8' style='text-align:center;color:#64748b;padding:40px;'>No applications found.</td></tr>";
@@ -2750,7 +2828,7 @@
           "</td>" +
           "<td class='app-cell-course' title='" + safeCourse + "'>" + safeCourse + "</td>" +
           "<td class='app-cell-qual' title='" + (app.qualification||"").replace(/"/g, "&quot;") + "'>" + safeQual + "</td>" +
-          "<td style='text-align:center;'><span class='badge-status status-" + app.status + "'>" + app.status.replace("_"," ") + "</span></td>" +
+          "<td style='text-align:center;'><span class='badge-status status-" + app.status + "'>" + formatStatusLabel(app.status) + "</span></td>" +
           "<td><span style='font-size:0.75rem;color:#64748b;white-space:nowrap;'>" + window.AcademicDB.formatDate(app.created_at) + "</span></td>" +
           "<td class='app-cell-actions'>" +
             "<button type='button' class='btn-sm btn-review-app' data-id='" + app.id + "' title='Review Application' style='padding:4px 8px;font-size:0.75rem;background:var(--primary-blue,#1854a1);color:#fff;border:none;border-radius:4px;cursor:pointer;font-weight:600;'>Review</button>" +
@@ -2808,11 +2886,11 @@
       updateBulkBar(); renderApplications();
     });
 
-    async function doBulkUpdate(newStatus) {
+    async function doBulkUpdate(actionType) {
       if (!selectedIds.size) return;
       const ids = Array.from(selectedIds);
       let rejectionReason = "";
-      if (newStatus === "rejected") {
+      if (actionType === "rejected") {
         rejectionReason = prompt(
           "Please enter the mandatory reason for rejection (this will be emailed to each rejected applicant):",
           "Academic prerequisites or document verification criteria not met for this cycle."
@@ -2823,18 +2901,30 @@
         }
         rejectionReason = rejectionReason.trim();
       } else {
-        if (!confirm("Approve " + ids.length + " application(s)?")) return;
+        if (!confirm("Approve " + ids.length + " selected application(s)?\n\n- Applicants under document review will be approved for payment (opening their 72h seat window).\n- Applicants with uploaded payment slips will have their enrollment finalized.")) return;
       }
       let ok = 0;
+      const allApps = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
       for (const id of ids) { 
         try { 
-          const r = await window.AdminService.updateApplicationStatus(id, newStatus, "", rejectionReason); 
+          const currentApp = allApps.find(a => a.id === id);
+          let targetStatus = actionType;
+          if (actionType === "approved") {
+            if (currentApp && (currentApp.status === "payment_verification_needed" || (currentApp.status === "under_review" && (currentApp.paymentMethod || currentApp.paymentRef)))) {
+              targetStatus = "accepted_paid";
+            } else {
+              targetStatus = "approved_for_payment";
+            }
+          }
+          const r = await window.AdminService.updateApplicationStatus(id, targetStatus, "Bulk update action.", rejectionReason); 
           if (r && r.success) ok++; 
         } catch(e) {} 
       }
-      logActivity(newStatus === "approved" ? "bulk_approved" : "bulk_rejected", "application", null);
+      logActivity(actionType === "approved" ? "bulk_approved" : "bulk_rejected", "application", null);
       selectedIds.clear(); updateBulkBar();
-      showToast("Updated " + ok + "/" + ids.length + " to " + newStatus + ".", "success");
+      loadOverview();
+      renderApplications();
+      showToast("Updated " + ok + "/" + ids.length + " application(s).", "success");
       await syncWithDatabase();
     }
     document.getElementById("bulkApproveBtn").addEventListener("click", () => doBulkUpdate("approved"));
@@ -3142,11 +3232,16 @@
     let currentViewingApp = null;
 
     function buildTimeline(app) {
+      const isDocsApproved = ["approved_for_payment", "payment_verification_needed", "payment_unsuccessful", "accepted_paid", "approved"].includes(app.status);
+      const isPaymentDone = ["payment_verification_needed", "accepted_paid", "approved"].includes(app.status);
+      const isEnrolled = ["accepted_paid", "approved"].includes(app.status);
+      const isRejected = app.status === "rejected";
+
       const steps = [
-        { label:"Applied",           done:true,                                                                   color:"#10b981" },
-        { label:"Payment Submitted", done:!!(app.paymentRef || ["under_review","approved","rejected"].includes(app.status)), color:"#6366f1" },
-        { label:"Under Review",      done:["under_review","approved","rejected"].includes(app.status),             color:"#f59e0b" },
-        { label:"Decision",          done:["approved","rejected"].includes(app.status),                            color:app.status === "approved" ? "#10b981" : "#ef4444" }
+        { label:"1. Applied", done:true, color:"#10b981" },
+        { label:"2. Docs Review", done:isDocsApproved || isRejected, color:isRejected ? "#ef4444" : (isDocsApproved ? "#10b981" : "#f59e0b") },
+        { label:"3. Payment (72h)", done:isPaymentDone, color:app.status === "payment_unsuccessful" ? "#f97316" : (isPaymentDone ? "#10b981" : "#cbd5e1") },
+        { label:"4. Enrolled", done:isEnrolled, color:isEnrolled ? "#10b981" : "#cbd5e1" }
       ];
       return steps.map((s, i) => {
         const bar = i > 0 ? "<div style='position:absolute;top:14px;left:-50%;width:100%;height:2px;background:" + (s.done ? s.color : "#e2e8f0") + ";'></div>" : "";
@@ -3175,7 +3270,7 @@
         document.getElementById("modalProgram").textContent = app.courseApplied || "—";
         document.getElementById("modalQualification").textContent = app.qualification || "—";
         document.getElementById("modalMajorInst").textContent = app.previousInstitution || "—";
-        document.getElementById("modalStatusSelect").value = app.status || "pending";
+        document.getElementById("modalStatusSelect").value = app.status || "pending_review";
         document.getElementById("modalInternalNotes").value = app.internalNotes || "";
 
         // Rejection reason setup
@@ -3186,19 +3281,180 @@
         const quickSelect = document.getElementById("quickRejectionReasonSelect");
         if (quickSelect) quickSelect.value = "";
 
+        // Payment Unsuccessful setup
+        const payFailSec = document.getElementById("paymentUnsuccessfulSection");
+        const payFailText = document.getElementById("modalPaymentFailReason");
+        const payFailErr = document.getElementById("modalPaymentFailError");
+        if (payFailErr) payFailErr.style.display = "none";
+        const quickPayFail = document.getElementById("quickPaymentFailReasonSelect");
+        if (quickPayFail) quickPayFail.value = "";
+
+        // 72h Window setup
+        const window72hInfo = document.getElementById("modal72hWindowInfo");
+        const countdownText = document.getElementById("modal72hCountdownText");
+
         let currentRejectionReason = app.rejectionReason || "";
+        let currentPayFailReason = app.payment_rejection_reason || "";
         const curNotes = app.internalNotes || "";
+
         if (!currentRejectionReason && curNotes.includes("[Rejection Reason]:")) {
-          const match = curNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:)))*)/i);
+          const match = curNotes.match(/\[Rejection Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:|\[Payment Deadline\]:|\[Payment Unsuccessful Reason\]:)))*)/i);
           if (match && match[1]) currentRejectionReason = match[1].trim();
         }
+        if (!currentPayFailReason && curNotes.includes("[Payment Unsuccessful Reason]:")) {
+          const match = curNotes.match(/\[Payment Unsuccessful Reason\]:\s*([^\n]+(?:\n(?!(?:\[Internal Notes\]:|\[Payment Deadline\]:|\[Rejection Reason\]:)))*)/i);
+          if (match && match[1]) currentPayFailReason = match[1].trim();
+        }
 
-        if (app.status === "rejected") {
-          if (rejectSec) rejectSec.style.display = "block";
-          if (rejectText) rejectText.value = currentRejectionReason;
-        } else {
-          if (rejectSec) rejectSec.style.display = "none";
-          if (rejectText) rejectText.value = "";
+        // Visibility by status
+        if (rejectSec) rejectSec.style.display = app.status === "rejected" ? "block" : "none";
+        if (rejectText) rejectText.value = currentRejectionReason;
+
+        if (payFailSec) payFailSec.style.display = app.status === "payment_unsuccessful" ? "block" : "none";
+        if (payFailText) payFailText.value = currentPayFailReason;
+
+        if (window72hInfo) {
+          if (app.status === "approved_for_payment") {
+            window72hInfo.style.display = "block";
+            const deadline = app.payment_deadline ? new Date(app.payment_deadline) : 
+                            (app.updated_at ? new Date(new Date(app.updated_at).getTime() + 72*3600*1000) : new Date(Date.now() + 72*3600*1000));
+            countdownText.textContent = "Seat Reserved Until: " + deadline.toLocaleString();
+          } else {
+            window72hInfo.style.display = "none";
+          }
+        }
+
+        // Copy Direct Payment Link Button
+        const copyPayLinkBtn = document.getElementById("modalCopyPayLinkBtn");
+        if (copyPayLinkBtn) {
+          copyPayLinkBtn.onclick = () => {
+            const payUrl = `${window.location.origin}/payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+            navigator.clipboard.writeText(payUrl).then(() => {
+              showToast("Payment link copied to clipboard!", "success");
+            }).catch(() => {
+              prompt("Direct payment URL:", payUrl);
+            });
+          };
+        }
+
+        // POPULATE STAGE-GATED QUICK ACTIONS
+        const qaLabel = document.getElementById("modalQuickActionLabel");
+        const qaButtons = document.getElementById("modalQuickActionButtons");
+
+        if (qaLabel && qaButtons) {
+          qaButtons.innerHTML = "";
+          if (app.status === "pending_review" || (app.status === "pending" && !app.paymentMethod && !app.paymentRef)) {
+            qaLabel.innerHTML = "<span style='color:#1e40af;'>Stage 1: Transcripts &amp; FAYDA ID Under Evaluation</span>";
+            qaButtons.innerHTML = `
+              <button type="button" class="btn-sm" id="btnQuickApprovePayment" style="background:#059669;color:#fff;border:none;padding:7px 15px;border-radius:5px;font-weight:700;cursor:pointer;">
+                ✓ Approve for Payment (Open 72h Window)
+              </button>
+              <button type="button" class="btn-sm" id="btnQuickRejectDocs" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;padding:7px 13px;border-radius:5px;font-weight:700;cursor:pointer;">
+                ✕ Reject Application
+              </button>
+            `;
+            document.getElementById("btnQuickApprovePayment").addEventListener("click", async () => {
+              const candName = app.fullName || "Applicant";
+              if (!confirm(`Approve academic qualifications for ${candName} (${app.id})?\n\nThis will open the 72-hour seat reservation window and dispatch an official acceptance email with the payment instructions link.`)) {
+                return;
+              }
+              const saveBtn = document.getElementById("modalSaveStatusBtn");
+              saveBtn.textContent = "Approving..."; saveBtn.disabled = true;
+              try {
+                const res = await window.AdminService.updateApplicationStatus(app.id, "approved_for_payment", "Academic credentials verified and approved.");
+                if (res && res.success) {
+                  logActivity("approved_for_payment", "application", app.id);
+                  closeAppModal(); loadOverview(); renderApplications();
+                  showToast(`Application ${app.id} approved for payment. 72-hour window opened and email sent!`, "success");
+                } else {
+                  showToast((res && res.error) || "Failed to update status.", "error");
+                }
+              } catch(e) {
+                showToast("Error: " + e.message, "error");
+              } finally {
+                saveBtn.textContent = "Update Status & Save"; saveBtn.disabled = false;
+              }
+            });
+
+            document.getElementById("btnQuickRejectDocs").addEventListener("click", () => {
+              document.getElementById("modalStatusSelect").value = "rejected";
+              document.getElementById("modalStatusSelect").dispatchEvent(new Event("change"));
+              document.getElementById("modalRejectionReason").focus();
+            });
+
+          } else if (app.status === "approved_for_payment") {
+            qaLabel.innerHTML = "<span style='color:#b45309;'>Stage 2: 72-Hour Seat Window Active &mdash; Awaiting Tuition Payment</span>";
+            qaButtons.innerHTML = `
+              <button type="button" class="btn-sm" id="btnQuickCopyLink" style="background:#fef3c7;border:1px solid #fde68a;color:#92400e;padding:7px 14px;border-radius:5px;font-weight:700;cursor:pointer;">
+                📋 Copy Payment Link
+              </button>
+            `;
+            document.getElementById("btnQuickCopyLink").addEventListener("click", () => {
+              const payUrl = `${window.location.origin}/payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+              navigator.clipboard.writeText(payUrl).then(() => {
+                showToast("Direct payment link copied!", "success");
+              }).catch(() => prompt("Payment Link:", payUrl));
+            });
+
+          } else if (app.status === "payment_verification_needed" || (app.status === "under_review" && (app.paymentMethod || app.paymentRef))) {
+            qaLabel.innerHTML = "<span style='color:#c2410c;'>Stage 3: Payment Slip Uploaded &mdash; Finance Verification Required</span>";
+            qaButtons.innerHTML = `
+              <button type="button" class="btn-sm" id="btnQuickConfirmPayment" style="background:#059669;color:#fff;border:none;padding:7px 15px;border-radius:5px;font-weight:700;cursor:pointer;">
+                ✓ Confirm Payment &amp; Finalize Enrollment
+              </button>
+              <button type="button" class="btn-sm" id="btnQuickFlagPaymentFail" style="background:#fee2e2;color:#b91c1c;border:1px solid #fca5a5;padding:7px 13px;border-radius:5px;font-weight:700;cursor:pointer;">
+                ⚠️ Flag Invalid / Unsuccessful
+              </button>
+            `;
+            document.getElementById("btnQuickConfirmPayment").addEventListener("click", async () => {
+              const candName = app.fullName || "Applicant";
+              if (!confirm(`Confirm verified payment for ${candName} (${app.id})?\n\nThis will officially enroll the student and dispatch the congratulatory Enrollment Confirmation email.`)) {
+                return;
+              }
+              const saveBtn = document.getElementById("modalSaveStatusBtn");
+              saveBtn.textContent = "Confirming..."; saveBtn.disabled = true;
+              try {
+                const res = await window.AdminService.updateApplicationStatus(app.id, "accepted_paid", "Payment slip verified and confirmed in full.");
+                if (res && res.success) {
+                  logActivity("accepted_paid", "application", app.id);
+                  closeAppModal(); loadOverview(); renderApplications();
+                  showToast(`Application ${app.id} verified and officially enrolled!`, "success");
+                } else {
+                  showToast((res && res.error) || "Failed to update status.", "error");
+                }
+              } catch(e) {
+                showToast("Error: " + e.message, "error");
+              } finally {
+                saveBtn.textContent = "Update Status & Save"; saveBtn.disabled = false;
+              }
+            });
+
+            document.getElementById("btnQuickFlagPaymentFail").addEventListener("click", () => {
+              document.getElementById("modalStatusSelect").value = "payment_unsuccessful";
+              document.getElementById("modalStatusSelect").dispatchEvent(new Event("change"));
+              document.getElementById("modalPaymentFailReason").focus();
+            });
+
+          } else if (app.status === "payment_unsuccessful") {
+            qaLabel.innerHTML = "<span style='color:#dc2626;'>Action Needed: Payment Flagged as Unsuccessful</span>";
+            qaButtons.innerHTML = `
+              <button type="button" class="btn-sm" id="btnQuickCopyReuploadLink" style="background:#ffffff;border:1px solid #cbd5e1;color:#334155;padding:7px 14px;border-radius:5px;font-weight:600;cursor:pointer;">
+                📋 Copy Re-upload Link
+              </button>
+            `;
+            document.getElementById("btnQuickCopyReuploadLink").addEventListener("click", () => {
+              const payUrl = `${window.location.origin}/payment-instructions.html?ref=${encodeURIComponent(app.id)}`;
+              navigator.clipboard.writeText(payUrl).then(() => {
+                showToast("Re-upload link copied!", "success");
+              }).catch(() => prompt("Payment Link:", payUrl));
+            });
+
+          } else if (app.status === "accepted_paid" || app.status === "approved") {
+            qaLabel.innerHTML = "<span style='color:#059669;'>Stage 4: Officially Enrolled &amp; Paid in Full ✓</span>";
+            qaButtons.innerHTML = "<span style='font-size:0.85rem;color:#065f46;font-weight:700;'>Admission Finalized</span>";
+          } else {
+            qaLabel.innerHTML = "<span style='color:#64748b;'>Status: " + app.status.toUpperCase() + "</span>";
+          }
         }
 
         document.getElementById("timelineContent").innerHTML = buildTimeline(app);
@@ -3287,23 +3543,48 @@
       }
     });
 
-    // Dynamic rejection reason toggle & preset populator
+    // Dynamic status toggle & preset populator
     document.getElementById("modalStatusSelect").addEventListener("change", (e) => {
-      const isReject = e.target.value === "rejected";
-      const sec = document.getElementById("rejectionReasonSection");
-      if (sec) sec.style.display = isReject ? "block" : "none";
+      const val = e.target.value;
+      const isReject = val === "rejected";
+      const isPayFail = val === "payment_unsuccessful";
+      const isApprovePay = val === "approved_for_payment";
+
+      const rejectSec = document.getElementById("rejectionReasonSection");
+      const payFailSec = document.getElementById("paymentUnsuccessfulSection");
+      const window72hInfo = document.getElementById("modal72hWindowInfo");
+
+      if (rejectSec) rejectSec.style.display = isReject ? "block" : "none";
+      if (payFailSec) payFailSec.style.display = isPayFail ? "block" : "none";
+      if (window72hInfo) window72hInfo.style.display = isApprovePay ? "block" : "none";
+
       if (isReject) {
         document.getElementById("modalRejectionReason").focus();
       } else {
         const err = document.getElementById("modalRejectionError");
         if (err) err.style.display = "none";
       }
+
+      if (isPayFail) {
+        document.getElementById("modalPaymentFailReason").focus();
+      } else {
+        const err = document.getElementById("modalPaymentFailError");
+        if (err) err.style.display = "none";
+      }
     });
 
-    document.getElementById("quickRejectionReasonSelect").addEventListener("change", (e) => {
+    document.getElementById("quickRejectionReasonSelect")?.addEventListener("change", (e) => {
       if (e.target.value) {
         document.getElementById("modalRejectionReason").value = e.target.value;
         const err = document.getElementById("modalRejectionError");
+        if (err) err.style.display = "none";
+      }
+    });
+
+    document.getElementById("quickPaymentFailReasonSelect")?.addEventListener("change", (e) => {
+      if (e.target.value) {
+        document.getElementById("modalPaymentFailReason").value = e.target.value;
+        const err = document.getElementById("modalPaymentFailError");
         if (err) err.style.display = "none";
       }
     });
@@ -3315,6 +3596,7 @@
       const newStatus = document.getElementById("modalStatusSelect").value;
       const notes = document.getElementById("modalInternalNotes").value.trim();
       let rejectionReason = "";
+      let paymentFailReason = "";
 
       if (newStatus === "rejected") {
         rejectionReason = document.getElementById("modalRejectionReason").value.trim();
@@ -3327,13 +3609,30 @@
         }
       }
 
+      if (newStatus === "payment_unsuccessful") {
+        paymentFailReason = document.getElementById("modalPaymentFailReason").value.trim();
+        if (!paymentFailReason) {
+          const errEl = document.getElementById("modalPaymentFailError");
+          errEl.textContent = "A specific payment issue explanation is mandatory.";
+          errEl.style.display = "block";
+          document.getElementById("modalPaymentFailReason").focus();
+          return;
+        }
+      }
+
       btn.textContent = "Saving..."; btn.disabled = true;
       try {
-        const res = await window.AdminService.updateApplicationStatus(currentViewingApp.id, newStatus, notes, rejectionReason);
+        const res = await window.AdminService.updateApplicationStatus(
+          currentViewingApp.id, 
+          newStatus, 
+          notes, 
+          rejectionReason, 
+          { paymentRejectionReason: paymentFailReason }
+        );
         if (res && res.success) {
-          logActivity(newStatus === "approved" ? "approved_application" : (newStatus === "rejected" ? "rejected_application" : "updated_application"), "application", currentViewingApp.id);
+          logActivity(newStatus.toLowerCase() + "_application", "application", currentViewingApp.id);
           closeAppModal(); loadOverview(); renderApplications();
-          showToast("Application " + currentViewingApp.id + " updated to " + newStatus.replace("_"," ").toUpperCase() + " (notification email dispatched).", "success");
+          showToast("Application " + currentViewingApp.id + " updated to " + formatStatusLabel(newStatus).toUpperCase() + " (notification email dispatched).", "success");
         } else { showToast((res && res.error) || "Failed to update.", "error"); }
       } catch(e) { showToast("Error: " + (e.message || "Network issue"), "error"); }
       finally { btn.textContent = orig; btn.disabled = false; }

@@ -89,16 +89,88 @@
             &check; Application Reference Number copied to clipboard! Please use it as the deposit/transfer description.
           </div>
 
-          <!-- Fee Summary Card -->
-          <div style="background: #e8f4fa; border: 1px solid #bce1f3; padding: 22px 28px; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
-            <div>
-              <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #0b1b3d;">Subsidized Intake Processing Fee</div>
-              <div style="font-size: 1.05rem; color: #3b4b59; margin-top: 4px;">Covering Skillsoft Percipio platform licensing, FAYDA identity validation &amp; UNY credentialing.</div>
-            </div>
-            <div style="font-size: 2rem; font-family: var(--font-serif); font-weight: 700; color: var(--primary-navy);" id="feeAmountDisplay">
-              15,000 ETB
+          <!-- 1. BANNER: UNDER ACADEMIC REVIEW (LOCKED) -->
+          <div id="lockedUnderReviewBanner" style="display: none; background: #fffbeb; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; padding: 24px; border-radius: 8px; margin-bottom: 30px;">
+            <div style="display: flex; gap: 16px; align-items: flex-start;">
+              <span style="font-size: 2rem;">&#128274;</span>
+              <div>
+                <h3 style="font-size: 1.25rem; color: #92400e; margin: 0 0 6px;">Application Under Academic Document Review</h3>
+                <p style="font-size: 0.95rem; color: #78350f; margin: 0 0 14px; line-height: 1.6;">
+                  Your application is currently undergoing academic qualification review by our Admissions Committee. To ensure no unnecessary fees are incurred, <strong>tuition fee payment is only enabled after your transcripts and FAYDA National ID are verified and approved</strong>.
+                </p>
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                  <a href="track.html" id="reviewTrackBtn" class="btn btn-sm" style="background: #0b1b3d; color: #fff; text-decoration: none; padding: 8px 18px; border-radius: 6px;">
+                    Track Real-Time Status &rarr;
+                  </a>
+                  <span style="font-size: 0.82rem; color: #92400e;">You will receive an official approval email once verified.</span>
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- 2. BANNER: APPROVED FOR PAYMENT (72-HOUR RESERVATION TIMER) -->
+          <div id="approvedReservationBanner" style="display: none; background: #f0fdf4; border: 1px solid #bbf7d0; border-left: 4px solid #16a34a; padding: 20px 24px; border-radius: 8px; margin-bottom: 25px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 14px;">
+              <div>
+                <div style="font-size: 0.78rem; font-weight: 700; text-transform: uppercase; color: #166534; letter-spacing: 0.5px;">&#10003; Academic Qualifications Approved</div>
+                <h3 style="font-size: 1.25rem; color: #14532d; margin: 4px 0 0;">Congratulations! Complete Payment to Secure Your Seat</h3>
+              </div>
+              <div id="reservationTimerBox" style="background: #fef3c7; border: 1px solid #fde68a; padding: 8px 16px; border-radius: 8px; text-align: center;">
+                <span style="font-size: 0.7rem; text-transform: uppercase; font-weight: 700; color: #92400e; display: block;">72-Hr Reservation Window</span>
+                <span id="reservationCountdown" style="font-size: 1.15rem; font-weight: 800; font-family: monospace; color: #b45309;">71h 59m remaining</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. BANNER: PAYMENT VERIFICATION UNSUCCESSFUL -->
+          <div id="paymentUnsuccessfulAlert" style="display: none; background: #fff7ed; border: 1px solid #fed7aa; border-left: 4px solid #ea580c; padding: 20px 24px; border-radius: 8px; margin-bottom: 25px;">
+            <h4 style="font-size: 1.15rem; color: #9a3412; margin: 0 0 6px;">&#9888; Action Required: Previous Payment Verification Unsuccessful</h4>
+            <p style="font-size: 0.92rem; color: #7c2d12; margin: 0 0 10px; line-height: 1.55;" id="unsuccessfulReasonText">
+              Reason: The submitted transaction reference could not be matched with bank deposit records.
+            </p>
+            <p style="font-size: 0.88rem; color: #431407; margin: 0;">
+              Please double-check your transaction receipt, verify the reference number, and re-upload your valid slip below.
+            </p>
+          </div>
+
+          <!-- 4. BANNER: FINAL PAYMENT VERIFICATION IN PROGRESS -->
+          <div id="finalVerificationPendingAlert" style="display: none; background: #eff6ff; border: 1px solid #bfdbfe; border-left: 4px solid #3b82f6; padding: 20px 24px; border-radius: 8px; margin-bottom: 25px;">
+            <div style="display: flex; gap: 14px; align-items: flex-start;">
+              <span style="font-size: 1.8rem;">&#9203;</span>
+              <div>
+                <h4 style="font-size: 1.15rem; color: #1e40af; margin: 0 0 4px;">Payment Slip Under Final Finance Audit</h4>
+                <p style="font-size: 0.92rem; color: #1e3a8a; margin: 0 0 10px; line-height: 1.55;">
+                  Your payment receipt and transaction reference have been received and are currently queued for verification against institutional bank statements.
+                </p>
+                <a href="track.html" id="pendingVerifyTrackBtn" class="btn btn-sm" style="background: #1e40af; color: #fff; text-decoration: none; padding: 6px 16px; border-radius: 4px; display: inline-block;">
+                  Track Live Status &rarr;
+                </a>
+              </div>
+            </div>
+          </div>
+
+          <!-- 5. BANNER: ACCEPTED & PAID IN FULL -->
+          <div id="paymentVerifiedSuccessAlert" style="display: none; background: #ecfdf5; border: 1px solid #a7f3d0; border-left: 4px solid #059669; padding: 24px; border-radius: 8px; margin-bottom: 30px; text-align: center;">
+            <div style="font-size: 2.2rem; margin-bottom: 8px;">&#127891;</div>
+            <h3 style="font-size: 1.35rem; color: #065f46; margin: 0 0 8px;">Enrollment Confirmed &amp; Paid in Full!</h3>
+            <p style="font-size: 0.95rem; color: #047857; margin: 0 auto 16px; max-width: 580px; line-height: 1.6;">
+              Your tuition payment has been officially audited and approved. Your seat is confirmed, and your Skillsoft Percipio orientation package will be sent to your email.
+            </p>
+            <a href="track.html" id="verifiedTrackBtn" class="btn btn-black" style="padding: 10px 22px; text-decoration: none; display: inline-block;">View Official Enrollment Record &rarr;</a>
+          </div>
+
+          <!-- ACTIVE PAYMENT WORKFLOW CONTAINER -->
+          <div id="activePaymentArea">
+            <!-- Fee Summary Card -->
+            <div style="background: #e8f4fa; border: 1px solid #bce1f3; padding: 22px 28px; margin-bottom: 35px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+              <div>
+                <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: #0b1b3d;">Subsidized Intake Processing Fee</div>
+                <div style="font-size: 1.05rem; color: #3b4b59; margin-top: 4px;">Covering Skillsoft Percipio platform licensing, FAYDA identity validation &amp; UNY credentialing.</div>
+              </div>
+              <div style="font-size: 2rem; font-family: var(--font-serif); font-weight: 700; color: var(--primary-navy);" id="feeAmountDisplay">
+                15,000 ETB
+              </div>
+            </div>
 
           <!-- Payment Methods Selection Grid -->
           <h3 style="font-size: 1.45rem; color: #0b1b3d; margin-bottom: 20px;">1. Choose Your Preferred Payment Channel</h3>
@@ -165,6 +237,7 @@
                 <a href="#" id="trackSubmittedAppBtn" class="btn btn-black">Track Application Status</a>
               </div>
             </form>
+            </div>
           </div>
 
           <!-- Bottom Utility: Cancel Application / Start Fresh -->
@@ -255,9 +328,9 @@
 
   <!-- Scripts -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="js/supabase-client.js?v=20261008_5"></script>
-  <script src="js/applications-service.js?v=20261008_5"></script>
-  <script src="js/main.js?v=20261008_5"></script>
+  <script src="js/supabase-client.js?v=20261016_gated_1"></script>
+  <script src="js/applications-service.js?v=20261016_gated_1"></script>
+  <script src="js/main.js?v=20261016_gated_1"></script>
   <script>
     document.addEventListener("DOMContentLoaded", async () => {
       const gridEl = document.getElementById("paymentMethodsGrid");
@@ -378,35 +451,85 @@
         document.getElementById("appProgramDisplay").textContent = app.courseApplied || "Selected Intake Program";
         refId = app.id;
 
-        // Check if payment proof has already been submitted or application is under review/approved
-        const isAlreadyPaid = Boolean(
-          app.paymentSlipUrl || 
-          app.payment_slip_url || 
-          (app.status && app.status !== "pending" && app.status !== "cancelled")
-        );
+        // 2-Stage Gated Admissions State Machine
+        const status = (app.status || "pending_review").toLowerCase();
 
-        if (isAlreadyPaid) {
-          // Clear active pending payment session lock since applicant already paid
+        const lockedBanner = document.getElementById("lockedUnderReviewBanner");
+        const approvedBanner = document.getElementById("approvedReservationBanner");
+        const unsuccessfulBanner = document.getElementById("paymentUnsuccessfulAlert");
+        const finalPendingBanner = document.getElementById("finalVerificationPendingAlert");
+        const verifiedSuccessBanner = document.getElementById("paymentVerifiedSuccessAlert");
+        const activeArea = document.getElementById("activePaymentArea");
+
+        // Helper: 72-Hour Countdown Timer
+        function startReservationTimer(targetTime) {
+          const countdownEl = document.getElementById("reservationCountdown");
+          if (!countdownEl) return;
+
+          function tick() {
+            const now = Date.now();
+            const diff = targetTime - now;
+
+            if (diff <= 0) {
+              countdownEl.textContent = "Reservation Expired";
+              countdownEl.style.color = "#dc2626";
+              return;
+            }
+
+            const hours = Math.floor(diff / (1000 * 60 * 60));
+            const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+            const secs = Math.floor((diff % (1000 * 60)) / 1000);
+            countdownEl.textContent = `${hours}h ${mins}m ${secs}s remaining`;
+          }
+
+          tick();
+          setInterval(tick, 1000);
+        }
+
+        if (status === "pending_review" || status === "pending") {
+          // STAGE 1: Academic documents not approved yet -> Payment Locked
+          if (lockedBanner) lockedBanner.style.display = "block";
+          if (activeArea) activeArea.style.display = "none";
+          const reviewBtn = document.getElementById("reviewTrackBtn");
+          if (reviewBtn) reviewBtn.href = `track.html?ref=${encodeURIComponent(app.id)}`;
           localStorage.removeItem("ae_pending_payment_ref");
-          if (window.AcademicDB && window.AcademicDB.keys) {
-            localStorage.removeItem(window.AcademicDB.keys.PENDING_REF);
-          }
-          const submitBtn = document.getElementById("btnSubmitSlip");
-          if (submitBtn) submitBtn.style.display = "none";
-          const formCard = document.getElementById("paymentProofForm");
-          if (formCard) formCard.style.display = "none";
-          const successAlert = document.getElementById("slipSuccessAlert");
-          if (successAlert) {
-            successAlert.style.display = "block";
-            const trackBtn = document.getElementById("trackSubmittedAppBtn");
-            if (trackBtn) trackBtn.href = `track.html?ref=${encodeURIComponent(app.id)}`;
-          }
-        } else {
-          // Active pending payment session: keep in localStorage
+        } else if (status === "approved_for_payment") {
+          // STAGE 2: Approved for Payment! Unlocked with 72-hour window
+          if (approvedBanner) approvedBanner.style.display = "block";
+          if (activeArea) activeArea.style.display = "block";
           localStorage.setItem("ae_pending_payment_ref", app.id);
+
+          // Calculate 72-hour deadline from updated_at or approval_date
+          const baseDate = new Date(app.payment_deadline || (new Date(app.updated_at || app.created_at || Date.now()).getTime() + 72 * 3600 * 1000)).getTime();
+          startReservationTimer(baseDate);
+        } else if (status === "payment_verification_needed" || status === "under_review") {
+          // STAGE 3: Payment proof submitted, waiting on admin finance audit
+          if (finalPendingBanner) finalPendingBanner.style.display = "block";
+          if (activeArea) activeArea.style.display = "none";
+          const pendingBtn = document.getElementById("pendingVerifyTrackBtn");
+          if (pendingBtn) pendingBtn.href = `track.html?ref=${encodeURIComponent(app.id)}`;
+          localStorage.removeItem("ae_pending_payment_ref");
+        } else if (status === "payment_unsuccessful") {
+          // STAGE 3 Alt: Previous slip rejected -> Student must re-upload
+          if (unsuccessfulBanner) unsuccessfulBanner.style.display = "block";
+          if (activeArea) activeArea.style.display = "block";
+          const reasonEl = document.getElementById("unsuccessfulReasonText");
+          const failReason = app.payment_rejection_reason || app.rejectionReason || app.internalNotes || "";
+          if (reasonEl && failReason) {
+            reasonEl.textContent = "Feedback from Finance: " + failReason;
+          }
+          localStorage.setItem("ae_pending_payment_ref", app.id);
+        } else if (status === "accepted_paid" || status === "approved") {
+          // STAGE 4: Final Enrolled & Verified
+          if (verifiedSuccessBanner) verifiedSuccessBanner.style.display = "block";
+          if (activeArea) activeArea.style.display = "none";
+          const verifiedBtn = document.getElementById("verifiedTrackBtn");
+          if (verifiedBtn) verifiedBtn.href = `track.html?ref=${encodeURIComponent(app.id)}`;
+          localStorage.removeItem("ae_pending_payment_ref");
+        } else {
+          if (activeArea) activeArea.style.display = "block";
         }
       } else if (refId) {
-        // Application ID exists, show pending state
         document.getElementById("appRefDisplay").textContent = refId;
         document.getElementById("appNameDisplay").textContent = "Applicant Verification in Progress";
         document.getElementById("appProgramDisplay").textContent = "Selected Intake Program";
