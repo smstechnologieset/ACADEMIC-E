@@ -2453,11 +2453,11 @@
 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../js/supabase-client.js?v=20261016_gated_1"></script>
-  <script src="../js/courses-service.js?v=20261016_gated_1"></script>
-  <script src="../js/applications-service.js?v=20261016_gated_1"></script>
-  <script src="../js/admin-service.js?v=20261016_gated_1"></script>
-  <script src="../js/cms-loader.js?v=20261016_gated_1"></script>
+  <script src="../js/supabase-client.js?v=20261016_slip_fix"></script>
+  <script src="../js/courses-service.js?v=20261016_slip_fix"></script>
+  <script src="../js/applications-service.js?v=20261016_slip_fix"></script>
+  <script src="../js/admin-service.js?v=20261016_slip_fix"></script>
+  <script src="../js/cms-loader.js?v=20261016_slip_fix"></script>
   <script>
   document.addEventListener("DOMContentLoaded", () => {
 
@@ -3461,7 +3461,10 @@
 
         function isImg(url) {
           if (!url) return false;
-          return url.startsWith("data:image") || url.includes("payment-proofs") || url.includes("documents") || /\.(png|jpe?g|webp|gif)$/i.test(url.split("?")[0]);
+          return url.startsWith("data:image") || 
+                 url.includes("payment-proofs") || 
+                 url.includes("documents") || 
+                 /\.(png|jpe?g|webp|gif|svg|bmp)(\?.*)?$/i.test(url);
         }
 
         function setDoc(thumbId, nameId, linkId, fileUrl, fileName, emColor) {
@@ -3493,9 +3496,18 @@
           }
         }
 
-        const faydaUrl = app.faydaFileUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_fayda_" + app.id) : "");
-        const eduUrl = app.educationDocUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_edu_" + app.id) : "");
-        const slipUrl = app.paymentSlipUrl || (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_slip_" + app.id) : "");
+        const faydaUrl = (app.faydaFileUrl && app.faydaFileUrl !== "assets/students.jpg" ? app.faydaFileUrl : "") || 
+                         (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_fayda_" + app.id) : "") || 
+                         (typeof localStorage !== "undefined" ? localStorage.getItem("doc_fayda_" + app.id) : "") || 
+                         app.faydaFileUrl || "";
+        const eduUrl = (app.educationDocUrl && app.educationDocUrl !== "assets/campus.jpg" ? app.educationDocUrl : "") || 
+                       (typeof sessionStorage !== "undefined" ? sessionStorage.getItem("doc_edu_" + app.id) : "") || 
+                       (typeof localStorage !== "undefined" ? localStorage.getItem("doc_edu_" + app.id) : "") || 
+                       app.educationDocUrl || "";
+        const slipUrl = (app.paymentSlipUrl && app.paymentSlipUrl !== "assets/campus.jpg" ? app.paymentSlipUrl : "") || 
+                        (typeof sessionStorage !== "undefined" ? (sessionStorage.getItem("doc_slip_" + app.id) || sessionStorage.getItem("slip_" + app.id)) : "") || 
+                        (typeof localStorage !== "undefined" ? (localStorage.getItem("doc_slip_" + app.id) || localStorage.getItem("slip_" + app.id)) : "") || 
+                        app.paymentSlipUrl || "";
 
         setDoc("modalFaydaThumb", "modalFaydaFileName", "modalFaydaLink", faydaUrl, app.faydaFileName || (faydaUrl ? "FAYDA_National_ID.png" : ""), "#1854a1");
         setDoc("modalEducationDocThumb", "modalEducationDocName", "modalEducationDocLink", eduUrl, app.educationDocName || (eduUrl ? "Academic_Transcript.pdf" : ""), "#10b981");

@@ -327,11 +327,22 @@ window.AdminService = {
               app.educationDocUrl = localMatch.educationDocUrl;
               app.educationDocName = localMatch.educationDocName;
             }
-            if (!app.paymentSlipUrl && localMatch.paymentSlipUrl) {
+            if (!app.paymentSlipUrl && localMatch.paymentSlipUrl && localMatch.paymentSlipUrl !== "assets/campus.jpg") {
               app.paymentSlipUrl = localMatch.paymentSlipUrl;
               app.paymentSlipName = localMatch.paymentSlipName;
             }
           }
+
+          // Resilient storage fallbacks for payment slip across sessions & local storage
+          if (!app.paymentSlipUrl) {
+            const cachedSlip = (typeof sessionStorage !== "undefined" ? (sessionStorage.getItem("doc_slip_" + app.id) || sessionStorage.getItem("slip_" + app.id)) : "") ||
+                               (typeof localStorage !== "undefined" ? (localStorage.getItem("doc_slip_" + app.id) || localStorage.getItem("slip_" + app.id)) : "");
+            if (cachedSlip && cachedSlip !== "assets/campus.jpg") {
+              app.paymentSlipUrl = cachedSlip;
+              if (!app.paymentSlipName) app.paymentSlipName = "payment_receipt.jpg";
+            }
+          }
+
           mergedMap.set(app.id, app);
         });
         
@@ -479,6 +490,21 @@ window.AdminService = {
       if (match && match[1]) rejectionReason = match[1].trim();
     }
 
+    // Extract slip URL & Name from internal notes tag if recorded during proof submission
+    let noteSlipUrl = "";
+    if (rawNotes.includes("[Payment Slip URL]:")) {
+      const match = rawNotes.match(/\[Payment Slip URL\]:\s*([^\n\r]+)/i);
+      if (match && match[1]) noteSlipUrl = match[1].trim();
+    }
+    let noteSlipName = "";
+    if (rawNotes.includes("[Payment Slip Name]:")) {
+      const match = rawNotes.match(/\[Payment Slip Name\]:\s*([^\n\r]+)/i);
+      if (match && match[1]) noteSlipName = match[1].trim();
+    }
+
+    const resolvedSlipUrl = (slipFile && slipFile.file_path) || row.payment_slip_url || noteSlipUrl || "";
+    const resolvedSlipName = (slipFile && slipFile.file_name) || row.payment_slip_name || noteSlipName || (resolvedSlipUrl ? "payment_receipt.jpg" : "");
+
     return {
       id: row.id,
       firstName: row.first_name || "",
@@ -505,8 +531,8 @@ window.AdminService = {
       faydaFileUrl: faydaFile ? faydaFile.file_path : (row.fayda_file_url || ""),
       educationDocName: eduFile ? (eduFile.file_name || "education_transcript.pdf") : (row.education_doc_name || ""),
       educationDocUrl: eduFile ? eduFile.file_path : (row.education_doc_url || ""),
-      paymentSlipName: slipFile ? (slipFile.file_name || "payment_receipt.jpg") : (row.payment_slip_name || ""),
-      paymentSlipUrl: slipFile ? slipFile.file_path : (row.payment_slip_url || ""),
+      paymentSlipName: resolvedSlipName,
+      paymentSlipUrl: resolvedSlipUrl,
       created_at: row.created_at || new Date().toISOString(),
       updated_at: row.updated_at || new Date().toISOString(),
       events: row.events || []

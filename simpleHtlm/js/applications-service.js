@@ -102,8 +102,9 @@ window.ApplicationsService = {
     if (!filePath) return;
     try {
       const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      let recorded = false;
       if (client && client.from) {
-        await client.from("application_files").insert({
+        const { error } = await client.from("application_files").insert({
           application_id: applicationId,
           file_category: category,
           file_path: filePath,
@@ -111,26 +112,28 @@ window.ApplicationsService = {
           file_size: fileSize || 0,
           mime_type: mimeType || "application/octet-stream"
         });
-        return;
+        if (!error) recorded = true;
       }
-      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
-      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
-      await fetch(`${supabaseUrl}/rest/v1/application_files`, {
-        method: "POST",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          application_id: applicationId,
-          file_category: category,
-          file_path: filePath,
-          file_name: fileName || "document",
-          file_size: fileSize || 0,
-          mime_type: mimeType || "application/octet-stream"
-        })
-      });
+      if (!recorded) {
+        const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+        const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+        await fetch(`${supabaseUrl}/rest/v1/application_files`, {
+          method: "POST",
+          headers: {
+            "apikey": supabaseKey,
+            "Authorization": `Bearer ${supabaseKey}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            application_id: applicationId,
+            file_category: category,
+            file_path: filePath,
+            file_name: fileName || "document",
+            file_size: fileSize || 0,
+            mime_type: mimeType || "application/octet-stream"
+          })
+        });
+      }
     } catch (e) {
       console.warn("Record file note:", e);
     }
@@ -574,8 +577,13 @@ window.ApplicationsService = {
     if (slipFile) {
       try {
         slipDataUrl = await this.fileToBase64(slipFile);
-        if (slipDataUrl && slipDataUrl.length < 2500000) {
+        if (slipDataUrl) {
+          sessionStorage.setItem("doc_slip_" + cleanId, slipDataUrl);
           sessionStorage.setItem("slip_" + cleanId, slipDataUrl);
+          if (slipDataUrl.length < 500000) {
+            localStorage.setItem("doc_slip_" + cleanId, slipDataUrl);
+            localStorage.setItem("slip_" + cleanId, slipDataUrl);
+          }
         }
       } catch (e) {
         console.warn("Slip file reading error:", e);
@@ -587,8 +595,8 @@ window.ApplicationsService = {
       const app = apps[idx];
       app.paymentMethod = paymentMethod;
       app.paymentRef = transactionRef.trim();
-      app.paymentSlipName = slipFile ? slipFile.name : "";
-      app.paymentSlipUrl = slipDataUrl && slipDataUrl.length < 200000 ? slipDataUrl : "assets/campus.jpg";
+      app.paymentSlipName = slipFile ? slipFile.name : (app.paymentSlipName || "Payment_Receipt.jpg");
+      app.paymentSlipUrl = slipDataUrl || app.paymentSlipUrl || "";
       app.status = "payment_verification_needed";
       app.updated_at = new Date().toISOString();
 
@@ -601,7 +609,14 @@ window.ApplicationsService = {
       });
 
       apps[idx] = app;
-      window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+      // Safeguard against storage quota: do not store massive base64 in local applications array
+      const appToSave = { ...app };
+      if (appToSave.paymentSlipUrl && appToSave.paymentSlipUrl.startsWith("data:") && appToSave.paymentSlipUrl.length > 200000) {
+        appToSave.paymentSlipUrl = "";
+      }
+      const safeApps = [...apps];
+      safeApps[idx] = appToSave;
+      window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, safeApps);
       sessionStorage.setItem("ae_current_app_" + cleanId, JSON.stringify(app));
       targetApp = app;
     } else {
@@ -623,12 +638,48 @@ window.ApplicationsService = {
         }
       }
 
+      const finalSlipUrl = slipUrl || slipDataUrl || (targetApp && targetApp.paymentSlipUrl) || "";
+      const finalSlipName = slipFile ? slipFile.name : ((targetApp && targetApp.paymentSlipName) || "Payment_Receipt.jpg");
+
+      if (targetApp) {
+        targetApp.paymentSlipUrl = finalSlipUrl;
+        targetApp.paymentSlipName = finalSlipName;
+        targetApp.paymentMethod = paymentMethod;
+        targetApp.paymentRef = transactionRef.trim();
+        targetApp.status = "payment_verification_needed";
+      }
+
+      // Update local storage record with the durable cloud slip URL
+      if (idx !== -1) {
+        apps[idx].paymentSlipUrl = finalSlipUrl;
+        apps[idx].paymentSlipName = finalSlipName;
+        apps[idx].paymentMethod = paymentMethod;
+        apps[idx].paymentRef = transactionRef.trim();
+        apps[idx].status = "payment_verification_needed";
+        window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
+      }
+
+      if (finalSlipUrl) {
+        try {
+          sessionStorage.setItem("doc_slip_" + cleanId, finalSlipUrl);
+          sessionStorage.setItem("slip_" + cleanId, finalSlipUrl);
+          localStorage.setItem("doc_slip_" + cleanId, finalSlipUrl);
+          localStorage.setItem("slip_" + cleanId, finalSlipUrl);
+        } catch (storageErr) {}
+      }
+      if (targetApp) {
+        try {
+          sessionStorage.setItem("ae_current_app_" + cleanId, JSON.stringify(targetApp));
+        } catch (storageErr) {}
+      }
+
       const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      const notesSlipInfo = finalSlipUrl ? `\n[Payment Slip URL]: ${finalSlipUrl}\n[Payment Slip Name]: ${finalSlipName}` : "";
       const patchPayload = {
         payment_method: paymentMethod,
         transaction_ref: transactionRef.trim(),
         status: "under_review",
-        internal_notes: `[Stage]: payment_verification_needed\nProof submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}).`,
+        internal_notes: `[Stage]: payment_verification_needed\nProof submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}).${notesSlipInfo}`,
         updated_at: new Date().toISOString()
       };
 
@@ -671,9 +722,10 @@ window.ApplicationsService = {
           qualification: targetApp.qualification || "Completed Degree",
           course_applied: targetApp.courseApplied || "Selected Intake Track",
           signature: targetApp.signature || targetApp.fullName || "Applicant",
-          status: "payment_verification_needed",
+          status: "under_review",
           payment_method: paymentMethod,
           transaction_ref: transactionRef.trim(),
+          internal_notes: `[Stage]: payment_verification_needed\nProof submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}).${notesSlipInfo}`,
           submission_date: targetApp.submission_date || new Date().toISOString().split("T")[0],
           created_at: targetApp.created_at || new Date().toISOString(),
           updated_at: new Date().toISOString()
