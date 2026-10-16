@@ -300,10 +300,19 @@ window.AdminService = {
       }
 
       if (rawApps && Array.isArray(rawApps)) {
-        const mapped = rawApps.map(row => this._mapSupabaseApp(row));
+        // Exclude any permanently deleted application IDs
+        let permanentlyDeleted = new Set();
+        try {
+          permanentlyDeleted = new Set(JSON.parse(localStorage.getItem("ae_permanently_deleted_ids") || "[]").map(x => String(x).trim().toLowerCase()));
+        } catch (e) {}
+
+        const validRawApps = rawApps.filter(row => row && row.id && !permanentlyDeleted.has(String(row.id).trim().toLowerCase()));
+        const mapped = validRawApps.map(row => this._mapSupabaseApp(row));
         
         // Merge with local applications to never lose offline/locally submitted applications
-        const local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+        let local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+        local = local.filter(app => app && app.id && !permanentlyDeleted.has(String(app.id).trim().toLowerCase()));
+
         const mergedMap = new Map();
         
         // 1. Put Supabase apps as canonical source with local document fallback
@@ -344,7 +353,11 @@ window.AdminService = {
     }
 
     // Fallback to local store
-    const local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+    let local = window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
+    try {
+      const permanentlyDeleted = new Set(JSON.parse(localStorage.getItem("ae_permanently_deleted_ids") || "[]").map(x => String(x).trim().toLowerCase()));
+      local = local.filter(app => app && app.id && !permanentlyDeleted.has(String(app.id).trim().toLowerCase()));
+    } catch (e) {}
     this._cachedApps = local;
     return local;
   },
@@ -355,6 +368,29 @@ window.AdminService = {
       const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
       const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
       
+      // Map rich frontend stage to valid Postgres DB constraint status
+      let dbStatus = "pending";
+      if (app.status === "approved_for_payment" || app.status === "accepted_paid" || app.status === "approved") {
+        dbStatus = "approved";
+      } else if (app.status === "payment_verification_needed" || app.status === "payment_unsuccessful" || app.status === "under_review") {
+        dbStatus = "under_review";
+      } else if (app.status === "rejected") {
+        dbStatus = "rejected";
+      } else if (app.status === "cancelled") {
+        dbStatus = "cancelled";
+      }
+
+      let notes = app.internalNotes || "";
+      if (!notes.includes("[Stage]:") && app.status) {
+        notes = `[Stage]: ${app.status}\n` + notes;
+      }
+      if (app.payment_deadline && !notes.includes("[Payment Deadline]:")) {
+        notes += `\n[Payment Deadline]: ${app.payment_deadline}`;
+      }
+      if (app.payment_rejection_reason && !notes.includes("[Payment Unsuccessful Reason]:")) {
+        notes += `\n[Payment Unsuccessful Reason]: ${app.payment_rejection_reason}`;
+      }
+
       const payload = {
         id: app.id,
         first_name: app.firstName || "Applicant",
@@ -362,14 +398,15 @@ window.AdminService = {
         last_name: app.lastName || "Candidate",
         full_name: app.fullName || `${app.firstName || ""} ${app.lastName || ""}`.trim(),
         age: isNaN(app.age) ? null : app.age,
-        phone: app.phone || "",
-        email: app.email || "",
+        phone: app.phone || "+251900000000",
+        email: app.email || "applicant@example.com",
         full_address: app.fullAddress || app.place || "Addis Ababa",
         place: app.place || "Addis Ababa",
-        qualification: app.qualification || "",
+        qualification: app.qualification || "Bachelor's Degree",
         course_applied: app.courseApplied || "Selected Intake Track",
         signature: app.signature || app.fullName || "Applicant",
-        status: app.status || "pending",
+        status: dbStatus,
+        internal_notes: notes.trim(),
         payment_method: app.paymentMethod || null,
         transaction_ref: app.paymentRef || null,
         submission_date: app.submission_date || new Date().toISOString().split("T")[0],
@@ -398,6 +435,50 @@ window.AdminService = {
     const eduFile = files.find(f => f.file_category === "document" || f.file_category === "education_doc" || f.file_category === "transcript" || (f.file_name && (f.file_name.toLowerCase().includes("transcript") || f.file_name.toLowerCase().includes("degree") || f.file_name.toLowerCase().includes("edu"))));
     const slipFile = files.find(f => f.file_category === "payment_proof" || f.file_category === "slip" || (f.file_name && (f.file_name.toLowerCase().includes("slip") || f.file_name.toLowerCase().includes("receipt"))));
 
+    const rawNotes = row.internal_notes || "";
+    let mappedStatus = row.status || "pending";
+
+    // Parse rich stage from internal notes tag
+    const stageMatch = rawNotes.match(/\[Stage\]:\s*([a-z_]+)/i);
+    if (stageMatch && stageMatch[1]) {
+      mappedStatus = stageMatch[1].trim();
+    } else {
+      // Inferred stage fallback
+      if (mappedStatus === "pending") {
+        mappedStatus = "pending_review";
+      } else if (mappedStatus === "approved") {
+        if (rawNotes.includes("[Payment Deadline]:") && !row.payment_method && !row.transaction_ref) {
+          mappedStatus = "approved_for_payment";
+        } else {
+          mappedStatus = "accepted_paid";
+        }
+      } else if (mappedStatus === "under_review") {
+        if (rawNotes.includes("[Payment Unsuccessful Reason]:")) {
+          mappedStatus = "payment_unsuccessful";
+        } else {
+          mappedStatus = "payment_verification_needed";
+        }
+      }
+    }
+
+    let paymentDeadline = "";
+    if (rawNotes.includes("[Payment Deadline]:")) {
+      const match = rawNotes.match(/\[Payment Deadline\]:\s*([^\n\r]+)/i);
+      if (match && match[1]) paymentDeadline = match[1].trim();
+    }
+
+    let paymentRejectionReason = "";
+    if (rawNotes.includes("[Payment Unsuccessful Reason]:")) {
+      const match = rawNotes.match(/\[Payment Unsuccessful Reason\]:\s*([^\n\r]+)/i);
+      if (match && match[1]) paymentRejectionReason = match[1].trim();
+    }
+
+    let rejectionReason = "";
+    if (rawNotes.includes("[Rejection Reason]:")) {
+      const match = rawNotes.match(/\[Rejection Reason\]:\s*([^\n\r]+)/i);
+      if (match && match[1]) rejectionReason = match[1].trim();
+    }
+
     return {
       id: row.id,
       firstName: row.first_name || "",
@@ -413,10 +494,13 @@ window.AdminService = {
       qualification: row.qualification || "Bachelor's Degree",
       previousInstitution: row.previous_institution || row.institution || "—",
       fieldOfStudy: row.field_of_study || "",
-      status: row.status || "pending",
+      status: mappedStatus,
       paymentMethod: row.payment_method || "",
       paymentRef: row.transaction_ref || "",
-      internalNotes: row.internal_notes || "",
+      internalNotes: rawNotes,
+      rejectionReason: rejectionReason,
+      payment_deadline: paymentDeadline,
+      payment_rejection_reason: paymentRejectionReason,
       faydaFileName: faydaFile ? (faydaFile.file_name || "fayda_id.pdf") : (row.fayda_file_name || ""),
       faydaFileUrl: faydaFile ? faydaFile.file_path : (row.fayda_file_url || ""),
       educationDocName: eduFile ? (eduFile.file_name || "education_transcript.pdf") : (row.education_doc_name || ""),
@@ -566,9 +650,27 @@ window.AdminService = {
     // Live update Supabase table
     try {
       const client = (window.AcademicDB && window.AcademicDB.supabase) || window.supabaseInstance;
+      
+      // Map rich stage to valid Postgres check constraint status
+      let dbStatus = "pending";
+      if (newStatus === "approved_for_payment" || newStatus === "accepted_paid" || newStatus === "approved") {
+        dbStatus = "approved";
+      } else if (newStatus === "payment_verification_needed" || newStatus === "payment_unsuccessful" || newStatus === "under_review") {
+        dbStatus = "under_review";
+      } else if (newStatus === "rejected") {
+        dbStatus = "rejected";
+      } else if (newStatus === "cancelled") {
+        dbStatus = "cancelled";
+      }
+
+      let taggedNotes = finalNotes || "";
+      if (!taggedNotes.includes("[Stage]:")) {
+        taggedNotes = `[Stage]: ${newStatus}\n` + taggedNotes;
+      }
+
       const payload = {
-        status: newStatus,
-        internal_notes: finalNotes,
+        status: dbStatus,
+        internal_notes: taggedNotes.trim(),
         updated_at: new Date().toISOString()
       };
 
@@ -578,7 +680,7 @@ window.AdminService = {
         const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
         const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
 
-        await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${id}`, {
+        await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${encodeURIComponent(id)}`, {
           method: "PATCH",
           headers: {
             "apikey": supabaseKey,
@@ -701,34 +803,35 @@ window.AdminService = {
     if (!id) return { success: false, error: "Missing application ID" };
     const cleanId = String(id).trim();
 
-    // 1. Remove from local storage
+    // 1. Record in permanently deleted IDs set so it never gets resurrected by sync
+    try {
+      const deletedSet = new Set(JSON.parse(localStorage.getItem("ae_permanently_deleted_ids") || "[]").map(x => String(x).trim().toLowerCase()));
+      deletedSet.add(cleanId.toLowerCase());
+      localStorage.setItem("ae_permanently_deleted_ids", JSON.stringify(Array.from(deletedSet)));
+    } catch (e) {}
+
+    // 2. Remove from local storage immediately
     let apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
     apps = apps.filter(a => a && a.id && a.id.toLowerCase().trim() !== cleanId.toLowerCase());
     this._cachedApps = apps;
     window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
 
-    // 2. Delete from Supabase
+    // 3. Delete from Supabase via serverless admin backend (using service role key)
     try {
-      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
-      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
+      const endpoint = (window.AcademicDB && typeof window.AcademicDB.getEmailApiEndpoint === "function")
+        ? window.AcademicDB.getEmailApiEndpoint()
+        : "/api/send-email";
 
-      // Best-effort delete events first
-      fetch(`${supabaseUrl}/rest/v1/application_events?application_id=eq.${encodeURIComponent(cleanId)}`, {
-        method: "DELETE",
-        headers: { "apikey": supabaseKey, "Authorization": `Bearer ${supabaseKey}` }
-      }).catch(() => {});
-
-      // Delete application row
-      await fetch(`${supabaseUrl}/rest/v1/applications?id=eq.${encodeURIComponent(cleanId)}`, {
-        method: "DELETE",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-          "Prefer": "return=minimal"
-        }
+      await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "delete_application",
+          ids: [cleanId]
+        })
       });
     } catch (err) {
-      console.warn("[AdminService] Supabase delete application error:", err);
+      console.warn("[AdminService] Server delete application warning:", err);
     }
 
     return { success: true };
@@ -741,28 +844,35 @@ window.AdminService = {
     if (!ids || !ids.length) return { success: false, deletedCount: 0 };
     const idSet = new Set(ids.map(i => String(i).toLowerCase().trim()));
 
-    // 1. Remove from local storage
+    // 1. Record in permanently deleted IDs set
+    try {
+      const deletedSet = new Set(JSON.parse(localStorage.getItem("ae_permanently_deleted_ids") || "[]").map(x => String(x).trim().toLowerCase()));
+      ids.forEach(i => deletedSet.add(String(i).trim().toLowerCase()));
+      localStorage.setItem("ae_permanently_deleted_ids", JSON.stringify(Array.from(deletedSet)));
+    } catch (e) {}
+
+    // 2. Remove from local storage immediately
     let apps = this._cachedApps || window.AcademicDB.getLocal(window.AcademicDB.keys.APPLICATIONS, []);
     apps = apps.filter(a => a && a.id && !idSet.has(String(a.id).toLowerCase().trim()));
     this._cachedApps = apps;
     window.AcademicDB.setLocal(window.AcademicDB.keys.APPLICATIONS, apps);
 
-    // 2. Delete from Supabase
+    // 3. Delete from Supabase via serverless admin backend (using service role key)
     try {
-      const supabaseUrl = (window.AcademicDB && window.AcademicDB.SUPABASE_URL) || "https://tfmbmmtlppkzcxpndiym.supabase.co";
-      const supabaseKey = (window.AcademicDB && window.AcademicDB.SUPABASE_ANON_KEY) || "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRmbWJtbXRscHBremN4cG5kaXltIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk3MzE3MzMsImV4cCI6MjEwNTMwNzczM30.e1EUxECJgGBRp_BpyzTNH3QwUQHzRbNXVLpRMl_mk0Y";
-      
-      const filterIds = ids.map(x => `"${encodeURIComponent(x)}"`).join(",");
-      await fetch(`${supabaseUrl}/rest/v1/applications?id=in.(${filterIds})`, {
-        method: "DELETE",
-        headers: {
-          "apikey": supabaseKey,
-          "Authorization": `Bearer ${supabaseKey}`,
-          "Prefer": "return=minimal"
-        }
+      const endpoint = (window.AcademicDB && typeof window.AcademicDB.getEmailApiEndpoint === "function")
+        ? window.AcademicDB.getEmailApiEndpoint()
+        : "/api/send-email";
+
+      await fetch(endpoint, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          type: "delete_application",
+          ids: ids
+        })
       });
     } catch (err) {
-      console.warn("[AdminService] Supabase bulk delete applications error:", err);
+      console.warn("[AdminService] Server bulk delete applications warning:", err);
     }
 
     return { success: true, deletedCount: ids.length };

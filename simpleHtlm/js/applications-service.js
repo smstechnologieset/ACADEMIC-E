@@ -257,7 +257,8 @@ window.ApplicationsService = {
         qualification: newApplication.qualification,
         course_applied: newApplication.courseApplied,
         signature: newApplication.signature,
-        status: "pending_review",
+        status: "pending",
+        internal_notes: "[Stage]: pending_review\nAcademic transcripts & FAYDA ID submitted for admissions review.",
         submission_date: todayDate
       };
 
@@ -453,7 +454,21 @@ window.ApplicationsService = {
           place: row.place || "Addis Ababa",
           courseApplied: row.course_applied || "General Track",
           qualification: row.qualification || "",
-          status: row.status || "pending_review",
+          status: (() => {
+            const stageMatch = rawNotes.match(/\[Stage\]:\s*([a-z_]+)/i);
+            if (stageMatch && stageMatch[1]) return stageMatch[1].trim();
+            const s = row.status || "pending";
+            if (s === "pending") return "pending_review";
+            if (s === "approved") {
+              if (rawNotes.includes("[Payment Deadline]:") && !row.payment_method && !row.transaction_ref) return "approved_for_payment";
+              return "accepted_paid";
+            }
+            if (s === "under_review") {
+              if (rawNotes.includes("[Payment Unsuccessful Reason]:")) return "payment_unsuccessful";
+              return "payment_verification_needed";
+            }
+            return s;
+          })(),
           paymentMethod: row.payment_method || "",
           paymentRef: row.transaction_ref || "",
           internalNotes: rawNotes,
@@ -612,7 +627,8 @@ window.ApplicationsService = {
       const patchPayload = {
         payment_method: paymentMethod,
         transaction_ref: transactionRef.trim(),
-        status: "payment_verification_needed",
+        status: "under_review",
+        internal_notes: `[Stage]: payment_verification_needed\nProof submitted via ${paymentMethod} (Ref: ${transactionRef.trim()}).`,
         updated_at: new Date().toISOString()
       };
 

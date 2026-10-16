@@ -240,7 +240,49 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
 
-    if (!to && type !== "contact_inquiry" && type !== "save_page_content" && type !== "save_staff_users") {
+    if (type === "delete_application") {
+      const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL || "https://tfmbmmtlppkzcxpndiym.supabase.co";
+      const srvKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+      if (!srvKey) {
+        return res.status(500).json({ error: "Server service key missing" });
+      }
+      const rawIds = body.ids || (body.id ? [body.id] : []);
+      const ids = Array.isArray(rawIds) ? rawIds.map(x => String(x).trim()).filter(Boolean) : [];
+      if (!ids.length) {
+        return res.status(400).json({ error: "Missing application IDs to delete" });
+      }
+
+      for (const appId of ids) {
+        await fetch(`${supabaseUrl}/rest/v1/application_events?application_id=eq.${encodeURIComponent(appId)}`, {
+          method: "DELETE",
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        }).catch(() => {});
+        await fetch(`${supabaseUrl}/rest/v1/application_files?application_id=eq.${encodeURIComponent(appId)}`, {
+          method: "DELETE",
+          headers: { "apikey": srvKey, "Authorization": `Bearer ${srvKey}` }
+        }).catch(() => {});
+      }
+
+      const filterIds = ids.map(x => `"${encodeURIComponent(x)}"`).join(",");
+      const delRes = await fetch(`${supabaseUrl}/rest/v1/applications?id=in.(${filterIds})`, {
+        method: "DELETE",
+        headers: {
+          "apikey": srvKey,
+          "Authorization": `Bearer ${srvKey}`,
+          "Prefer": "return=representation"
+        }
+      });
+
+      if (!delRes.ok) {
+        const errTxt = await delRes.text();
+        return res.status(500).json({ error: "Supabase delete failed: " + errTxt });
+      }
+
+      const deletedRows = await delRes.json();
+      return res.status(200).json({ success: true, count: deletedRows.length, deleted: deletedRows });
+    }
+
+    if (!to && type !== "contact_inquiry" && type !== "save_page_content" && type !== "save_staff_users" && type !== "delete_application") {
       return res.status(400).json({ error: "Recipient email 'to' is required." });
     }
 

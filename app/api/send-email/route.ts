@@ -141,6 +141,46 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Server service key missing" }, { status: 500 });
     }
 
+    if (type === "delete_application") {
+      if (!srvKey) {
+        return NextResponse.json({ error: "Server service key missing" }, { status: 500 });
+      }
+      const rawIds = body.ids || (body.id ? [body.id] : []);
+      const ids = Array.isArray(rawIds) ? rawIds.map((x: any) => String(x).trim()).filter(Boolean) : [];
+      if (!ids.length) {
+        return NextResponse.json({ error: "Missing application IDs to delete" }, { status: 400 });
+      }
+
+      for (const appId of ids) {
+        await fetch(`${supabaseUrl}/rest/v1/application_events?application_id=eq.${encodeURIComponent(appId)}`, {
+          method: "DELETE",
+          headers: { apikey: srvKey, Authorization: `Bearer ${srvKey}` },
+        }).catch(() => {});
+        await fetch(`${supabaseUrl}/rest/v1/application_files?application_id=eq.${encodeURIComponent(appId)}`, {
+          method: "DELETE",
+          headers: { apikey: srvKey, Authorization: `Bearer ${srvKey}` },
+        }).catch(() => {});
+      }
+
+      const filterIds = ids.map((x: string) => `"${encodeURIComponent(x)}"`).join(",");
+      const delRes = await fetch(`${supabaseUrl}/rest/v1/applications?id=in.(${filterIds})`, {
+        method: "DELETE",
+        headers: {
+          apikey: srvKey,
+          Authorization: `Bearer ${srvKey}`,
+          Prefer: "return=representation",
+        },
+      });
+
+      if (!delRes.ok) {
+        const errTxt = await delRes.text();
+        return NextResponse.json({ error: "Supabase delete failed: " + errTxt }, { status: 500 });
+      }
+
+      const deletedRows = await delRes.json();
+      return NextResponse.json({ success: true, count: deletedRows.length, deleted: deletedRows });
+    }
+
     // ── PASSWORD RESET FLOW ──
     if (type === "request_password_reset") {
       const targetEmail = (email || to || "").trim().toLowerCase();
