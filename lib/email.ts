@@ -112,11 +112,20 @@ async function sendEmail(
 
 const baseWrapper = (content: string) => `
 <div style="font-family: 'Inter', Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden;">
-  <div style="background: linear-gradient(135deg, #1e40af 0%, #3b82f6 100%); padding: 28px 30px;">
-    <h1 style="color: #ffffff; font-size: 20px; margin: 0; font-weight: 800; letter-spacing: -0.02em;">
-      🎓 Academic Excellence
-    </h1>
-    <p style="color: #bfdbfe; font-size: 12px; margin: 6px 0 0 0;">Official Admissions Office</p>
+  <div style="background: linear-gradient(135deg, #0b1b3d 0%, #1e3a8a 100%); padding: 26px 30px;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="width: 68px; vertical-align: middle; padding-right: 16px;">
+          <img src="https://academicexcellences.com/assets/logo.png" alt="Academic Excellence" width="62" height="62" style="display: block; width: 62px; height: 62px; border-radius: 50%; border: 2px solid #3b82f6; background: #ffffff; object-fit: contain;" />
+        </td>
+        <td style="vertical-align: middle;">
+          <h1 style="color: #ffffff; font-size: 21px; margin: 0; font-weight: 800; letter-spacing: -0.02em; line-height: 1.2;">
+            Academic Excellence
+          </h1>
+          <p style="color: #93c5fd; font-size: 13px; margin: 4px 0 0 0; font-weight: 600;">Official Admissions Office</p>
+        </td>
+      </tr>
+    </table>
   </div>
   <div style="padding: 30px; color: #1e293b; font-size: 14px; line-height: 1.7;">
     ${content}

@@ -9,13 +9,22 @@ const REPLY_TO_ADDRESS = process.env.RESEND_REPLY_TO || "academicexcellenceco@gm
 
 const baseWrapper = (content) => `
 <div style="font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; max-width: 600px; margin: 0 auto; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
-  <div style="background: linear-gradient(135deg, #0b1b3d 0%, #1e3a8a 100%); padding: 32px 30px; text-align: left;">
-    <div style="font-size: 22px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em;">
-      🎓 Academic Excellence
-    </div>
-    <div style="color: #93c5fd; font-size: 13px; margin-top: 6px; font-weight: 500;">
-      Admissions Office
-    </div>
+  <div style="background: linear-gradient(135deg, #0b1b3d 0%, #1e3a8a 100%); padding: 26px 30px; text-align: left;">
+    <table role="presentation" border="0" cellpadding="0" cellspacing="0" style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="width: 68px; vertical-align: middle; padding-right: 16px;">
+          <img src="https://academicexcellences.com/assets/logo.png" alt="Academic Excellence" width="62" height="62" style="display: block; width: 62px; height: 62px; border-radius: 50%; border: 2px solid #3b82f6; background: #ffffff; object-fit: contain;" />
+        </td>
+        <td style="vertical-align: middle;">
+          <div style="font-size: 21px; font-weight: 800; color: #ffffff; letter-spacing: -0.02em; margin: 0; line-height: 1.2;">
+            Academic Excellence
+          </div>
+          <div style="color: #93c5fd; font-size: 13px; margin-top: 4px; font-weight: 600; letter-spacing: 0.5px;">
+            Official Admissions Office
+          </div>
+        </td>
+      </tr>
+    </table>
   </div>
   <div style="padding: 32px 30px; color: #1e293b; font-size: 15px; line-height: 1.7;">
     ${content}
